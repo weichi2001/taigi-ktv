@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>台語歌 KTV 字幕工具</title>
+<title>臺語歌廳 Tâi-gí kua-thiann</title>
 <style>
   /* jf open 粉圓 2.1 (justfont, SIL OFL 1.1): Han + 台羅 tone marks */
   @font-face{font-family:"Huninn";src:url(huninn.woff2) format("woff2");font-display:swap;}
@@ -174,11 +174,17 @@
   #countdown{display:flex;gap:calc(var(--hsize,56px)*.3);height:18px;margin-bottom:8px;align-items:flex-end;overflow:visible}
   #countdown i{width:calc(var(--hsize,56px)*.66);height:calc(var(--hsize,56px)*.66);border-radius:50%;background:var(--ktv-fill);box-shadow:0 0 calc(var(--hsize,56px)*.25) var(--ktv-fill);display:block;flex:none}
   /* landing + player mode */
-  #landing{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;padding:24px}
-  #landing .pick{width:300px;padding:28px 26px;border:1px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s,box-shadow .15s}
+  .brand{font-weight:700;letter-spacing:.04em;color:var(--ink);text-shadow:0 0 6px var(--glow),0 0 18px var(--glow),0 0 40px var(--glow2)}
+  .brand .rom{font-weight:500;font-size:.72em;letter-spacing:.02em;opacity:.9}
+  :root{--glow:rgba(196,70,43,.45);--glow2:rgba(196,70,43,.25)} body.dark{--glow:rgba(255,140,100,.6);--glow2:rgba(255,140,100,.35)}
+  h1.brand{font-size:22px;margin:0}
+  #landing{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:24px}
+  #landing .brand.big{font-size:52px;text-align:center;line-height:1.25}
+  #landing .brand.big .rom{font-size:.5em}
+  #landing .picks{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+  #landing .pick{width:220px;padding:26px 24px;border:1px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;text-align:center;font:inherit;color:inherit;transition:border-color .15s,box-shadow .15s}
   #landing .pick:hover{border-color:var(--accent);box-shadow:0 8px 28px rgba(0,0,0,.10)}
-  #landing .pick b{display:block;font-size:22px;margin-bottom:8px}
-  #landing .pick span{font-size:14px;color:var(--muted);line-height:1.7}
+  #landing .pick b{display:block;font-size:22px}
   #pbar{display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
   #plist{display:none;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:6px}
   body.player main{grid-template-columns:1fr;max-width:1240px;margin:0 auto}
@@ -192,13 +198,17 @@
 </head>
 <body>
 <header>
-  <h1>台語歌 KTV 字幕工具 <span id="verTag" style="font-size:12px;font-weight:400;color:var(--muted)">v52</span></h1>
+  <h1 class="brand">臺語歌廳 <span class="rom">Tâi-gí kua-thiann</span><span id="verTag" style="font-size:12px;font-weight:400;color:var(--muted);margin-left:10px;text-shadow:none">v0.52</span></h1>
   <span style="flex:1"></span>
+  <button id="menuBtn" title="回到選擇畫面">☰ 選單</button>
   <button id="themeBtn" title="切換深色／淺色">🌙 深色</button>
 </header>
 <div id="landing" style="display:none">
-  <button class="pick" id="pickEditor"><b>✏️ 編輯器</b><span>貼歌詞、載入歌曲、跟唱對時間、框選畫面、匯出影片。做一首新歌或修改既有專案都在這裡。</span></button>
-  <button class="pick" id="pickPlayer"><b>🎤 播放器</b><span>選一個放專案檔的資料夾，列出裡面所有的歌，點進去就是純 KTV 畫面。只播放、不會動到任何設定。</span></button>
+  <div class="brand big">臺語歌廳<br><span class="rom">Tâi-gí kua-thiann</span></div>
+  <div class="picks">
+    <button class="pick" id="pickEditor"><b>✏️ 編輯器</b></button>
+    <button class="pick" id="pickPlayer"><b>🎤 播放器</b></button>
+  </div>
 </div>
 <div id="focusCatcher" tabindex="-1" aria-hidden="true" style="position:fixed;width:1px;height:1px;opacity:0;left:-10px;top:-10px;outline:none"></div>
 <main>
@@ -320,7 +330,7 @@
   <div>
     <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
-      <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button></div>
+      <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
     <div id="plist"></div>
     <div id="stageWrap">
@@ -4247,6 +4257,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   $('pickEditor').onclick=enterEditor; $('pickPlayer').onclick=enterPlayer;
   $('toEditor').onclick=()=>{ try{ location.hash='editor'; }catch(e){} location.reload(); };
+  // back to the menu: from the editor just show it; from the player reload so the editor's own song comes back
+  $('menuBtn').onclick=()=>{ if(PLAYER){ try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} location.reload(); return; } if(rec) stopRec(''); try{ audio.pause(); }catch(e){} $('landing').style.display='flex'; };
+  $('toMenu').onclick=()=>$('menuBtn').onclick();
   $('toList').onclick=()=>{ try{ audio.pause(); }catch(e){} if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); };
   $('pfolder').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
   async function scanFolder(fl){
