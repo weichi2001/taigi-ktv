@@ -3214,7 +3214,13 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---------- vocals: 原唱 / 伴唱音軌 (a file the user made elsewhere) / 簡易消人聲 (centre cancel)
   let instFile=null, voxMode='orig';
   const instEl=new Audio(); instEl.preload='auto';
-  const instNear=()=>Math.abs(instEl.currentTime-audio.currentTime)<0.15;
+  // instSeek: every jump of the instrumental goes through here. A seek in an mp3 lands late by a
+  // fairly constant amount (decoder start-up + imprecise frame index), so we learn that lag and
+  // aim ahead of it; the lock window makes the first seconds after a switch snap hard instead of
+  // crawling in by rate changes, which is what used to sound off for a while.
+  let instLag=0, instLock=0, instSeekAt=0;
+  function instSeek(){ instSeekAt=performance.now(); instLock=instSeekAt; try{ instEl.currentTime=Math.max(0,audio.currentTime+instLag); }catch(e){} }
+  instEl.addEventListener('seeked',()=>{ if(audio.paused||instEl.paused) return; const d=audio.currentTime-instEl.currentTime; if(Math.abs(d)<1) instLag=Math.max(-0.2,Math.min(0.6,instLag+d*0.7)); });
   function setInst(f){
     instFile=f||null;
     $('instName').textContent=f?('伴唱音軌：'+f.name):'載入伴唱音軌（選用，先用外部工具去好人聲）';
@@ -3224,23 +3230,25 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   $('instFile').onchange=e=>{ const f=e.target.files[0]; if(f){ setInst(f); cacheAudio('__inst',f); if(voxMode!=='inst'){ setVox('inst'); } } e.target.value=''; };
   $('instClear').onclick=()=>{ setInst(null); dropAudio('__inst'); };
-  audio.addEventListener('play',()=>{ if(graph.ctx) graph.ctx.resume().catch(()=>{}); if(voxMode==='inst'&&instFile){ instEl.currentTime=audio.currentTime; instEl.playbackRate=audio.playbackRate; instEl.play().catch(()=>{}); } });
+  audio.addEventListener('play',()=>{ if(graph.ctx) graph.ctx.resume().catch(()=>{}); if(voxMode==='inst'&&instFile){ instSeek(); instEl.playbackRate=audio.playbackRate; instEl.play().catch(()=>{}); } });
   audio.addEventListener('pause',()=>{ instEl.pause(); });
-  audio.addEventListener('seeking',()=>{ if(instFile) instEl.currentTime=audio.currentTime; });
+  audio.addEventListener('seeking',()=>{ if(instFile) instSeek(); });
   audio.addEventListener('ratechange',()=>{ try{ instEl.playbackRate=audio.playbackRate; }catch(e){} });
   // keep the instrumental on the main clock: a big gap seeks, a small one is closed by
   // nudging the playback rate a few percent, which the ear does not notice (a seek it does)
   setInterval(()=>{
     if(voxMode!=='inst'||!instFile||audio.paused) return;
-    if(instEl.paused&&!instEl.ended){ instEl.currentTime=audio.currentTime; instEl.play().catch(()=>{}); return; }
+    if(instEl.paused&&!instEl.ended){ instSeek(); instEl.play().catch(()=>{}); return; }
+    if(instEl.seeking||performance.now()-instSeekAt<400) return;      // let a seek land before judging it
     const d=instEl.currentTime-audio.currentTime, base=audio.playbackRate||1;
+    const locking=performance.now()-instLock<3000;                     // right after a switch / seek
     let r=base;
-    if(Math.abs(d)>0.6){ instEl.currentTime=audio.currentTime; }
-    else if(Math.abs(d)>0.05){ r=base*(d>0?(1-Math.min(.04,Math.abs(d)*.1)):(1+Math.min(.04,Math.abs(d)*.1))); }
-    if(Math.abs(instEl.playbackRate-r)>0.002) try{ instEl.playbackRate=r; }catch(e){}
+    if(Math.abs(d)>(locking?0.08:0.6)){ instSeek(); }
+    else if(Math.abs(d)>0.04){ const k=Math.min(.015,Math.abs(d)*.08); r=base*(d>0?1-k:1+k); }
+    if(Math.abs(instEl.playbackRate-r)>0.001) try{ instEl.playbackRate=r; }catch(e){}
   },250);
   audio.addEventListener('waiting',()=>{ if(voxMode==='inst'&&instFile) instEl.pause(); });
-  audio.addEventListener('playing',()=>{ if(voxMode==='inst'&&instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-audio.currentTime)>0.3) instEl.currentTime=audio.currentTime; instEl.play().catch(()=>{}); } });
+  audio.addEventListener('playing',()=>{ if(voxMode==='inst'&&instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-audio.currentTime)>0.3) instSeek(); instEl.play().catch(()=>{}); } });
 
   // Web Audio graph for the player: dry path, and a karaoke path = (L−R) plus the centre's lows.
   // Built once, lazily (a media element can only ever be wired into one graph).
@@ -3282,7 +3290,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(mode==='kara'){ const g=ensureGraph(); if(g.ctx){ g.dry.gain.value=0; g.wet.gain.value=1; g.ctx.resume().catch(()=>{}); } }
     else if(graph.ctx){ graph.dry.gain.value=1; graph.wet.gain.value=0; }
     audio.muted=(mode==='inst');
-    if(mode==='inst'){ if(!audio.paused){ instEl.currentTime=audio.currentTime; instEl.play().catch(()=>{}); } } else instEl.pause();
+    if(mode==='inst'){ if(!audio.paused){ instSeek(); instEl.play().catch(()=>{}); } } else instEl.pause();
   }
   $('voxSel').onchange=()=>setVox($('voxSel').value);
   vidEl.addEventListener('loadedmetadata',()=>{ if(!ytp) $('instBox').style.display='block'; });
