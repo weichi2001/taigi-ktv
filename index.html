@@ -194,6 +194,8 @@
   .song{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;transition:border-color .15s}
   .song:hover{border-color:var(--accent)} .song b{display:block;font-size:17px} .song small{color:var(--muted);font-size:12.5px;display:block;margin-top:4px}
   .song.bad{opacity:.6}
+  .pgrp{grid-column:1/-1;font-size:15px;font-weight:700;color:var(--accent);margin:10px 0 -2px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .pgrp:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -4265,15 +4267,24 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   async function scanFolder(fl){
     pfiles=fl; psongs=[]; const js=fl.filter(f=>/\.json$/i.test(f.name)&&!/^\./.test(f.name));
     pmsg('正在讀取 '+js.length+' 個檔案…');
-    for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){ const media=(o.audio&&o.audio.name)?(fl.find(x=>x.name===o.audio.name)||null):null; psongs.push({o,f,media}); } }catch(e){} }
-    psongs.sort((a,b)=>String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
+    // "root/歌手/專案.ktv.json": the first folder under the chosen one is the singer / band
+    const dirOf=f=>{ const p=(f.webkitRelativePath||'').split('/'); return p.length>2?p[1]:''; };
+    const sameDir=(f,g)=>{ const a=(f.webkitRelativePath||'').split('/').slice(0,-1).join('/'), b=(g.webkitRelativePath||'').split('/').slice(0,-1).join('/'); return a===b; };
+    for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){
+      let media=null; if(o.audio&&o.audio.name){ const c=fl.filter(x=>x.name===o.audio.name); media=c.find(x=>sameDir(x,f))||c[0]||null; }
+      psongs.push({o,f,media,group:dirOf(f)}); } }catch(e){} }
+    psongs.sort((a,b)=>((a.group===''?1:0)-(b.group===''?1:0))||a.group.localeCompare(b.group,'zh-Hant')||String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
     renderSongs(); document.body.classList.add('list');
     pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'這個資料夾裡沒有專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
   }
   function renderSongs(){
-    $('plist').innerHTML=psongs.map((s,i)=>{ const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
+    let html='', last=null; const grouped=psongs.some(s=>s.group);
+    psongs.forEach((s,i)=>{ const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
+      if(grouped&&s.group!==last){ last=s.group; html+=`<div class="pgrp">${esc(s.group||'其他')}</div>`; }
       const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
-      return `<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(o.artist||'')}</small><small>${esc(src)}・${timed}/${o.lines.length} 句已對時</small></div>`; }).join('');
+      const artist=o.artist||s.group||'';
+      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}・${timed}/${o.lines.length} 句已對時</small></div>`; });
+    $('plist').innerHTML=html;
   }
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
   async function playSong(s){
