@@ -170,14 +170,36 @@
   details#fine{margin-top:14px}
   details#fine summary{cursor:pointer;font-weight:700;font-size:15px}
   details#fine[open] summary{margin-bottom:10px}
+  /* countdown dots: about two thirds of a character, sitting just above the first row */
+  #countdown{display:flex;gap:calc(var(--hsize,56px)*.3);height:18px;margin-bottom:8px;align-items:flex-end;overflow:visible}
+  #countdown i{width:calc(var(--hsize,56px)*.66);height:calc(var(--hsize,56px)*.66);border-radius:50%;background:var(--ktv-fill);box-shadow:0 0 calc(var(--hsize,56px)*.25) var(--ktv-fill);display:block;flex:none}
+  /* landing + player mode */
+  #landing{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap;padding:24px}
+  #landing .pick{width:300px;padding:28px 26px;border:1px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;text-align:left;font:inherit;color:inherit;transition:border-color .15s,box-shadow .15s}
+  #landing .pick:hover{border-color:var(--accent);box-shadow:0 8px 28px rgba(0,0,0,.10)}
+  #landing .pick b{display:block;font-size:22px;margin-bottom:8px}
+  #landing .pick span{font-size:14px;color:var(--muted);line-height:1.7}
+  #pbar{display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+  #plist{display:none;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:6px}
+  body.player main{grid-template-columns:1fr;max-width:1240px;margin:0 auto}
+  body.player main>.card,body.player #splitter,body.player #rec,body.player #lineCard,body.player #verTag{display:none}
+  body.player #pbar{display:flex}
+  body.player.list #plist{display:grid} body.player.list #stageWrap{display:none}
+  .song{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;transition:border-color .15s}
+  .song:hover{border-color:var(--accent)} .song b{display:block;font-size:17px} .song small{color:var(--muted);font-size:12.5px;display:block;margin-top:4px}
+  .song.bad{opacity:.6}
 </style>
 </head>
 <body>
 <header>
-  <h1>台語歌 KTV 字幕工具 <span id="verTag" style="font-size:12px;font-weight:400;color:var(--muted)">v51</span></h1>
+  <h1>台語歌 KTV 字幕工具 <span id="verTag" style="font-size:12px;font-weight:400;color:var(--muted)">v52</span></h1>
   <span style="flex:1"></span>
   <button id="themeBtn" title="切換深色／淺色">🌙 深色</button>
 </header>
+<div id="landing" style="display:none">
+  <button class="pick" id="pickEditor"><b>✏️ 編輯器</b><span>貼歌詞、載入歌曲、跟唱對時間、框選畫面、匯出影片。做一首新歌或修改既有專案都在這裡。</span></button>
+  <button class="pick" id="pickPlayer"><b>🎤 播放器</b><span>選一個放專案檔的資料夾，列出裡面所有的歌，點進去就是純 KTV 畫面。只播放、不會動到任何設定。</span></button>
+</div>
 <div id="focusCatcher" tabindex="-1" aria-hidden="true" style="position:fixed;width:1px;height:1px;opacity:0;left:-10px;top:-10px;outline:none"></div>
 <main>
   <div class="card">
@@ -296,6 +318,11 @@
   <div id="splitter" title="拖曳調整左右寬度"></div>
 
   <div>
+    <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
+      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
+      <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button></div>
+    <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
+    <div id="plist"></div>
     <div id="stageWrap">
       <div id="stage">
         <div id="bgWrap" class="off"><div id="bgClip"><video id="audio" playsinline></video><div id="ytHost"></div></div></div>
@@ -342,7 +369,7 @@
       </details>
     </div>
 
-    <div class="card" style="margin-top:14px">
+    <div class="card" id="lineCard" style="margin-top:14px">
       <h2 style="margin-bottom:8px">歌詞 <span style="font-weight:400;font-size:12.5px;color:var(--muted)">（點一句：跳到那裡，並可在上方微調）</span></h2>
       <div class="row" id="pickBar" style="margin:0 0 8px">
         <button id="uBtn" title="復原（Ctrl/⌘ + Z）" disabled>↶ 復原</button><button id="rBtn" title="重做（Ctrl/⌘ + Shift + Z）" disabled>↷ 重做</button>
@@ -2491,7 +2518,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
 
   // ---------- storage
   function dataObj(){ return {v:3,yt:ytId||undefined,voc:{on:$('vocOn').checked,words:$('vocIn').value,color:$('vocColor').value},crop:{x:cropF.x,y:cropF.y,w:cropF.w,h:cropF.h,s:+$('scrimV').value,a:$('cropAsp').value},hap:$('hapIn').value,title:$('songTitle').value,artist:$('songArtist').value,lines:lines.map(l=>({h:l.h,r:l.r,a:l.a,b:l.b}))}; }
-  function save(){ try{ localStorage.setItem(LS,JSON.stringify(dataObj())); }catch(e){} }
+  let PLAYER=false;   // player mode: play projects from a folder, never write the editor's state
+  function save(){ if(PLAYER) return; try{ localStorage.setItem(LS,JSON.stringify(dataObj())); }catch(e){} }
   function loadObj(o){
     if(!o||!Array.isArray(o.lines)) throw new Error('bad');
     if(typeof o.hap==='string'){ $('hapIn').value=o.hap; loadHap(o.hap); }
@@ -2525,6 +2553,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     audio.src=URL.createObjectURL(f); $('audioName').textContent=f.name;
     if(!$('songTitle').value){ $('songTitle').value=f.name.replace(/\.[^.]+$/,''); updateTitle(); }
     renderRec();
+    if(PLAYER){ peaks=null; drawTL(); return; }
     peaks=null; $('waveStatus').textContent='正在讀取波形…';
     try{
       const buf=await f.arrayBuffer(); const AC=window.OfflineAudioContext||window.webkitOfflineAudioContext; const ctx=new AC(1,44100,44100);
@@ -3373,7 +3402,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const yB=BOT-LH, yA=yB-LH-HS*.15;
       if(S.want[0]!=null) drawLine(S.want[0],0,t,yA);
       if(S.want[1]!=null) drawLine(S.want[1],1,t,yB);
-      if(S.dots){ g.fillStyle=fill; g.shadowColor=fill; g.shadowBlur=HS*.25; const r=HS*.15; for(let d=0;d<S.dots;d++){ g.beginPath(); g.arc(X0+r+d*r*3,yA-HS*.45,r,0,7); g.fill(); } g.shadowBlur=0; }
+      if(S.dots){ g.fillStyle=fill; g.shadowColor=fill; g.shadowBlur=HS*.25; const r=HS*.33, gap=HS*.3; for(let d=0;d<S.dots;d++){ g.beginPath(); g.arc(X0+r+d*(2*r+gap),yA-HS*.12-r,r,0,7); g.fill(); } g.shadowBlur=0; }
     };
   }
   async function exportVideo(){
@@ -4200,12 +4229,62 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---------- init
   { let hv=null; try{ hv=localStorage.getItem('taigi-ktv-hap'); }catch(e){} $('hapIn').value=hv??DEFAULT_HAP; loadHap($('hapIn').value); }
   $('hapReset').onclick=()=>{ $('hapIn').value=DEFAULT_HAP; };
-  setTimeout(async()=>{ if(!lastFile&&!ytp&&lines.length){ const c=await getAudio('__current'); if(c&&c.blob){ loadAudio(new File([c.blob],c.name,{type:c.type||c.blob.type})); } }
+  setTimeout(async()=>{ if(PLAYER) return; if(!lastFile&&!ytp&&lines.length){ const c=await getAudio('__current'); if(c&&c.blob){ loadAudio(new File([c.blob],c.name,{type:c.type||c.blob.type})); } }
     const inst=await getAudio('__inst'); if(inst&&inst.blob) setInst(new File([inst.blob],inst.name,{type:inst.type||inst.blob.type}));
     try{ const vm=localStorage.getItem('taigi-ktv-vox'); if(vm&&vm!=='kara') setVox(vm); }catch(e){}
  },0);
   try{ const o=JSON.parse(localStorage.getItem(LS)||'null')||JSON.parse(localStorage.getItem('taigi-ktv-v2')||'null')||JSON.parse(localStorage.getItem('taigi-ktv-v1')||'null'); if(o) loadObj(o); }catch(e){}
   applyStyle(); updateTitle(); renderRec(); edTitle(); applyCrop(); commit('目前的內容');
+  // ---------- landing + player mode
+  let pfiles=[], psongs=[];
+  const pmsg=m=>{ const el=$('pmsg'); el.textContent=m||''; el.style.display=m?'block':'none'; };
+  function enterEditor(){ $('landing').style.display='none'; }
+  function enterPlayer(){
+    PLAYER=true; document.body.classList.add('player','list'); $('landing').style.display='none';
+    if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
+    pmsg('先按「📁 選擇資料夾」，選放專案檔（.ktv.json）和歌曲檔的資料夾');
+    setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
+  }
+  $('pickEditor').onclick=enterEditor; $('pickPlayer').onclick=enterPlayer;
+  $('toEditor').onclick=()=>{ try{ location.hash='editor'; }catch(e){} location.reload(); };
+  $('toList').onclick=()=>{ try{ audio.pause(); }catch(e){} if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); };
+  $('pfolder').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
+  async function scanFolder(fl){
+    pfiles=fl; psongs=[]; const js=fl.filter(f=>/\.json$/i.test(f.name)&&!/^\./.test(f.name));
+    pmsg('正在讀取 '+js.length+' 個檔案…');
+    for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){ const media=(o.audio&&o.audio.name)?(fl.find(x=>x.name===o.audio.name)||null):null; psongs.push({o,f,media}); } }catch(e){} }
+    psongs.sort((a,b)=>String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
+    renderSongs(); document.body.classList.add('list');
+    pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'這個資料夾裡沒有專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
+  }
+  function renderSongs(){
+    $('plist').innerHTML=psongs.map((s,i)=>{ const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
+      const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
+      return `<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(o.artist||'')}</small><small>${esc(src)}・${timed}/${o.lines.length} 句已對時</small></div>`; }).join('');
+  }
+  $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
+  async function playSong(s){
+    if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
+    const o=JSON.parse(JSON.stringify(s.o)); pmsg('');
+    if(!o.yt&&ytp) clearYT(true);
+    loadObj(o);
+    if(!o.yt){
+      let f=s.media;
+      if(!f&&o.audio&&o.audio.name){ try{ const c=await getAudio('__byname:'+o.audio.name); if(c&&c.blob) f=new File([c.blob],c.name,{type:c.type||c.blob.type}); }catch(e){} }
+      if(f) loadAudio(f);
+      else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
+    }
+    setVox('orig'); document.body.classList.remove('list'); $('pnow').textContent=projName(); updateTitle();
+    setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
+    try{ audio.currentTime=0; }catch(e){}
+  }
+  (function route(){
+    const h=(location.hash||'').replace('#','');
+    if(h==='editor'){ enterEditor(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+    else if(h==='player'){ enterPlayer(); }
+    else $('landing').style.display='flex';
+  })();
+
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ slotIdx[0]=slotIdx[1]=undefined; drawTL(); relayoutHy(); });
   if(document.fonts) document.fonts.addEventListener('loadingdone',()=>relayoutHy());
   requestAnimationFrame(loop);
