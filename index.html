@@ -2689,7 +2689,6 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     // the API swapped our div for an iframe; put a fresh div back
     { const d=document.createElement('div'); d.id='ytHost'; const h=$('ytHost'); if(h) h.replaceWith(d); else $('bgClip').appendChild(d); }
     $('audioName').textContent='選擇音檔或影片（mp3 / m4a / wav / mp4 / mov）'; $('ytUrl').value=''; ytMsg('');
-    $('voxSel').disabled=false; $('voxSel').title='人聲';
     syncVideoUI(); if(!silent){ renderRec(); drawTL(); save(); }
   }
   $('ytLoad').onclick=()=>{ const id=ytParse($('ytUrl').value); if(!id){ ytMsg('看不出這是 YouTube 連結，請貼完整的網址（youtube.com/watch?v=… 或 youtu.be/…）',true); return; } loadYT(id); commit('載入 YouTube'); };
@@ -3202,7 +3201,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function syncVideoUI(){
     const on=hasVideo();
     $('bgWrap').classList.toggle('off',!on); $('bgWrap').classList.toggle('yt',!!ytp); $('vidBox').style.display=on?'block':'none';
-    $('voxSel').disabled=!!ytp; $('voxSel').title=ytp?'YouTube 來源無法處理人聲':'人聲'; if(ytp) $('instBox').style.display='none';
+    voxUI(); if(ytp&&!PLAYER) $('instBox').style.display='none';
         if(on){ applyCrop(); cropFrame(); }
   }
 
@@ -3217,6 +3216,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('instName').textContent=f?('伴唱音軌：'+f.name):'載入伴唱音軌（選用，先用外部工具去好人聲）';
     $('instClear').style.display=f?'inline':'none'; $('instMsg').textContent='';
     if(f){ instEl.src=URL.createObjectURL(f); instEl.volume=audio.volume; } else { try{ instEl.pause(); instEl.removeAttribute('src'); }catch(e){} if(voxMode==='inst') setVox('orig'); }
+    voxUI();
   }
   $('instFile').onchange=e=>{ const f=e.target.files[0]; if(f){ setInst(f); cacheAudio('__inst',f); if(voxMode!=='inst'){ setVox('inst'); } } e.target.value=''; };
   $('instClear').onclick=()=>{ setInst(null); dropAudio('__inst'); };
@@ -3256,8 +3256,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     }catch(e){ graph.ctx=null; }
     return graph;
   }
+  // YouTube gives us no audio data: 簡易消人聲 is impossible there, but a separate 伴奏 file can still replace its sound
+  function voxUI(){ const sel=$('voxSel'); sel.querySelector('[value=kara]').disabled=!!ytp;
+    const can=!ytp||!!instFile; sel.disabled=!can; sel.title=can?'人聲':'YouTube 來源：要有伴奏檔才能切換'; }
   function setVox(mode){
-    if(ytp&&mode!=='orig') mode='orig';
+    if(ytp&&mode==='kara') mode='orig';
     if(mode==='inst'&&!instFile){ $('instMsg').textContent='還沒有伴唱音軌，先在 STEP 1 載入'; mode='orig'; }
     voxMode=mode; $('voxSel').value=mode; try{ localStorage.setItem('taigi-ktv-vox',mode); }catch(e){}
     if(mode==='kara'){ const g=ensureGraph(); if(g.ctx){ g.dry.gain.value=0; g.wet.gain.value=1; g.ctx.resume().catch(()=>{}); } }
@@ -4272,7 +4275,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const sameDir=(f,g)=>{ const a=(f.webkitRelativePath||'').split('/').slice(0,-1).join('/'), b=(g.webkitRelativePath||'').split('/').slice(0,-1).join('/'); return a===b; };
     for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){
       let media=null; if(o.audio&&o.audio.name){ const c=fl.filter(x=>x.name===o.audio.name); media=c.find(x=>sameDir(x,f))||c[0]||null; }
-      psongs.push({o,f,media,group:dirOf(f)}); } }catch(e){} }
+      // 伴奏/<同名>.mp3 next to the singer folders: the same base name as the project file (or the song title)
+      const base=f.name.replace(/\.ktv\.json$|\.json$/i,''), names=[base, o.title||''].filter(Boolean);
+      const inst=fl.find(x=>{ const p=(x.webkitRelativePath||'').split('/'); return p.length===3&&p[1]==='伴奏'&&/\.(mp3|m4a|aac|wav|ogg|flac|mp4)$/i.test(x.name)&&names.includes(x.name.replace(/\.[^.]+$/,'')); })||null;
+      psongs.push({o,f,media,inst,group:dirOf(f)}); } }catch(e){} }
     psongs.sort((a,b)=>((a.group===''?1:0)-(b.group===''?1:0))||a.group.localeCompare(b.group,'zh-Hant')||String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
     renderSongs(); document.body.classList.add('list');
     pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'這個資料夾裡沒有專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
@@ -4283,7 +4289,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(grouped&&s.group!==last){ last=s.group; html+=`<div class="pgrp">${esc(s.group||'其他')}</div>`; }
       const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
       const artist=o.artist||s.group||'';
-      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}・${timed}/${o.lines.length} 句已對時</small></div>`; });
+      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・🎹 有伴奏':''}・${timed}/${o.lines.length} 句已對時</small></div>`; });
     $('plist').innerHTML=html;
   }
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
@@ -4298,7 +4304,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
-    setVox('orig'); document.body.classList.remove('list'); $('pnow').textContent=projName(); updateTitle();
+    setInst(s.inst||null); setVox('orig'); document.body.classList.remove('list'); $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
   }
