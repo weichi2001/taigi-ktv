@@ -2643,7 +2643,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       emit('loadedmetadata'); emit('durationchange');
       if(A._t>0) try{ A.player.seekTo(A._t,true); }catch(e){}
       if(A._wantPlay) try{ A.player.playVideo(); }catch(e){}
-      A._iv=setInterval(()=>{ if(A.dead) return; if(A._playing&&!A._frozen){ const p=pt(), g=A.currentTime; if(Math.abs(p-g)>0.04){ A._t=p; A._tAt=now(); } } if(!A._dur) try{ A._dur=A.player.getDuration()||0; if(A._dur) emit('durationchange'); }catch(e){} },250);
+      // keep our smooth clock on YouTube's: big errors snap, small ones are eased in so nothing
+      // that follows this clock (the lyrics, an instrumental track) jumps back and forth
+      A._iv=setInterval(()=>{ if(A.dead) return; if(A._playing&&!A._frozen){ const p=pt(), g=A.currentTime, err=p-g;
+          if(Math.abs(err)>0.3){ A._t=p; A._tAt=now(); } else if(Math.abs(err)>0.01){ A._tAt-=err*0.35*1000/Math.max(.25,A._rate); } }
+        if(!A._dur) try{ A._dur=A.player.getDuration()||0; if(A._dur) emit('durationchange'); }catch(e){} },250);
     };
     return A;
   }
@@ -3224,7 +3228,19 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   audio.addEventListener('pause',()=>{ instEl.pause(); });
   audio.addEventListener('seeking',()=>{ if(instFile) instEl.currentTime=audio.currentTime; });
   audio.addEventListener('ratechange',()=>{ try{ instEl.playbackRate=audio.playbackRate; }catch(e){} });
-  setInterval(()=>{ if(voxMode==='inst'&&instFile&&!audio.paused&&!instNear()) instEl.currentTime=audio.currentTime; },500);
+  // keep the instrumental on the main clock: a big gap seeks, a small one is closed by
+  // nudging the playback rate a few percent, which the ear does not notice (a seek it does)
+  setInterval(()=>{
+    if(voxMode!=='inst'||!instFile||audio.paused) return;
+    if(instEl.paused&&!instEl.ended){ instEl.currentTime=audio.currentTime; instEl.play().catch(()=>{}); return; }
+    const d=instEl.currentTime-audio.currentTime, base=audio.playbackRate||1;
+    let r=base;
+    if(Math.abs(d)>0.6){ instEl.currentTime=audio.currentTime; }
+    else if(Math.abs(d)>0.05){ r=base*(d>0?(1-Math.min(.04,Math.abs(d)*.1)):(1+Math.min(.04,Math.abs(d)*.1))); }
+    if(Math.abs(instEl.playbackRate-r)>0.002) try{ instEl.playbackRate=r; }catch(e){}
+  },250);
+  audio.addEventListener('waiting',()=>{ if(voxMode==='inst'&&instFile) instEl.pause(); });
+  audio.addEventListener('playing',()=>{ if(voxMode==='inst'&&instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-audio.currentTime)>0.3) instEl.currentTime=audio.currentTime; instEl.play().catch(()=>{}); } });
 
   // Web Audio graph for the player: dry path, and a karaoke path = (L−R) plus the centre's lows.
   // Built once, lazily (a media element can only ever be wired into one graph).
