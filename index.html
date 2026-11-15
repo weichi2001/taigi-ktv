@@ -340,7 +340,7 @@
     <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">📄 選擇檔案</label>
-      <span id="pOff" class="instOffUI" style="display:none;align-items:center;gap:4px;font-size:13px;color:var(--muted)">伴奏偏移 <button class="instOffM" title="伴奏提早 50 ms">−</button><b class="instOffV" style="min-width:56px;text-align:center">0 ms</b><button class="instOffP" title="伴奏延後 50 ms">＋</button></span>
+      <span id="pOff" class="instOffUI" style="display:none;align-items:center;gap:4px;font-size:13px;color:var(--muted)">伴奏偏移 <button class="instOffM" title="伴奏提早 50 ms">−</button><b class="instOffV" style="min-width:56px;text-align:center">0 ms</b><button class="instOffP" title="伴奏延後 50 ms">＋</button> <span id="instLive" style="font-variant-numeric:tabular-nums;min-width:120px"></span></span>
       <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
     <div id="plist"></div>
@@ -3315,6 +3315,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('instClear').onclick=()=>{ setInst(null); dropAudio('__inst'); };
   document.querySelectorAll('.instOffM').forEach(b=>b.onclick=()=>setInstOff(instOff-0.05));
   document.querySelectorAll('.instOffP').forEach(b=>b.onclick=()=>setInstOff(instOff+0.05));
+  setInterval(()=>{ const el=$('instLive'); if(!el||!instFile) return;
+    const st=instEl.paused?'⏸ 未播放':(instEl.seeking?'⟳ 跳轉中':'▶'); const d=Math.round((instEl.currentTime-instTarget())*1000);
+    el.textContent=`伴奏 ${st} ${audio.paused?'':(d>0?'+':'')+d+' ms'} ${instEl.muted?'(靜音)':''} 載入${instEl.readyState}`; },250);
   function paintInstOffUI(){ document.querySelectorAll('.instOffUI').forEach(el=>{ el.style.display=instFile?(el.id==='pOff'?'inline-flex':'flex'):'none'; }); }
   audio.addEventListener('play',()=>{ if(graph.ctx) graph.ctx.resume().catch(()=>{}); if(instFile){ instSeek(true); instEl.playbackRate=audio.playbackRate; instEl.play().catch(()=>{}); } });
   audio.addEventListener('pause',()=>{ instEl.pause(); });
@@ -3396,7 +3399,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(p>=1){ clearInterval(fadeTimer); fadeTimer=null; instEl.volume=toInst?V:0; audio.volume=V; audio.muted=toInst; }
     },30);
   }
-  $('voxSel').onchange=()=>{ if(!audio.paused) primeInst(); setVox($('voxSel').value); };
+  $('voxSel').onchange=()=>{ if(!audio.paused){ primeInst(); if(instFile&&Math.abs(instEl.currentTime-instTarget())>0.08) instSeek(true); } setVox($('voxSel').value); };
   vidEl.addEventListener('loadedmetadata',()=>{ if(!ytp) $('instBox').style.display='block'; });
 
   $('audio').addEventListener('loadedmetadata',syncVideoUI);
