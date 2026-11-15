@@ -151,6 +151,9 @@
   #stageWrap:fullscreen.barOn .stagebar,#stageWrap:fullscreen .stagebar:hover,#stageWrap.pseudoFs.barOn .stagebar,#stageWrap.pseudoFs .stagebar:hover{opacity:1}
   #stageWrap.pseudoFs{position:fixed;inset:0;z-index:60;border-radius:0;height:100dvh}
   body.pseudoFsBody{overflow:hidden}
+  .stagebar .ic+.tx{margin-left:5px}
+  @media (max-width:700px){ .stagebar{gap:6px;padding:8px 10px} .stagebar .tx{display:none} .stagebar button{padding:7px 10px} #seek{min-width:90px} #timeLbl{font-size:12px} }
+  @media (hover:none){ #stageWrap:fullscreen .stagebar:hover,#stageWrap.pseudoFs .stagebar:hover{opacity:0} #stageWrap:fullscreen.barOn .stagebar,#stageWrap.pseudoFs.barOn .stagebar{opacity:1} }
   #lineList .li{grid-template-columns:24px 26px 96px 1fr}
   .li .pk{display:flex;align-items:center;justify-content:center;height:100%;cursor:pointer}
   .li .pk input{width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
@@ -349,13 +352,13 @@
         <div id="stageEmpty">先在左邊載入音檔或影片，貼上歌詞並按「讀入歌詞」。</div>
       </div>
       <div class="stagebar">
-        <button id="playBtn">▶ 播放</button>
-        <button id="restartBtn">⏮ 從頭</button>
+        <button id="playBtn"><span class="ic">▶</span><span class="tx">播放</span></button>
+        <button id="restartBtn" title="從頭"><span class="ic">⏮</span><span class="tx">從頭</span></button>
         <input type="range" id="seek" min="0" max="1000" value="0">
         <span id="timeLbl">0:00 / 0:00</span>
         <select id="voxSel" title="人聲"><option value="orig">原唱</option><option value="inst">伴唱音軌</option><option value="kara">簡易消人聲</option></select>
         <span id="volWrap" title="音量"><span id="volIcon" style="cursor:pointer">🔊</span><input type="range" id="vol" min="0" max="100" value="100"></span>
-        <button id="fsBtn">⛶ 全螢幕</button>
+        <button id="fsBtn" title="全螢幕"><span class="ic">⛶</span><span class="tx">全螢幕</span></button>
       </div>
     </div>
 
@@ -3048,8 +3051,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function primeInst(){ if(!instFile||!instEl.paused) return; try{ instSeek(true); const p=instEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
   function togglePlay(){ if(!audio.src) return; if(audio.paused){ playStop=null; audio.playbackRate=1; primeInst(); audio.play().catch(()=>{}); } else audio.pause(); }
   $('playBtn').onclick=()=>{ if(exporting) return; if(rec) stopRec(''); togglePlay(); };
-  audio.addEventListener('play',()=>$('playBtn').textContent='⏸ 暫停');
-  audio.addEventListener('pause',()=>$('playBtn').textContent='▶ 播放');
+  const playLbl=(ic,tx)=>{ const b=$('playBtn'); b.querySelector('.ic').textContent=ic; b.querySelector('.tx').textContent=tx; b.title=tx; };
+  audio.addEventListener('play',()=>playLbl('⏸','暫停'));
+  audio.addEventListener('pause',()=>playLbl('▶','播放'));
   audio.addEventListener('ended',()=>{ if(rec) stopRec('歌放完了。還沒按到的字可以點那個字、再按「開始跟唱」補。'); });
   $('restartBtn').onclick=()=>{ audio.currentTime=0; };
   $('rate').onchange=()=>{ if(rec) audio.playbackRate=+$('rate').value; };
@@ -3240,6 +3244,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const instOn=()=>voxMode==='inst';
   const VOL_OK=(()=>{ try{ const a=new Audio(); a.volume=0.5; return Math.abs(a.volume-0.5)<0.01; }catch(e){ return false; } })();   // false on iPhone / iPad
   const instSilence=on=>{ if(VOL_OK) instEl.volume=on?0:userVol(); instEl.muted=on; };
+  if(!VOL_OK){ const w=$('volWrap'); if(w) w.style.display='none'; }
   // instSeek: every jump of the instrumental goes through here. A seek in an mp3 lands late by a
   // fairly constant amount (decoder start-up + imprecise frame index), so we learn that lag and
   // aim ahead of it; the lock window makes the first seconds after a switch snap hard instead of
@@ -3247,7 +3252,12 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   let instLag=0, instLock=0, instSeekAt=0, instFix=0, instErr=0;
   // lock=true only for a real jump (switch / play / the user seeking); corrective seeks do not
   // re-open the window, otherwise clock jitter could keep it seeking forever (= stutter)
-  function instSeek(lock){ instSeekAt=performance.now(); if(lock){ instLock=instSeekAt; instFix=0; } instErr=0; try{ instEl.currentTime=Math.max(0,audio.currentTime+instLag); }catch(e){} }
+  let instWant=null;    // a seek the element could not take yet (not loaded): redone when it can
+  function instSeek(lock){ instSeekAt=performance.now(); if(lock){ instLock=instSeekAt; instFix=0; } instErr=0;
+    const t=Math.max(0,audio.currentTime+instLag);
+    if(instEl.readyState<1){ instWant=t; return; }
+    instWant=null; try{ instEl.currentTime=t; }catch(e){ instWant=t; } }
+  ['loadedmetadata','canplay'].forEach(ev=>instEl.addEventListener(ev,()=>{ if(instWant!=null||(!audio.paused&&Math.abs(instEl.currentTime-audio.currentTime)>0.5)){ instWant=null; instSeekAt=performance.now(); try{ instEl.currentTime=Math.max(0,audio.currentTime+instLag); }catch(e){} } }));
   instEl.addEventListener('seeked',()=>{ if(audio.paused||instEl.paused) return; const d=audio.currentTime-instEl.currentTime; if(Math.abs(d)<1) instLag=Math.max(-0.2,Math.min(0.6,instLag+d*0.7)); });
   function setInst(f){
     instFile=f||null;
