@@ -145,10 +145,12 @@
   .hy{position:absolute;transform:translateX(-50%);font-family:"Huninn","TaiLo",sans-serif;font-size:calc(var(--hsize,56px)*var(--rratio,.42));line-height:1.3;text-shadow:var(--ol2);color:#fff;white-space:nowrap;pointer-events:none}
   .hy.on{color:var(--ktv-fill)}
   .sy .jn{color:#b3a79b;margin-left:1px}
-  #stageWrap:fullscreen{display:flex;flex-direction:column;background:#0b0d1a}
-  #stageWrap:fullscreen #stage{flex:1;aspect-ratio:auto;height:auto;padding:4% 5% 7%}
-  #stageWrap:fullscreen .stagebar{position:fixed;left:0;right:0;bottom:0;opacity:0;transition:opacity .3s;background:rgba(20,24,49,.92)}
-  #stageWrap:fullscreen.barOn .stagebar,#stageWrap:fullscreen .stagebar:hover{opacity:1}
+  #stageWrap:fullscreen,#stageWrap.pseudoFs{display:flex;flex-direction:column;background:#0b0d1a}
+  #stageWrap:fullscreen #stage,#stageWrap.pseudoFs #stage{flex:1;aspect-ratio:auto;height:auto;padding:4% 5% 7%}
+  #stageWrap:fullscreen .stagebar,#stageWrap.pseudoFs .stagebar{position:fixed;left:0;right:0;bottom:0;opacity:0;transition:opacity .3s;background:rgba(20,24,49,.92);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #stageWrap:fullscreen.barOn .stagebar,#stageWrap:fullscreen .stagebar:hover,#stageWrap.pseudoFs.barOn .stagebar,#stageWrap.pseudoFs .stagebar:hover{opacity:1}
+  #stageWrap.pseudoFs{position:fixed;inset:0;z-index:60;border-radius:0;height:100dvh}
+  body.pseudoFsBody{overflow:hidden}
   #lineList .li{grid-template-columns:24px 26px 96px 1fr}
   .li .pk{display:flex;align-items:center;justify-content:center;height:100%;cursor:pointer}
   .li .pk input{width:16px;height:16px;cursor:pointer;accent-color:var(--accent)}
@@ -2721,7 +2723,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(cur>=F.length) cur=0;
     rec=true; undoStack=[]; playStop=null; gotKey=false; lastTapT=null;
     seekBefore(cur);
-    audio.playbackRate=+$('rate').value;
+    audio.playbackRate=+$('rate').value; primeInst();
     audio.play().then(()=>{ paintKeyMon(); }).catch(err=>{ blocked('音樂播不起來（'+(err&&err.name||'')+'）—— 先按一次上面的 ▶ 播放，再按「開始跟唱」'); rec=false; setRecUI(false); });
     $('recBtn').textContent='■ 停止'; setRecUI(true); setTimeout(parkFocus,0);
     renderRec(); paintKeyMon();
@@ -2812,7 +2814,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const fc=$('focusCatcher');
   function parkFocus(){ try{ fc.focus({preventScroll:true}); }catch(e){ try{ fc.focus(); }catch(e2){} } }
   document.addEventListener('click',e=>{ if(e.target.closest('button,summary')) setTimeout(parkFocus,0); },true);
-  document.addEventListener('pointerdown',e=>{ if(e.target.closest('#stageWrap,#recView,#lineList')) setTimeout(parkFocus,0); },true);
+  document.addEventListener('pointerdown',e=>{ if(e.target.closest('select,input,textarea,option')) return; if(e.target.closest('#stageWrap,#recView,#lineList')) setTimeout(parkFocus,0); },true);
   ['keyup','keypress'].forEach(ev=>document.addEventListener(ev,e=>{ const tag=(e.target.tagName||'').toLowerCase(); if((e.code==='Space'||e.code==='Enter'||e.code==='NumpadEnter')&&(tag==='button'||tag==='summary'||(tag==='input'&&e.target.type==='range'))) e.preventDefault(); },true));
   window.addEventListener('keydown',e=>{
     const el=e.target, tag=(el&&el.tagName||'').toLowerCase();
@@ -3037,11 +3039,14 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   ['fsize','rsize','showRom','fillColor'].forEach(id=>$(id).addEventListener('input',()=>{applyStyle();relayoutHy();}));
   window.addEventListener('resize',()=>relayoutHy());
-  document.addEventListener('fullscreenchange',()=>{applyStyle();requestAnimationFrame(relayoutHy);});
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{applyStyle();applyCrop();requestAnimationFrame(relayoutHy);}));
   try{ new ResizeObserver(()=>{ applyStyle(); applyCrop(); relayoutHy(); }).observe($('stage')); }catch(e){}
 
   // ---------- transport (normal playback always 1×)
-  function togglePlay(){ if(!audio.src) return; if(audio.paused){ playStop=null; audio.playbackRate=1; audio.play().catch(()=>{}); } else audio.pause(); }
+  // On iPhone / iPad an <audio> may only start inside a tap. The instrumental normally starts from
+  // the song's own 'play' event, which is not a tap, so every tap that starts the song also pokes it.
+  function primeInst(){ if(!instFile||!instEl.paused) return; try{ instSeek(true); const p=instEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+  function togglePlay(){ if(!audio.src) return; if(audio.paused){ playStop=null; audio.playbackRate=1; primeInst(); audio.play().catch(()=>{}); } else audio.pause(); }
   $('playBtn').onclick=()=>{ if(exporting) return; if(rec) stopRec(''); togglePlay(); };
   audio.addEventListener('play',()=>$('playBtn').textContent='⏸ 暫停');
   audio.addEventListener('pause',()=>$('playBtn').textContent='▶ 播放');
@@ -3052,7 +3057,19 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('seek').oninput=()=>{ if(isFinite(audio.duration)) audio.currentTime=$('seek').value/1000*audio.duration; };
   $('stage').addEventListener('pointerdown',e=>{ if(!rec) return; e.preventDefault(); const r=$('stage').getBoundingClientRect();
     if(e.clientX-r.left > r.width*0.78) endLine(); else tapChar(); });
-  $('fsBtn').onclick=()=>{ try{ if(document.fullscreenElement) document.exitFullscreen(); else $('stageWrap').requestFullscreen().catch(()=>{}); }catch(e){} };
+  const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement||null;
+  const pseudoFs=on=>{ $('stageWrap').classList.toggle('pseudoFs',on); document.body.classList.toggle('pseudoFsBody',on); applyStyle(); applyCrop(); requestAnimationFrame(relayoutHy); if(on){ try{ screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} } };
+  $('fsBtn').onclick=()=>{
+    const w=$('stageWrap');
+    if(w.classList.contains('pseudoFs')){ pseudoFs(false); return; }
+    try{
+      if(fsEl()){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); return; }
+      if(w.requestFullscreen){ w.requestFullscreen().catch(()=>pseudoFs(true)); return; }
+      if(w.webkitRequestFullscreen){ w.webkitRequestFullscreen(); return; }
+    }catch(e){}
+    pseudoFs(true);                                   // iPhone Safari: no element fullscreen at all
+  };
+  window.addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('stageWrap').classList.contains('pseudoFs')) pseudoFs(false); });
   let barT=0; function showBar(){ $('stageWrap').classList.add('barOn'); clearTimeout(barT); barT=setTimeout(()=>$('stageWrap').classList.remove('barOn'),2500); }
   $('stageWrap').addEventListener('mousemove',showBar); $('stageWrap').addEventListener('pointerdown',showBar);
 
@@ -3322,7 +3339,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(p>=1){ clearInterval(fadeTimer); fadeTimer=null; instEl.volume=toInst?V:0; audio.volume=V; audio.muted=toInst; }
     },30);
   }
-  $('voxSel').onchange=()=>setVox($('voxSel').value);
+  $('voxSel').onchange=()=>{ if(!audio.paused) primeInst(); setVox($('voxSel').value); };
   vidEl.addEventListener('loadedmetadata',()=>{ if(!ytp) $('instBox').style.display='block'; });
 
   $('audio').addEventListener('loadedmetadata',syncVideoUI);
