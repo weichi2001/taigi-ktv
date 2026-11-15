@@ -332,6 +332,7 @@
   <div>
     <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
+      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">📄 選擇檔案</label>
       <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
     <div id="plist"></div>
@@ -2530,6 +2531,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
 
   // ---------- storage
   function dataObj(){ return {v:3,yt:ytId||undefined,voc:{on:$('vocOn').checked,words:$('vocIn').value,color:$('vocColor').value},crop:{x:cropF.x,y:cropF.y,w:cropF.w,h:cropF.h,s:+$('scrimV').value,a:$('cropAsp').value},hap:$('hapIn').value,title:$('songTitle').value,artist:$('songArtist').value,lines:lines.map(l=>({h:l.h,r:l.r,a:l.a,b:l.b}))}; }
+  const nfc=x=>{ try{ return String(x||'').normalize('NFC'); }catch(e){ return String(x||''); } };
+  const sameName=(a,b)=>nfc(a)===nfc(b);
   let PLAYER=false;   // player mode: play projects from a folder, never write the editor's state
   function save(){ if(PLAYER) return; try{ localStorage.setItem(LS,JSON.stringify(dataObj())); }catch(e){} }
   function loadObj(o){
@@ -2559,7 +2562,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function firstUntimed(){ rebuild(); const k=F.findIndex(([i,k])=>lines[i].a[k]==null); cur=k<0?F.length:k; }
 
   // ---------- audio + waveform
-  $('audioFile').onchange=e=>{ const f=e.target.files[0]; if(f){ loadAudio(f); cacheAudio('__current',f); cacheAudio('__byname:'+f.name,f); if(curPid) cacheAudio(curPid,f); } e.target.value=''; };
+  $('audioFile').onchange=e=>{ const f=e.target.files[0]; if(f){ loadAudio(f); cacheAudio('__current',f); cacheAudio('__byname:'+nfc(f.name),f); if(curPid) cacheAudio(curPid,f); } e.target.value=''; };
   async function loadAudio(f){
     if(!f) return; if(ytp){ clearYT(true); save(); } lastFile=f; hideAsk(); setTimeout(syncVideoUI,300);
     audio.src=URL.createObjectURL(f); $('audioName').textContent=f.name;
@@ -3218,6 +3221,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // then only a short crossfade, not a seek-and-start, so nothing clicks or has to lock in.
   const userVol=()=>{ const v=$('vol'); return v?(+v.value/100):1; };
   const instOn=()=>voxMode==='inst';
+  const VOL_OK=(()=>{ try{ const a=new Audio(); a.volume=0.5; return Math.abs(a.volume-0.5)<0.01; }catch(e){ return false; } })();   // false on iPhone / iPad
+  const instSilence=on=>{ if(VOL_OK) instEl.volume=on?0:userVol(); instEl.muted=on; };
   // instSeek: every jump of the instrumental goes through here. A seek in an mp3 lands late by a
   // fairly constant amount (decoder start-up + imprecise frame index), so we learn that lag and
   // aim ahead of it; the lock window makes the first seconds after a switch snap hard instead of
@@ -3231,7 +3236,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     instFile=f||null;
     $('instName').textContent=f?('伴唱音軌：'+f.name):'載入伴唱音軌（選用，先用外部工具去好人聲）';
     $('instClear').style.display=f?'inline':'none'; $('instMsg').textContent='';
-    if(f){ instEl.src=URL.createObjectURL(f); instEl.volume=instOn()?userVol():0; if(!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } }
+    if(f){ instEl.src=URL.createObjectURL(f); instSilence(!instOn()); if(!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } }
     else { try{ instEl.pause(); instEl.removeAttribute('src'); }catch(e){} if(voxMode==='inst') setVox('orig'); }
     voxUI();
   }
@@ -3307,8 +3312,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     clearInterval(fadeTimer);
     const V=userVol(), from=Math.min(1,Math.max(0,instEl.volume/(V||1)));
     const to=toInst?1:0;
-    if(!instFile||audio.paused||from===to){ instEl.volume=toInst&&instFile?V:0; audio.volume=V; audio.muted=toInst&&!!instFile; return; }
-    audio.muted=false;
+    if(!VOL_OK||!instFile||audio.paused||from===to){ instSilence(!(toInst&&instFile)); if(VOL_OK) audio.volume=V; audio.muted=toInst&&!!instFile; return; }
+    audio.muted=false; instEl.muted=false;
     if(toInst&&instEl.paused){ instSeek(true); instEl.play().catch(()=>{}); }
     const t0=performance.now(), D=250;
     fadeTimer=setInterval(()=>{
@@ -3336,7 +3341,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('askSkip').onclick=()=>{ hideAsk(); pstat('先不載入音檔；要用時再從 STEP 1 選擇'); };
   async function restoreAudio(key,meta){
     const c=await getAudio(key);
-    if(c&&c.blob&&(!meta||!meta.name||c.name===meta.name)){ const f=new File([c.blob],c.name,{type:c.type||c.blob.type}); loadAudio(f); cacheAudio('__current',f); return true; }
+    if(c&&c.blob&&(!meta||!meta.name||sameName(c.name,meta.name))){ const f=new File([c.blob],c.name,{type:c.type||c.blob.type}); loadAudio(f); cacheAudio('__current',f); return true; }
     if(meta&&meta.name){ askAudio(meta.name); }
     return false;
   }
@@ -3404,7 +3409,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function dlErr(e){ const c=e&&e.code; return c==='declined'?'已取消下載':c==='rate_limited'?'下載視窗已經開著，請先處理那一個':c==='too_large'?'檔案太大，試試 720p':'這裡無法下載檔案'; }
   $('projDownload').onclick=async()=>{ if(!dl){ pstat('這裡無法下載檔案'); return; } if(!lines.length){ pstat('還沒有歌詞'); return; }
     try{ await dl.save({filename:($('songTitle').value||'未命名')+'.ktv.json',data:JSON.stringify({...dataObj(),name:projName(),audio:lastFile?{name:lastFile.name,size:lastFile.size}:null})}); pstat('專案檔已下載'); }catch(e){ pstat(dlErr(e)); } };
-  $('projOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ if(rec) stopRec(''); const o=JSON.parse(await f.text()); loadObj(o); curPid=null; renderProjSel(); save(); drawTL(); commit('開啟專案檔'); const got=(ytp||!o.audio)?false:await restoreAudio('__byname:'+o.audio.name,o.audio); pstat('已開啟專案檔（要留著的話按「儲存專案」）'+(got?'，音檔已自動載入':'')); }catch(err){ pstat('這個檔案讀不進來'); } e.target.value=''; };
+  $('projOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ if(rec) stopRec(''); const o=JSON.parse(await f.text()); loadObj(o); curPid=null; renderProjSel(); save(); drawTL(); commit('開啟專案檔'); const got=(ytp||!o.audio)?false:await restoreAudio('__byname:'+nfc(o.audio.name),o.audio); pstat('已開啟專案檔（要留著的話按「儲存專案」）'+(got?'，音檔已自動載入':'')); }catch(err){ pstat('這個檔案讀不進來'); } e.target.value=''; };
 
   // ---------- video export: draw the stage on a canvas while the song plays once, record canvas + audio
   let exporting=false, expCancel=null, actx=null, asrc=null, adest=null;
@@ -4252,7 +4257,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---------- volume
   (function(){
     const v=$('vol'), ic=$('volIcon'); let last=100;
-    const paint=()=>{ const n=+v.value; audio.volume=n/100; try{ instEl.volume=(voxMode==='inst')?n/100:0; }catch(e){} ic.textContent=n===0?'🔇':n<50?'🔉':'🔊';
+    const paint=()=>{ const n=+v.value; audio.volume=n/100; try{ if(VOL_OK) instEl.volume=(voxMode==='inst')?n/100:0; }catch(e){} ic.textContent=n===0?'🔇':n<50?'🔉':'🔊';
       try{ localStorage.setItem('taigi-ktv-vol',String(n)); }catch(e){} };
     try{ const sv=localStorage.getItem('taigi-ktv-vol'); if(sv!=null) v.value=sv; }catch(e){}
     v.addEventListener('input',paint);
@@ -4316,21 +4321,27 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('toMenu').onclick=()=>$('menuBtn').onclick();
   $('toList').onclick=()=>{ try{ audio.pause(); }catch(e){} if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); };
   $('pfolder').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
+  $('pfiles').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
   async function scanFolder(fl){
     pfiles=fl; psongs=[]; const js=fl.filter(f=>/\.json$/i.test(f.name)&&!/^\./.test(f.name));
+    const flat=!fl.some(f=>f.webkitRelativePath&&f.webkitRelativePath.includes('/'));   // picked as files, not a folder
     pmsg('正在讀取 '+js.length+' 個檔案…');
     // "root/歌手/專案.ktv.json": the first folder under the chosen one is the singer / band
-    const dirOf=f=>{ const p=(f.webkitRelativePath||'').split('/'); return p.length>2?p[1]:''; };
+    const dirOf=f=>{ const p=(f.webkitRelativePath||'').split('/'); return p.length>2?nfc(p[1]):''; };
     const sameDir=(f,g)=>{ const a=(f.webkitRelativePath||'').split('/').slice(0,-1).join('/'), b=(g.webkitRelativePath||'').split('/').slice(0,-1).join('/'); return a===b; };
     for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){
-      let media=null; if(o.audio&&o.audio.name){ const c=fl.filter(x=>x.name===o.audio.name); media=c.find(x=>sameDir(x,f))||c[0]||null; }
-      // 伴奏/<同名>.mp3 next to the singer folders: the same base name as the project file (or the song title)
-      const base=f.name.replace(/\.ktv\.json$|\.json$/i,''), names=[base, o.title||''].filter(Boolean);
-      const inst=fl.find(x=>{ const p=(x.webkitRelativePath||'').split('/'); return p.length===3&&p[1]==='伴奏'&&/\.(mp3|m4a|aac|wav|ogg|flac|mp4)$/i.test(x.name)&&names.includes(x.name.replace(/\.[^.]+$/,'')); })||null;
+      let media=null; if(o.audio&&o.audio.name){ const c=fl.filter(x=>sameName(x.name,o.audio.name)); media=c.find(x=>sameDir(x,f))||c[0]||null; }
+      // 伴奏/<同名>.mp3 next to the singer folders: the same base name as the project file (or the song title).
+      // Picked as loose files (phones / tablets have no folder picker): any audio file with that base
+      // name that is not the song's own file counts as its instrumental.
+      const base=nfc(f.name.replace(/\.ktv\.json$|\.json$/i,'')), names=[base, nfc(o.title||'')].filter(Boolean);
+      const isAud=x=>/\.(mp3|m4a|aac|wav|ogg|flac|mp4)$/i.test(x.name), stem=x=>nfc(x.name.replace(/\.[^.]+$/,''));
+      const inst=fl.find(x=>{ const p=(x.webkitRelativePath||'').split('/'); return p.length===3&&nfc(p[1])==='伴奏'&&isAud(x)&&names.includes(stem(x)); })
+        ||(!flat?null:fl.find(x=>isAud(x)&&names.includes(stem(x))&&!(o.audio&&sameName(x.name,o.audio.name))))||null;
       psongs.push({o,f,media,inst,group:dirOf(f)}); } }catch(e){} }
     psongs.sort((a,b)=>((a.group===''?1:0)-(b.group===''?1:0))||a.group.localeCompare(b.group,'zh-Hant')||String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
     renderSongs(); document.body.classList.add('list');
-    pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'這個資料夾裡沒有專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
+    pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'沒有找到專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
   }
   function renderSongs(){
     let html='', last=null; const grouped=psongs.some(s=>s.group);
@@ -4349,7 +4360,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     loadObj(o);
     if(!o.yt){
       let f=s.media;
-      if(!f&&o.audio&&o.audio.name){ try{ const c=await getAudio('__byname:'+o.audio.name); if(c&&c.blob) f=new File([c.blob],c.name,{type:c.type||c.blob.type}); }catch(e){} }
+      if(!f&&o.audio&&o.audio.name){ try{ const c=await getAudio('__byname:'+nfc(o.audio.name)); if(c&&c.blob) f=new File([c.blob],c.name,{type:c.type||c.blob.type}); }catch(e){} }
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
