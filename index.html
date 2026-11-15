@@ -3280,7 +3280,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const userVol=()=>{ const v=$('vol'); return v?(+v.value/100):1; };
   const instOn=()=>voxMode==='inst';
   const VOL_OK=(()=>{ try{ const a=new Audio(); a.volume=0.5; return Math.abs(a.volume-0.5)<0.01; }catch(e){ return false; } })();   // false on iPhone / iPad
-  const instSilence=on=>{ if(VOL_OK) instEl.volume=on?0:userVol(); instEl.muted=on; };
+  // Silence by volume, not by muting, wherever volume works: a muted element lets the browser
+  // close its audio output, and reopening it on unmute costs a few dozen ms that land as lag.
+  const instSilence=on=>{ if(VOL_OK){ instEl.volume=on?0:userVol(); instEl.muted=false; } else instEl.muted=on; };
   if(!VOL_OK){ const w=$('volWrap'); if(w) w.style.display='none'; }
   // instSeek: every jump of the instrumental goes through here. A seek in an mp3 lands late by a
   // fairly constant amount (decoder start-up + imprecise frame index), so we learn that lag and
