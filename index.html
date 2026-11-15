@@ -195,6 +195,7 @@
   body.player main{grid-template-columns:1fr;max-width:1240px;margin:0 auto}
   body.player main>.card,body.player #splitter,body.player #rec,body.player #lineCard,body.player #verTag{display:none}
   body.player #pbar{display:flex}
+  body.player #vocQuickWrap{display:inline-flex!important}
   body.player.list #plist{display:grid} body.player.list #stageWrap{display:none}
   .song{padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;transition:border-color .15s}
   .song:hover{border-color:var(--accent)} .song b{display:block;font-size:17px} .song small{color:var(--muted);font-size:12.5px;display:block;margin-top:4px}
@@ -356,6 +357,7 @@
         <button id="restartBtn" title="從頭"><span class="ic">⏮</span><span class="tx">從頭</span></button>
         <input type="range" id="seek" min="0" max="1000" value="0">
         <span id="timeLbl">0:00 / 0:00</span>
+        <label id="vocQuickWrap" title="顯示教學生字" style="display:none;align-items:center;gap:4px;cursor:pointer;font-size:13px;white-space:nowrap"><input type="checkbox" id="vocQuick" style="width:15px;height:15px;accent-color:var(--accent)">生</label>
         <select id="voxSel" title="人聲"><option value="orig">原唱</option><option value="inst">伴唱音軌</option><option value="kara">簡易消人聲</option></select>
         <span id="volWrap" title="音量"><span id="volIcon" style="cursor:pointer">🔊</span><input type="range" id="vol" min="0" max="100" value="100"></span>
         <button id="fsBtn" title="全螢幕"><span class="ic">⛶</span><span class="tx">全螢幕</span></button>
@@ -2480,6 +2482,38 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     L.b=(Array.isArray(b)&&b.length===n)?b.slice():new Array(n).fill(null);
     return L;
   }
+  // Re-reading edited lyrics keeps the timings of every line that is still recognisably the same
+  // line: lines are aligned old↔new by similarity, then within a matched pair the timings follow
+  // the characters (same count → one to one; otherwise by matching the characters themselves).
+  function lcsPairs(A,B,eq){ const n=A.length,m=B.length,D=[]; for(let i=0;i<=n;i++){ D.push(new Int16Array(m+1)); }
+    for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) D[i][j]=eq(A[i],B[j])?D[i+1][j+1]+1:Math.max(D[i+1][j],D[i][j+1]);
+    const out=[]; let i=0,j=0; while(i<n&&j<m){ if(eq(A[i],B[j])){ out.push([i,j]); i++; j++; } else if(D[i+1][j]>=D[i][j+1]) i++; else j++; } return out; }
+  function lineSim(o,h,r){ const a=o.h.replace(/\s+/g,''), b=h.replace(/\s+/g,''); if(!a.length||!b.length) return 0;
+    if(a===b) return 1; const l=lcsPairs([...a],[...b],(x,y)=>x===y).length; const sim=2*l/(a.length+b.length);
+    return (o.r&&r&&o.r.trim()===r.trim())?Math.max(sim,0.7):sim; }
+  function mergeLines(old,parsed){
+    const hadOld=old.some(l=>l.a.some(t=>t!=null));
+    if(!hadOld) return {lines:parsed.map(([h,r])=>mk(h,r)),hadOld:false,kept:0,partial:0,fresh:parsed.length};
+    // monotonic alignment of lines (DP on similarity), threshold 0.5 = "still the same line"
+    const n=old.length,m=parsed.length,S=[],D=[]; for(let i=0;i<n;i++){ S.push(parsed.map(([h,r])=>{ const v=lineSim(old[i],h,r); return v>=0.5?v:0; })); }
+    for(let i=0;i<=n;i++) D.push(new Float64Array(m+1));
+    for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) D[i][j]=Math.max(D[i+1][j],D[i][j+1],S[i][j]?S[i][j]+D[i+1][j+1]:0);
+    const match=new Array(m).fill(-1); let i=0,j=0;
+    while(i<n&&j<m){ if(S[i][j]&&Math.abs(D[i][j]-(S[i][j]+D[i+1][j+1]))<1e-9){ match[j]=i; i++; j++; } else if(D[i+1][j]>=D[i][j+1]) i++; else j++; }
+    let kept=0,partial=0,fresh=0;
+    const lines=parsed.map(([h,r],j)=>{
+      const oi=match[j]; if(oi<0){ fresh++; return mk(h,r); }
+      const o=old[oi], L=mk(h,r); const N=L.units.length;
+      if(!o.a.some(t=>t!=null)){ return L; }
+      if(o.units.length===N){ L.a=o.a.slice(); L.b=o.b.slice(); kept++; return L; }
+      const pairs=lcsPairs(o.units.map(u=>u.c),L.units.map(u=>u.c),(x,y)=>x===y);
+      if(!pairs.length){ fresh++; return L; }
+      pairs.forEach(([a,b])=>{ L.a[b]=o.a[a]; L.b[b]=o.b[a]; });
+      // a unit's end must not run past the next unit's start; drop ends that would
+      for(let k=0;k<N-1;k++){ if(L.b[k]!=null&&L.a[k+1]!=null&&L.b[k]>L.a[k+1]) L.b[k]=null; }
+      kept++; if(pairs.length<N) partial++; return L; });
+    return {lines,hadOld:true,kept,partial,fresh};
+  }
   // flat index helpers
   function flat(){ const f=[]; lines.forEach((l,i)=>l.units.forEach((u,k)=>f.push([i,k]))); return f; }
   let F=[];
@@ -2519,6 +2553,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('expClose').onclick=()=>{ if(exporting){ $('expStatus').textContent='匯出中，要停的話先按「取消」'; return; } $('expModal').style.display='none'; };
   $('expModal').addEventListener('click',e=>{ if(e.target===$('expModal')&&!exporting) $('expModal').style.display='none'; });
   $('vocOn').addEventListener('change',()=>{ $('vocBody').style.display=$('vocOn').checked?'block':'none'; refreshVocab(); });
+  $('vocQuick').addEventListener('change',()=>{ $('vocOn').checked=$('vocQuick').checked; $('vocBody').style.display=$('vocOn').checked?'block':'none'; refreshVocab(); });
   $('vocIn').addEventListener('input',refreshVocab); $('vocColor').addEventListener('input',refreshVocab);
   $('lyrSearch').onclick=()=>{ const q=($('songTitle').value||'').trim();
     const u='https://taigilyrics.kiantiong.com/'+(q?('?kind=meta&q='+encodeURIComponent(q)+'&per_page=30'):'');
@@ -2526,10 +2561,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('parseBtn').onclick=()=>{
     loadHap($('hapIn').value); try{ localStorage.setItem('taigi-ktv-hap',$('hapIn').value); }catch(e){}
     const p=parse($('lyricsIn').value); if(!p.length){ $('parseInfo').textContent='沒有讀到歌詞'; return; }
-    const same=p.length===lines.length;
-    lines=p.map(([h,r],i)=>same?mk(h,r,lines[i].a,lines[i].b):mk(h,r));
+    const M=mergeLines(lines,p); lines=M.lines;
     const bad=lines.filter(l=>!l.aligned&&!l.nor).length;
-    $('parseInfo').innerHTML=`讀到 ${lines.length} 句`+(bad?`，<span style="color:var(--accent)">${bad} 句字數和音節數對不上（列表標紅）</span>`:'，每句都能逐字對齊');
+    const keptMsg=M.hadOld?(M.kept?`，保留了 ${M.kept} 句的時間`+(M.partial?`（${M.partial} 句只保留部分）`:'')+(M.fresh?`，${M.fresh} 句要重新對時`:''):'，時間需要重新對'):'';
+    $('parseInfo').innerHTML=`讀到 ${lines.length} 句`+keptMsg+(bad?`，<span style="color:var(--accent)">${bad} 句字數和音節數對不上（列表標紅）</span>`:'');
     readVoc(); markVocab(); cur=0; firstUntimed(); rebuild(); renderList(); renderRec(); updateTitle(); save(); drawTL(); commit('讀入歌詞');
   };
   ['songTitle','songArtist'].forEach(id=>$(id).addEventListener('input',()=>{updateTitle();save();}));
@@ -4391,7 +4426,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
-    setInst(s.inst||null); setVox('orig'); document.body.classList.remove('list'); $('pnow').textContent=projName(); updateTitle();
+    setInst(s.inst||null); setVox('orig'); document.body.classList.remove('list');
+    $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
   }
