@@ -3317,7 +3317,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   document.querySelectorAll('.instOffP').forEach(b=>b.onclick=()=>setInstOff(instOff+0.05));
   setInterval(()=>{ const el=$('instLive'); if(!el||!instFile) return;
     const st=instEl.paused?'⏸ 未播放':(instEl.seeking?'⟳ 跳轉中':'▶'); const d=Math.round((instEl.currentTime-instTarget())*1000);
-    el.textContent=`伴奏 ${st} ${audio.paused?'':(d>0?'+':'')+d+' ms'} ${instEl.muted?'(靜音)':''} 載入${instEl.readyState}`; },250);
+    el.textContent=`伴奏 ${st} ${audio.paused?'':(d>0?'+':'')+d+' ms'}`; },250);
   function paintInstOffUI(){ document.querySelectorAll('.instOffUI').forEach(el=>{ el.style.display=instFile?(el.id==='pOff'?'inline-flex':'flex'):'none'; }); }
   audio.addEventListener('play',()=>{ if(graph.ctx) graph.ctx.resume().catch(()=>{}); if(instFile){ instSeek(true); instEl.playbackRate=audio.playbackRate; instEl.play().catch(()=>{}); } });
   audio.addEventListener('pause',()=>{ instEl.pause(); });
@@ -3333,10 +3333,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     instErr=instErr?instErr*0.6+raw*0.4:raw;                           // smoothed: ignore the clock's jitter
     const d=instErr, locking=performance.now()-instLock<2500&&instFix<2;
     let r=base;
-    if(!instOn()){ if(Math.abs(d)>0.05&&Math.abs(raw)>0.05) instSeek(false); }   // silent: free to jump, nobody hears it
+    if(!instOn()){ if(Math.abs(d)>0.02&&Math.abs(raw)>0.02) instSeek(false); }   // silent: free to jump, nobody hears it
     else if(Math.abs(d)>0.6){ instSeek(false); }
     else if(locking&&Math.abs(raw)>0.08&&Math.abs(d)>0.08){ instFix++; instSeek(false); }
-    else if(Math.abs(d)>0.04){ const k=Math.min(.01,Math.abs(d)*.06); r=base*(d>0?1-k:1+k); }
+    else if(Math.abs(d)>0.015){ const k=Math.min(.02,Math.abs(d)/2); r=base*(d>0?1-k:1+k); }   // close the gap in ~2 s
     if(Math.abs(instEl.playbackRate-r)>0.001) try{ instEl.playbackRate=r; }catch(e){}
   },250);
   audio.addEventListener('waiting',()=>{ if(instFile) instEl.pause(); });
