@@ -256,6 +256,7 @@
       <div id="instBox" style="display:none;margin-top:8px">
         <label class="file"><input type="file" id="instFile" accept="audio/*,video/*"><span>🎹</span><span id="instName">載入伴唱音軌（選用，先用外部工具去好人聲）</span></label>
         <div class="status" style="margin-top:4px"><span id="instMsg"></span> <span id="instClear" style="display:none;color:var(--accent);cursor:pointer;text-decoration:underline">移除</span></div>
+        <div class="row instOffUI" style="display:none;align-items:center;gap:4px;font-size:13px;color:var(--muted);margin-top:4px">伴奏偏移 <button class="instOffM" title="伴奏提早 50 ms">−</button><b class="instOffV" style="min-width:56px;text-align:center">0 ms</b><button class="instOffP" title="伴奏延後 50 ms">＋</button><span style="font-size:12px">伴奏比畫面慢就按 −，快就按 ＋</span></div>
       </div>
       <div id="vidBox" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)">
         <div class="step" style="margin-bottom:6px">影片畫面（框選要留下的範圍）</div>
@@ -339,6 +340,7 @@
     <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">📄 選擇檔案</label>
+      <span id="pOff" class="instOffUI" style="display:none;align-items:center;gap:4px;font-size:13px;color:var(--muted)">伴奏偏移 <button class="instOffM" title="伴奏提早 50 ms">−</button><b class="instOffV" style="min-width:56px;text-align:center">0 ms</b><button class="instOffP" title="伴奏延後 50 ms">＋</button></span>
       <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
     <div id="plist"></div>
@@ -3288,22 +3290,32 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // lock=true only for a real jump (switch / play / the user seeking); corrective seeks do not
   // re-open the window, otherwise clock jitter could keep it seeking forever (= stutter)
   let instWant=null;    // a seek the element could not take yet (not loaded): redone when it can
+  let instOff=0;        // user trim, seconds: + plays the instrumental later than the clock
+  const instOffKey=()=>'taigi-ktv-instoff:'+nfc(($('songTitle').value||'')+'|'+(instFile?instFile.name:''));
+  function loadInstOff(){ try{ const v=+localStorage.getItem(instOffKey()); instOff=isFinite(v)?v:0; }catch(e){ instOff=0; } paintInstOff(); }
+  function setInstOff(v){ instOff=Math.max(-2,Math.min(2,Math.round(v*1000)/1000)); try{ localStorage.setItem(instOffKey(),String(instOff)); }catch(e){} paintInstOff(); instErr=0; if(!audio.paused&&instFile) instSeek(false); }
+  function paintInstOff(){ document.querySelectorAll('.instOffV').forEach(el=>{ el.textContent=(instOff>0?'+':'')+Math.round(instOff*1000)+' ms'; }); }
+  const instTarget=()=>audio.currentTime-instOff;   // + = the instrumental sounds later
   function instSeek(lock){ instSeekAt=performance.now(); if(lock){ instLock=instSeekAt; instFix=0; } instErr=0;
-    const t=Math.max(0,audio.currentTime+instLag);
+    const t=Math.max(0,instTarget()+instLag);
     if(instEl.readyState<1){ instWant=t; return; }
     instWant=null; try{ instEl.currentTime=t; }catch(e){ instWant=t; } }
-  ['loadedmetadata','canplay'].forEach(ev=>instEl.addEventListener(ev,()=>{ if(instWant!=null||(!audio.paused&&Math.abs(instEl.currentTime-audio.currentTime)>0.5)){ instWant=null; instSeekAt=performance.now(); try{ instEl.currentTime=Math.max(0,audio.currentTime+instLag); }catch(e){} } }));
-  instEl.addEventListener('seeked',()=>{ if(audio.paused||instEl.paused) return; const d=audio.currentTime-instEl.currentTime; if(Math.abs(d)<1) instLag=Math.max(-0.2,Math.min(0.6,instLag+d*0.7)); });
+  ['loadedmetadata','canplay'].forEach(ev=>instEl.addEventListener(ev,()=>{ if(instWant!=null||(!audio.paused&&Math.abs(instEl.currentTime-instTarget())>0.5)){ instWant=null; instSeekAt=performance.now(); try{ instEl.currentTime=Math.max(0,instTarget()+instLag); }catch(e){} } }));
+  instEl.addEventListener('seeked',()=>{ if(audio.paused||instEl.paused) return; const d=instTarget()-instEl.currentTime; if(Math.abs(d)<1) instLag=Math.max(-0.2,Math.min(0.6,instLag+d*0.7)); });
   function setInst(f){
     instFile=f||null;
     $('instName').textContent=f?('伴唱音軌：'+f.name):'載入伴唱音軌（選用，先用外部工具去好人聲）';
     $('instClear').style.display=f?'inline':'none'; $('instMsg').textContent='';
+    loadInstOff(); paintInstOffUI();
     if(f){ instEl.src=URL.createObjectURL(f); instSilence(!instOn()); if(!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } }
     else { try{ instEl.pause(); instEl.removeAttribute('src'); }catch(e){} if(voxMode==='inst') setVox('orig'); }
     voxUI();
   }
   $('instFile').onchange=e=>{ const f=e.target.files[0]; if(f){ setInst(f); cacheAudio('__inst',f); if(voxMode!=='inst'){ setVox('inst'); } } e.target.value=''; };
   $('instClear').onclick=()=>{ setInst(null); dropAudio('__inst'); };
+  document.querySelectorAll('.instOffM').forEach(b=>b.onclick=()=>setInstOff(instOff-0.05));
+  document.querySelectorAll('.instOffP').forEach(b=>b.onclick=()=>setInstOff(instOff+0.05));
+  function paintInstOffUI(){ document.querySelectorAll('.instOffUI').forEach(el=>{ el.style.display=instFile?(el.id==='pOff'?'inline-flex':'flex'):'none'; }); }
   audio.addEventListener('play',()=>{ if(graph.ctx) graph.ctx.resume().catch(()=>{}); if(instFile){ instSeek(true); instEl.playbackRate=audio.playbackRate; instEl.play().catch(()=>{}); } });
   audio.addEventListener('pause',()=>{ instEl.pause(); });
   audio.addEventListener('seeking',()=>{ if(instFile) instSeek(true); });
@@ -3314,18 +3326,18 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(!instFile||audio.paused) return;
     if(instEl.paused&&!instEl.ended){ instSeek(true); instEl.play().catch(()=>{}); return; }
     if(instEl.seeking||performance.now()-instSeekAt<500) return;      // let a seek land before judging it
-    const raw=instEl.currentTime-audio.currentTime, base=audio.playbackRate||1;
+    const raw=instEl.currentTime-instTarget(), base=audio.playbackRate||1;
     instErr=instErr?instErr*0.6+raw*0.4:raw;                           // smoothed: ignore the clock's jitter
     const d=instErr, locking=performance.now()-instLock<2500&&instFix<2;
     let r=base;
-    if(!instOn()){ if(Math.abs(d)>0.12&&Math.abs(raw)>0.12) instSeek(false); }   // silent: free to jump, nobody hears it
+    if(!instOn()){ if(Math.abs(d)>0.05&&Math.abs(raw)>0.05) instSeek(false); }   // silent: free to jump, nobody hears it
     else if(Math.abs(d)>0.6){ instSeek(false); }
-    else if(locking&&Math.abs(raw)>0.15&&Math.abs(d)>0.12){ instFix++; instSeek(false); }
+    else if(locking&&Math.abs(raw)>0.08&&Math.abs(d)>0.08){ instFix++; instSeek(false); }
     else if(Math.abs(d)>0.04){ const k=Math.min(.01,Math.abs(d)*.06); r=base*(d>0?1-k:1+k); }
     if(Math.abs(instEl.playbackRate-r)>0.001) try{ instEl.playbackRate=r; }catch(e){}
   },250);
   audio.addEventListener('waiting',()=>{ if(instFile) instEl.pause(); });
-  audio.addEventListener('playing',()=>{ if(instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-audio.currentTime)>0.3) instSeek(true); instEl.play().catch(()=>{}); } });
+  audio.addEventListener('playing',()=>{ if(instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-instTarget())>0.3) instSeek(true); instEl.play().catch(()=>{}); } });
 
   // Web Audio graph for the player: dry path, and a karaoke path = (L−R) plus the centre's lows.
   // Built once, lazily (a media element can only ever be wired into one graph).
