@@ -3356,15 +3356,17 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(!instFile||audio.paused) return;
     if(instEl.paused&&!instEl.ended){ instSeek(true); instEl.play().catch(()=>{}); return; }
     if(instEl.seeking||performance.now()-instSeekAt<500) return;      // let a seek land before judging it
+    // While it is audible the instrumental plays at exactly the song's rate: any other rate switches
+    // on the browser's time-stretcher, which is what made it sound grainy and choppy. Two clocks
+    // running at the same rate hardly drift, so all the fine alignment is done while it is silent
+    // (free seeks, nobody hears them); audible, only a long-averaged, clearly real gap is corrected.
     const raw=instPos()-instTarget(), base=audio.playbackRate||1;
-    instErr=instErr?instErr*0.6+raw*0.4:raw;                           // smoothed: ignore the clock's jitter
-    const d=instErr, locking=performance.now()-instLock<2500&&instFix<2;
-    let r=base;
-    if(!instOn()){ if(Math.abs(d)>0.02&&Math.abs(raw)>0.02) instSeek(false); }   // silent: free to jump, nobody hears it
-    else if(Math.abs(d)>0.6){ instSeek(false); }
-    else if(locking&&Math.abs(raw)>0.08&&Math.abs(d)>0.08){ instFix++; instSeek(false); }
-    else if(Math.abs(d)>0.015){ const k=Math.min(.02,Math.abs(d)/2); r=base*(d>0?1-k:1+k); }   // close the gap in ~2 s
-    if(Math.abs(instEl.playbackRate-r)>0.001) try{ instEl.playbackRate=r; }catch(e){}
+    if(Math.abs(instEl.playbackRate-base)>0.0001) try{ instEl.playbackRate=base; }catch(e){}
+    if(!instOn()){ instErr=0; if(Math.abs(raw)>0.02) instSeek(false); return; }
+    instErr=instErr?instErr*0.9+raw*0.1:raw;                           // ~2.5 s average: the clock's jitter cancels out
+    const locking=performance.now()-instLock<2500&&instFix<1;
+    if(Math.abs(instErr)>0.25&&Math.abs(raw)>0.25){ instSeek(false); }
+    else if(locking&&Math.abs(raw)>0.15&&Math.abs(instErr)>0.12){ instFix++; instSeek(false); }
   },250);
   audio.addEventListener('waiting',()=>{ if(instFile) instEl.pause(); });
   audio.addEventListener('playing',()=>{ if(instFile&&!audio.paused){ if(Math.abs(instEl.currentTime-instTarget())>0.3) instSeek(true); instEl.play().catch(()=>{}); } });
@@ -3426,7 +3428,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(p>=1){ clearInterval(fadeTimer); fadeTimer=null; instEl.volume=toInst?V:0; audio.volume=V; audio.muted=toInst; }
     },30);
   }
-  $('voxSel').onchange=()=>{ if(!audio.paused){ primeInst(); if(instFile&&Math.abs(instEl.currentTime-instTarget())>0.08) instSeek(true); } setVox($('voxSel').value); };
+  $('voxSel').onchange=()=>{ if(!audio.paused){ primeInst(); if(instFile&&(instEl.paused||Math.abs(instPos()-instTarget())>0.15)) instSeek(true); } setVox($('voxSel').value); };
   vidEl.addEventListener('loadedmetadata',()=>{ if(!ytp) $('instBox').style.display='block'; });
 
   $('audio').addEventListener('loadedmetadata',syncVideoUI);
@@ -4547,7 +4549,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   // ---------- developer mode: the song folder lives in a shared Google Drive folder
   // (the password only hides the button from students: the folder link itself is public)
-  const DEV_HASH='7c3c10de3cc7300e3efdcff5ef2d39c9f3891eeae0e9df6b1110e51588008910';
+  const DEV_HASH='cc56dfa083030e6b42fbc4e62ffb96fd050f0545180251346eff2cc389780f5e';
   const DRIVE_FOLDER='1s1dSafz4Ie_JHLI1eQEjYmkgUiA0c9HR';
   const DRIVE_KEY='AIzaSyA0dji5imeZPpc88qsr7i7flW47cYrL9_o';   // may also be pasted into the box below (kept in this browser)
   const driveKey=()=>{ try{ return DRIVE_KEY||localStorage.getItem('taigi-ktv-drivekey')||''; }catch(e){ return DRIVE_KEY; } };
