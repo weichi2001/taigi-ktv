@@ -168,6 +168,8 @@
   #bgWrap:not(.off)~#scrim{display:block}
   /* the background layers are positioned, so everything drawn over them needs a stacking context too */
   #stageTitle,#countdown,#stageEmpty,.slot{position:relative;z-index:2}
+  #wm{display:none;position:absolute;top:3.5%;right:4.5%;z-index:3;font-size:calc(var(--hsize,56px)*.3);color:rgba(255,255,255,.78);text-shadow:0 1px 3px rgba(0,0,0,.8),0 0 8px rgba(0,0,0,.5);letter-spacing:.04em;pointer-events:none}
+  #stage.wm-on #wm{display:block}
   #stageTitle,#stageEmpty{position:absolute}
   #countdown i{position:relative;z-index:2}
   .controls .cv{font-variant-numeric:tabular-nums;min-width:34px;display:inline-block}
@@ -224,18 +226,16 @@
     <div class="section">
       <div class="step">專案</div>
       <div class="row" style="margin-top:0">
-        <select id="projSel" style="flex:1;min-width:160px"><option value="">（未儲存的新專案）</option></select>
         <button id="projNew">新專案</button>
-      </div>
-      <div class="row">
-        <button class="primary" id="projSave">儲存專案</button>
-        <button id="projSaveAs">另存新專案</button>
-        <button id="projDel">刪除</button>
-      </div>
-      <div class="row">
-        <button id="projDownload">下載專案檔</button>
-        <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="projOpen" accept=".json,application/json">開啟專案檔</label>
+        <button id="projOpenBtn">開啟專案檔</button><input type="file" id="projOpen" accept=".json,application/json" style="display:none">
+        <button class="primary" id="projSave" title="⌘S / Ctrl+S">儲存</button>
+        <button id="projSaveAs">另存新檔</button>
         <button class="accent" id="expOpen">⬇ 匯出影片</button>
+      </div>
+      <div class="row" id="oldProjRow" style="display:none;align-items:center">
+        <span style="font-size:13px;color:var(--muted)">瀏覽器裡的舊專案</span>
+        <select id="projSel" style="flex:1;min-width:160px"><option value="">（選一個開啟）</option></select>
+        <button id="projDel">刪除</button>
       </div>
       <div class="status" id="projStatus"></div>
       <div id="audioAsk" style="display:none;margin-top:10px;padding:12px;border-radius:10px;background:var(--accent-soft);border:1px solid #efc9bd">
@@ -348,6 +348,7 @@
         <div id="scrim"></div>
         <div id="stageTitle"></div>
         <div id="countdown"></div>
+        <div id="wm">版權為原創所有，僅供教育用途</div>
         <div class="slot a" id="slotA"></div>
         <div class="slot b" id="slotB"></div>
         <div id="stageEmpty">先在左邊載入音檔或影片，貼上歌詞並按「讀入歌詞」。</div>
@@ -415,7 +416,11 @@
         <button class="accent" id="expBtn">開始匯出</button>
         <button id="expCancel" style="display:none">取消</button>
       </div>
-      <div id="expYtNote" style="display:none;margin:8px 0 0;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid #efc9bd;font-size:14px;line-height:1.7">這個專案的來源是 <b>YouTube 連結</b>。瀏覽器拿不到 YouTube 的畫面和聲音（YouTube 也不允許下載），所以 YouTube 來源只能在這個網頁裡播放，<b>不能匯出成影片檔</b>。要做成檔案，請改用「載入音檔或影片」載入自己的檔案。</div>
+      <div id="expYtNote" style="display:none;margin:8px 0 0;padding:10px 12px;border-radius:8px;background:var(--accent-soft);border:1px solid #efc9bd;font-size:14px;line-height:1.7">
+        <b>YouTube 來源的匯出方式：螢幕錄製</b>。瀏覽器拿不到 YouTube 的畫面與聲音資料，所以改成「把這個分頁錄下來」，影片右上角會加上「版權為原創所有，僅供教育用途」浮水印。<br>
+        按下「開始錄製」後瀏覽器會問你要分享什麼：請選 <b>這個分頁</b>，並勾選 <b>分享分頁音訊</b>。錄製期間：<b>不要切到別的分頁、不要縮小視窗、不要調整音量</b>；滑鼠移開畫面。錄到歌曲結束會自動停止，中途要停按 <span class="kbd">Esc</span>。畫面大小取決於瀏覽器視窗，請先把視窗放到最大。
+        <div class="row" style="margin-top:8px"><button class="accent" id="expRecBtn">● 開始錄製</button></div>
+      </div>
       <div class="mlive"><canvas id="expLive" width="640" height="360"></canvas><div id="expLiveCap" class="status" style="margin:6px 0 0">按「開始匯出」後，這裡會顯示正在寫進影片的畫面</div></div>
       <div id="expBar" style="display:none;margin-top:10px;height:8px;border-radius:5px;background:var(--line);overflow:hidden"><div id="expFill" style="height:100%;width:0;background:var(--accent)"></div></div>
       <div class="status" id="expStatus"></div>
@@ -2549,7 +2554,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       else if(out.length&&!out[out.length-1][1]) out[out.length-1][1]=s; }
     return out;
   }
-  $('expOpen').onclick=()=>{ $('expModal').style.display='flex'; $('expVox').value=voxMode; $('expYtNote').style.display=ytp?'block':'none'; $('expBtn').disabled=!!ytp; $('expLive').parentElement.style.display=ytp?'none':''; $('expTitleName').textContent=($('songTitle').value||'')+(lastFile?('　'+lastFile.name):''); };
+  $('expOpen').onclick=()=>{ $('expModal').style.display='flex'; $('expVox').value=voxMode; $('expYtNote').style.display=ytp?'block':'none'; $('expBtn').style.display=ytp?'none':''; $('expLive').parentElement.style.display=ytp?'none':''; ['expRes','expVq','expAq'].forEach(id=>$(id).parentElement.style.display=ytp?'none':''); $('expStatus').textContent=''; $('expTitleName').textContent=($('songTitle').value||'')+(lastFile?('　'+lastFile.name):''); };
   $('expClose').onclick=()=>{ if(exporting){ $('expStatus').textContent='匯出中，要停的話先按「取消」'; return; } $('expModal').style.display='none'; };
   $('expModal').addEventListener('click',e=>{ if(e.target===$('expModal')&&!exporting) $('expModal').style.display='none'; });
   $('vocOn').addEventListener('change',()=>{ $('vocBody').style.display=$('vocOn').checked?'block':'none'; refreshVocab(); });
@@ -3431,8 +3436,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const pstat=m=>$('projStatus').textContent=m;
   function projName(){ return ($('songTitle').value||'未命名')+($('songArtist').value?' — '+$('songArtist').value:''); }
   function renderProjSel(){
-    const sel=$('projSel'); const opts=['<option value="">（未儲存的新專案）</option>'].concat(projects.map(p=>`<option value="${esc(p.id)}">${esc(p.name||'未命名')}</option>`));
+    const sel=$('projSel'); const opts=['<option value="">（選一個開啟）</option>'].concat(projects.map(p=>`<option value="${esc(p.id)}">${esc(p.name||'未命名')}</option>`));
     sel.innerHTML=opts.join(''); sel.value=curPid&&projects.some(p=>p.id===curPid)?curPid:'';
+    $('oldProjRow').style.display=projects.length?'flex':'none';
   }
   function localProjects(){ try{ return JSON.parse(localStorage.getItem(PLS)||'{}'); }catch(e){ return {}; } }
   function loadLocalList(){ const o=localProjects(); projects=Object.entries(o).map(([id,v])=>({id,name:v.name,updated:v.updated||0,body:v})).sort((a,b)=>b.updated-a.updated); renderProjSel(); }
@@ -3450,16 +3456,25 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(pcoll){ await pcoll.doc(id).set(body); }
     else { const o=localProjects(); o[id]=body; localStorage.setItem(PLS,JSON.stringify(o)); loadLocalList(); }
   }
+  // ---------- save / save as: a project is a .ktv.json file the user picks a place for, like any app.
+  // Chrome / Edge keep a handle so 儲存 writes back silently; elsewhere each save is a download.
+  let fileHandle=null, fileName=null;
+  const FS_OK=typeof window.showSaveFilePicker==='function';
+  const PTYPES=[{description:'臺語歌廳專案',accept:{'application/json':['.json']}}];
+  const projBody=()=>({...dataObj(),name:projName(),updated:Date.now(),audio:lastFile?{name:lastFile.name,size:lastFile.size}:null});
+  const suggestName=()=>(($('songTitle').value||'未命名').replace(/[\\/:*?"<>|]/g,'_'))+'.ktv.json';
+  async function writeHandle(h){ const w=await h.createWritable(); await w.write(JSON.stringify(projBody())); await w.close(); }
   async function saveProj(asNew){
     if(!lines.length){ pstat('還沒有歌詞，沒有東西可以存'); return; }
-    const id=(!asNew&&curPid)||('p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
-    const body={...dataObj(),name:projName(),updated:Date.now(),audio:lastFile?{name:lastFile.name,size:lastFile.size}:null};
-    pstat('儲存中…');
-    try{ await writeProj(id,body); curPid=id; renderProjSel(); if(lastFile) cacheAudio(id,lastFile); pstat('已儲存「'+body.name+'」'+(pcoll?'（雲端，換電腦也能開）':'（存在這台電腦的瀏覽器）')); }
-    catch(e){ pstat(e&&e.code==='quota_exceeded'?'雲端空間滿了，請先刪掉一些舊專案':'儲存失敗，請再試一次'); }
+    if(!FS_OK){ if(!dl){ pstat('這裡無法存檔'); return; } try{ await dl.save({filename:suggestName(),data:JSON.stringify(projBody())}); pstat('專案檔已下載（這個瀏覽器每次儲存都是下載一個新檔）'); }catch(e){ pstat(dlErr(e)); } return; }
+    try{
+      if(asNew||!fileHandle){ const h=await window.showSaveFilePicker({suggestedName:suggestName(),types:PTYPES}); fileHandle=h; fileName=h.name; }
+      pstat('儲存中…'); await writeHandle(fileHandle); curPid=null; pstat('已儲存 '+fileName);
+    }catch(e){ if(e&&e.name==='AbortError'){ pstat('已取消'); return; } pstat('儲存失敗：'+((e&&e.message)||'')); }
   }
   $('projSave').onclick=()=>saveProj(false);
   $('projSaveAs').onclick=()=>saveProj(true);
+  window.addEventListener('keydown',e=>{ if((e.metaKey||e.ctrlKey)&&!e.altKey&&e.code==='KeyS'){ e.preventDefault(); if(!PLAYER) saveProj(e.shiftKey); } });
   $('projSel').onchange=async()=>{
     const id=$('projSel').value; if(!id){ return; }
     if(rec) stopRec('');
@@ -3467,14 +3482,28 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       let body=null;
       if(pcoll){ const d=await pcoll.doc(id).get(); body=d.exists?d.data():null; } else body=localProjects()[id]||null;
       if(!body){ pstat('找不到這個專案'); return; }
-      loadObj(JSON.parse(JSON.stringify(body))); curPid=id; save(); drawTL(); commit('開啟專案');
+      loadObj(JSON.parse(JSON.stringify(body))); curPid=id; fileHandle=null; fileName=null; save(); drawTL(); commit('開啟專案');
       if(!ytp){ vidEl.pause(); vidEl.removeAttribute('src'); lastFile=null; peaks=null; $('audioName').textContent='選擇音檔或影片（mp3 / m4a / wav / mp4 / mov）'; syncVideoUI(); }
       const got=ytp?false:(body.audio?await restoreAudio(id,body.audio):false);
       pstat('已開啟「'+(body.name||'')+'」'+(ytp?'（YouTube 來源）':got?'，音檔已自動載入':body.audio?'':'（這個專案沒有記錄音檔）'));
     }catch(e){ pstat('開啟失敗，請再試一次'); }
   };
-  $('projNew').onclick=()=>{ if(rec) stopRec(''); curPid=null; hideAsk(); setTimeout(()=>commit('新專案'),0); lines=[]; F=[]; cur=0; sel=-1; ['songTitle','songArtist','lyricsIn'].forEach(id=>$(id).value='');
-    slotIdx[0]=slotIdx[1]=undefined; renderList(); renderRec(); updateTitle(); edTitle(); drawTL(); save(); renderProjSel(); pstat('新專案：貼上歌詞、載入音檔就可以開始'); };
+  function freshProject(){
+    if(rec) stopRec('');
+    try{ audio.pause(); }catch(e){}
+    if(ytp) clearYT(true);
+    try{ vidEl.removeAttribute('src'); vidEl.load(); }catch(e){}
+    lastFile=null; peaks=null; $('audioFile').value=''; $('audioName').textContent='選擇音檔或影片（mp3 / m4a / wav / mp4 / mov）'; $('waveStatus').textContent='';
+    setInst(null); dropAudio('__inst'); dropAudio('__current'); setVox('orig'); $('instBox').style.display='none';
+    lines=[]; F=[]; cur=0; sel=-1; undoStack=[]; playStop=null; curPid=null; fileHandle=null; fileName=null;
+    ['songTitle','songArtist','lyricsIn','dataBox'].forEach(id=>$(id).value='');
+    $('vocOn').checked=false; $('vocIn').value=''; $('vocColor').value='#ff4d4d'; $('vocBody').style.display='none'; readVoc();
+    cropF={x:0,y:0,w:1,h:1}; $('cropAsp').value='1.7778'; $('scrimV').value=35; applyCrop();
+    slotIdx[0]=slotIdx[1]=undefined; setSlot(0,null); setSlot(1,null); hideAsk();
+    $('parseInfo').textContent=''; $('recStatus').textContent='';
+    syncVideoUI(); renderList(); renderRec(); updateTitle(); edTitle(); drawTL(); save(); renderProjSel();
+  }
+  $('projNew').onclick=()=>{ freshProject(); setTimeout(()=>commit('新專案'),0); pstat('新專案：貼上歌詞、載入音檔或 YouTube 連結就可以開始'); };
   twoStep($('projDel'),'刪除',async()=>{
     if(!curPid){ pstat('目前不是已儲存的專案'); return; }
     try{ dropAudio(curPid); if(pcoll) await pcoll.doc(curPid).delete(); else { const o=localProjects(); delete o[curPid]; localStorage.setItem(PLS,JSON.stringify(o)); loadLocalList(); }
@@ -3484,11 +3513,14 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const OFFLINE=!window.claude;
   let dl=null;
   if(OFFLINE){ dl={save:async({filename,data})=>{ const blob=data instanceof Blob?data:new Blob([data]); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },8000); return {status:'saved'}; }}; }
-  else (async()=>{ try{ dl=await window.claude.use('downloads'); }catch(e){ dl=null; } if(!dl){ $('projDownload').style.display='none'; } })();
+  else (async()=>{ try{ dl=await window.claude.use('downloads'); }catch(e){ dl=null; } })();
   function dlErr(e){ const c=e&&e.code; return c==='declined'?'已取消下載':c==='rate_limited'?'下載視窗已經開著，請先處理那一個':c==='too_large'?'檔案太大，試試 720p':'這裡無法下載檔案'; }
-  $('projDownload').onclick=async()=>{ if(!dl){ pstat('這裡無法下載檔案'); return; } if(!lines.length){ pstat('還沒有歌詞'); return; }
-    try{ await dl.save({filename:($('songTitle').value||'未命名')+'.ktv.json',data:JSON.stringify({...dataObj(),name:projName(),audio:lastFile?{name:lastFile.name,size:lastFile.size}:null})}); pstat('專案檔已下載'); }catch(e){ pstat(dlErr(e)); } };
-  $('projOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; try{ if(rec) stopRec(''); const o=JSON.parse(await f.text()); loadObj(o); curPid=null; renderProjSel(); save(); drawTL(); commit('開啟專案檔'); const got=(ytp||!o.audio)?false:await restoreAudio('__byname:'+nfc(o.audio.name),o.audio); pstat('已開啟專案檔（要留著的話按「儲存專案」）'+(got?'，音檔已自動載入':'')); }catch(err){ pstat('這個檔案讀不進來'); } e.target.value=''; };
+  async function openProjFile(f,handle){ try{ if(rec) stopRec(''); const o=JSON.parse(await f.text()); freshProject(); loadObj(o); fileHandle=handle||null; fileName=handle?handle.name:null; curPid=null; renderProjSel(); save(); drawTL(); commit('開啟專案檔');
+      const got=(ytp||!o.audio)?false:await restoreAudio('__byname:'+nfc(o.audio.name),o.audio); pstat('已開啟 '+f.name+(got?'，音檔已自動載入':'')); }catch(err){ pstat('這個檔案讀不進來'); } }
+  $('projOpenBtn').onclick=async()=>{
+    if(typeof window.showOpenFilePicker==='function'){ try{ const [h]=await window.showOpenFilePicker({types:PTYPES,multiple:false}); const f=await h.getFile(); await openProjFile(f,h); }catch(e){ if(!(e&&e.name==='AbortError')) pstat('開啟失敗'); } return; }
+    $('projOpen').click(); };
+  $('projOpen').onchange=async e=>{ const f=e.target.files[0]; if(!f) return; await openProjFile(f,null); e.target.value=''; };
 
   // ---------- video export: draw the stage on a canvas while the song plays once, record canvas + audio
   let exporting=false, expCancel=null, actx=null, asrc=null, adest=null;
@@ -4302,6 +4334,49 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   };
 
   $('expCancel').onclick=()=>{ if(expCancel) expCancel(); };
+
+  // ---------- YouTube source: record this tab (picture + tab audio) while the song plays once
+  let recYT=null;
+  async function exportYT(){
+    const es=m=>$('expStatus').textContent=m;
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){ es('這個瀏覽器不支援畫面錄製，請改用 Chrome 或 Edge'); return; }
+    if(!ytp||!lines.length){ es('沒有可以錄的內容'); return; }
+    let stream;
+    try{ stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:30,cursor:'never'},audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,suppressLocalAudioPlayback:false},preferCurrentTab:true,selfBrowserSurface:'include',surfaceSwitching:'exclude',monitorTypeSurfaces:'exclude',systemAudio:'exclude'}); }
+    catch(e){ es('已取消，或瀏覽器不允許錄製'); return; }
+    if(!stream.getAudioTracks().length){ stream.getTracks().forEach(t=>t.stop()); es('沒有勾選「分享分頁音訊」，這樣影片會沒有聲音。請再按一次「開始錄製」，在對話框裡勾選分享音訊。'); return; }
+    const mime=['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>{ try{ return MediaRecorder.isTypeSupported(m); }catch(e){ return false; } });
+    if(!mime){ stream.getTracks().forEach(t=>t.stop()); es('這個瀏覽器無法錄影'); return; }
+    const ext=mime.startsWith('video/mp4')?'mp4':'webm';
+    setVox($('expVox').value==='inst'?'inst':'orig');
+    $('expModal').style.display='none'; exporting=true;
+    if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
+    $('stage').classList.add('wm-on'); if(!$('stageWrap').classList.contains('pseudoFs')&&!fsEl()) pseudoFs(true); $('stageWrap').classList.remove('barOn');
+    audio.currentTime=0; await new Promise(r=>setTimeout(r,600));
+    const chunks=[]; const mr=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:12e6,audioBitsPerSecond:192000});
+    mr.ondataavailable=e=>{ if(e.data&&e.data.size) chunks.push(e.data); };
+    const t0=performance.now(); let done=false, why='';
+    const finish=(reason)=>{ if(done) return; done=true; why=reason||''; try{ if(mr.state!=='inactive') mr.stop(); }catch(e){} };
+    const onEnd=()=>setTimeout(()=>finish('完成'),800);
+    const onKey=e=>{ if(e.key==='Escape') finish('已中途停止'); };
+    audio.addEventListener('ended',onEnd); window.addEventListener('keydown',onKey,true);
+    stream.getVideoTracks()[0].addEventListener('ended',()=>finish('分享已停止'));
+    recYT={finish}; expCancel=()=>finish('已取消');
+    mr.onstop=async()=>{
+      audio.removeEventListener('ended',onEnd); window.removeEventListener('keydown',onKey,true);
+      stream.getTracks().forEach(t=>t.stop()); try{ audio.pause(); }catch(e){}
+      $('stage').classList.remove('wm-on'); if($('stageWrap').classList.contains('pseudoFs')) pseudoFs(false);
+      exporting=false; recYT=null; expCancel=null; $('expModal').style.display='flex';
+      const blob=new Blob(chunks,{type:mime}); const secs=Math.round((performance.now()-t0)/1000);
+      if(!blob.size){ es('沒有錄到內容'); return; }
+      try{ if(dl) await dl.save({filename:($('songTitle').value||'KTV')+'.'+ext,data:blob}); else { const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=($('songTitle').value||'KTV')+'.'+ext; a.click(); }
+        es(`${why}，影片已下載（錄了 ${secs} 秒・${ext.toUpperCase()}・${Math.round(blob.size/1048576)} MB）`+(ext==='webm'?'　※這個瀏覽器只能錄成 WebM，用 Chrome／VLC 都能播':'')); }
+      catch(e){ es(dlErr(e)); }
+    };
+    mr.start(1000);
+    try{ await audio.play(); }catch(e){ finish('播放不起來'); }
+  }
+  $('expRecBtn').onclick=()=>exportYT();
 
   // ---------- clear / reset (two-step confirm; confirm() is blocked in this page)
   function twoStep(btn,label,run){
