@@ -339,7 +339,27 @@
     <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
       <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">📄 選擇檔案</label>
+      <button id="devBtn" title="開發者模式">🔧</button>
       <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
+    <div id="devBox" style="display:none;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft)">
+      <div id="devAsk" class="row" style="margin:0;align-items:center">
+        <span style="font-size:14px;font-weight:700">開發者模式</span>
+        <input class="txt" type="password" id="devPw" placeholder="密碼" style="width:140px" autocomplete="off">
+        <button id="devOk">確定</button><span class="status" id="devMsg" style="margin:0"></span>
+      </div>
+      <div id="devIn" style="display:none">
+        <div class="row" style="margin:0;align-items:center">
+          <span style="font-size:14px;font-weight:700">🔧 開發者模式</span>
+          <button class="accent" id="devLoad">☁ 從 Google Drive 載入歌單</button>
+          <span class="status" id="devStat" style="margin:0"></span>
+        </div>
+        <div class="row" id="devKeyRow" style="margin:6px 0 0;align-items:center;display:none">
+          <span style="font-size:13px;color:var(--muted)">Google API 金鑰</span>
+          <input class="txt" id="devKey" placeholder="AIza…" style="flex:1;min-width:200px" autocomplete="off">
+          <button id="devKeySave">記住</button>
+        </div>
+      </div>
+    </div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
     <div id="plist"></div>
     <div id="stageWrap">
@@ -4514,15 +4534,65 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     loadObj(o);
     if(!o.yt){
       let f=s.media;
+      if(f&&f instanceof DriveFile){ try{ pmsg('正在從 Drive 下載 '+f.name+'…'); f=await f.fetch((g,t)=>pmsg('正在從 Drive 下載 '+s.media.name+'… '+(t?Math.round(g/t*100)+'%':Math.round(g/1048576)+' MB'))); pmsg(''); }catch(e){ pmsg('下載失敗：'+((e&&e.message)||'')); f=null; } }
       if(!f&&o.audio&&o.audio.name){ try{ const c=await getAudio('__byname:'+nfc(o.audio.name)); if(c&&c.blob) f=new File([c.blob],c.name,{type:c.type||c.blob.type}); }catch(e){} }
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
-    setInst(s.inst||null); setVox('orig'); document.body.classList.remove('list');
+    let instF=s.inst||null; if(instF&&instF instanceof DriveFile){ try{ pmsg('正在從 Drive 下載伴奏…'); instF=await instF.fetch(); pmsg(''); }catch(e){ instF=null; } }
+    setInst(instF); setVox('orig'); document.body.classList.remove('list');
     $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
   }
+  // ---------- developer mode: the song folder lives in a shared Google Drive folder
+  // (the password only hides the button from students: the folder link itself is public)
+  const DEV_HASH='7c3c10de3cc7300e3efdcff5ef2d39c9f3891eeae0e9df6b1110e51588008910';
+  const DRIVE_FOLDER='1s1dSafz4Ie_JHLI1eQEjYmkgUiA0c9HR';
+  const DRIVE_KEY='';                                  // may also be pasted into the box below (kept in this browser)
+  const driveKey=()=>{ try{ return DRIVE_KEY||localStorage.getItem('taigi-ktv-drivekey')||''; }catch(e){ return DRIVE_KEY; } };
+  let devOn=false;
+  async function sha256(t){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  $('devBtn').onclick=()=>{ const box=$('devBox'); const show=box.style.display==='none'; box.style.display=show?'block':'none'; if(show){ $('devAsk').style.display=devOn?'none':'flex'; $('devIn').style.display=devOn?'block':'none'; if(!devOn) setTimeout(()=>$('devPw').focus(),0); } };
+  async function devTry(){ const ok=(await sha256($('devPw').value.trim()))===DEV_HASH; $('devPw').value=''; if(!ok){ $('devMsg').textContent='密碼不對'; return; }
+    devOn=true; $('devMsg').textContent=''; $('devAsk').style.display='none'; $('devIn').style.display='block'; $('devKeyRow').style.display=driveKey()?'none':'flex'; if(!driveKey()) $('devStat').textContent='第一次使用：請貼上 Google API 金鑰'; }
+  $('devOk').onclick=devTry; $('devPw').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); devTry(); } });
+  $('devKeySave').onclick=()=>{ const k=$('devKey').value.trim(); if(!k) return; try{ localStorage.setItem('taigi-ktv-drivekey',k); }catch(e){} $('devKeyRow').style.display='none'; $('devStat').textContent='金鑰已記住'; };
+  // a Drive file that behaves enough like a File for the scanner: text() for json now, fetch() for media later
+  class DriveFile{
+    constructor(m,rel){ this.id=m.id; this.name=m.name; this.size=+m.size||0; this.type=m.mimeType||''; this.md5=m.md5Checksum||''; this.webkitRelativePath=rel; this._file=null; }
+    url(){ return 'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(this.id)+'?alt=media&key='+encodeURIComponent(driveKey()); }
+    async text(){ const r=await fetch(this.url()); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text(); }
+    async fetch(onp){
+      if(this._file) return this._file;
+      const key='drive:'+this.id+':'+this.md5;
+      try{ const c=await getAudio(key); if(c&&c.blob){ this._file=new File([c.blob],this.name,{type:c.type||this.type}); return this._file; } }catch(e){}
+      const r=await fetch(this.url()); if(!r.ok) throw new Error('HTTP '+r.status);
+      const total=+r.headers.get('content-length')||this.size||0; const rd=r.body.getReader(); const parts=[]; let got=0;
+      while(true){ const {done,value}=await rd.read(); if(done) break; parts.push(value); got+=value.length; if(onp) onp(got,total); }
+      this._file=new File(parts,this.name,{type:this.type}); try{ cacheAudio(key,this._file); }catch(e){}
+      return this._file;
+    }
+  }
+  async function driveList(folderId){
+    const out=[]; let tok='';
+    do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(`'${folderId}' in parents and trashed=false`)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
+      const r=await fetch(u); if(!r.ok){ let m=''; try{ m=(await r.json()).error.message; }catch(e){} throw new Error('HTTP '+r.status+(m?'：'+m:'')); }
+      const j=await r.json(); out.push(...(j.files||[])); tok=j.nextPageToken||''; }while(tok);
+    return out;
+  }
+  async function scanDrive(){
+    if(!driveKey()){ $('devKeyRow').style.display='flex'; $('devStat').textContent='先貼上 Google API 金鑰'; return; }
+    $('devStat').textContent='正在讀取 Drive 歌單…'; pmsg('正在讀取 Google Drive 歌單…');
+    try{
+      const FOLDER='application/vnd.google-apps.folder'; const files=[];
+      const root=await driveList(DRIVE_FOLDER);
+      for(const m of root){ if(m.mimeType===FOLDER){ const kids=await driveList(m.id); for(const k of kids){ if(k.mimeType!==FOLDER) files.push(new DriveFile(k,'KTV/'+m.name+'/'+k.name)); } } else files.push(new DriveFile(m,'KTV/'+m.name)); }
+      await scanFolder(files);
+      $('devStat').textContent='Drive 歌單：'+psongs.length+' 首';
+    }catch(e){ const m=(e&&e.message)||''; $('devStat').textContent='讀不到 Drive：'+m; pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認資料夾是「知道連結的人都能檢視」，金鑰有啟用 Drive API。'); }
+  }
+  $('devLoad').onclick=scanDrive;
   (function route(){
     const h=(location.hash||'').replace('#','');
     if(h==='editor'){ enterEditor(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
