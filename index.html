@@ -4549,7 +4549,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // (the password only hides the button from students: the folder link itself is public)
   const DEV_HASH='7c3c10de3cc7300e3efdcff5ef2d39c9f3891eeae0e9df6b1110e51588008910';
   const DRIVE_FOLDER='1s1dSafz4Ie_JHLI1eQEjYmkgUiA0c9HR';
-  const DRIVE_KEY='';                                  // may also be pasted into the box below (kept in this browser)
+  const DRIVE_KEY='AIzaSyA0dji5imeZPpc88qsr7i7flW47cYrL9_o';   // may also be pasted into the box below (kept in this browser)
   const driveKey=()=>{ try{ return DRIVE_KEY||localStorage.getItem('taigi-ktv-drivekey')||''; }catch(e){ return DRIVE_KEY; } };
   let devOn=false;
   async function sha256(t){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
