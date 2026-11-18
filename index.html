@@ -193,8 +193,8 @@
   #landing .pick:hover{border-color:var(--accent);box-shadow:0 8px 28px rgba(0,0,0,.10)}
   #landing .pick b{display:block;font-size:22px}
   #verTag{position:absolute;left:18px;bottom:14px;font-size:12px;color:var(--muted)}
-  #fbBtn{position:absolute;right:18px;bottom:14px;background:#f08a24;border-color:#f08a24;color:#fff;font-weight:700;padding:9px 16px;border-radius:999px;box-shadow:0 4px 14px rgba(240,138,36,.35)}
-  #fbBtn:hover{background:#e07a12;border-color:#e07a12}
+  #fbBtn{position:absolute;right:18px;bottom:14px;background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;padding:9px 16px;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.15)}
+  #fbBtn:hover{filter:brightness(.93)}
   #landing.fb #picks,#landing.fb #fbBtn,#landing.fb .brand.big{display:none}
   #landing.fb #fbPanel{display:block!important}
   #psearch{display:none;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}
@@ -229,8 +229,8 @@
   </div>
   <div id="fbPanel" style="display:none;width:min(720px,100%)">
     <div id="fbChoose" class="picks">
-      <button class="pick" id="fbBug"><b>🐞 Bug 回報</b></button>
-      <button class="pick" id="fbSong"><b>🎵 歌單建議</b></button>
+      <button class="pick" id="fbBug"><b>Bug 回報</b></button>
+      <button class="pick" id="fbSong"><b>歌單建議</b></button>
     </div>
     <div id="fbForm" style="display:none">
       <div class="row" style="margin:0 0 8px;align-items:center"><b id="fbTitle" style="font-size:18px"></b><span style="flex:1"></span><a id="fbExt" href="#" target="_blank" rel="noopener" style="font-size:13px;color:var(--muted)">在新分頁開啟 ↗</a></div>
@@ -376,7 +376,7 @@
         </div>
         <div class="row" style="margin:6px 0 0;align-items:center">
           <span style="font-size:13px;color:var(--muted)">問題反饋後台</span>
-          <button id="devFbBug">🐞 Bug 回報的回覆</button><button id="devFbSong">🎵 歌單建議的回覆</button>
+          <button id="devFbBug">Bug 回報的回覆</button><button id="devFbSong">歌單建議的回覆</button>
         </div>
         <div class="row" id="devKeyRow" style="margin:6px 0 0;align-items:center;display:none">
           <span style="font-size:13px;color:var(--muted)">Google API 金鑰</span>
@@ -4588,8 +4588,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   // ---------- feedback (Google Forms): two public forms; their response pages are linked in developer mode
   const FB={
-    bug:{title:'🐞 Bug 回報',form:'https://docs.google.com/forms/d/e/1FAIpQLSdv_9FJDW-mKsDsYPzRqoHiQzG3-L8fxEfl8qUulRX46SrJqw/viewform',admin:'https://docs.google.com/forms/d/1g6ppCxaMfuPvJG__gQMW-X9haDn_Qxx-R5_N5Fepbk0/edit#responses'},
-    song:{title:'🎵 歌單建議',form:'https://docs.google.com/forms/d/e/1FAIpQLScrolhAhGtDGyud-vJS8mWdvkCvYA-3MrALTyiu82GgNE8I8g/viewform',admin:'https://docs.google.com/forms/d/1Hz1H4-sJ2kXrRkQVqmduvDQ5r-EZ6de5Hix5VJ6eTzw/edit#responses'},
+    bug:{title:'Bug 回報',form:'https://docs.google.com/forms/d/e/1FAIpQLSdv_9FJDW-mKsDsYPzRqoHiQzG3-L8fxEfl8qUulRX46SrJqw/viewform',admin:'https://docs.google.com/forms/d/1g6ppCxaMfuPvJG__gQMW-X9haDn_Qxx-R5_N5Fepbk0/edit#responses'},
+    song:{title:'歌單建議',form:'https://docs.google.com/forms/d/e/1FAIpQLScrolhAhGtDGyud-vJS8mWdvkCvYA-3MrALTyiu82GgNE8I8g/viewform',admin:'https://docs.google.com/forms/d/1Hz1H4-sJ2kXrRkQVqmduvDQ5r-EZ6de5Hix5VJ6eTzw/edit#responses'},
   };
   const fbEmbed=u=>u?(u.replace(/\/viewform.*$/,'/viewform')+'?embedded=true'):'';
   function fbShow(k){ const F=FB[k]; $('fbChoose').style.display='none'; $('fbForm').style.display='block'; $('fbTitle').textContent=F.title;
@@ -4660,9 +4660,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const root=await driveQuery([DRIVE_FOLDER]);
       const dirs=root.filter(m=>m.mimeType===FOLDER), dname={}; dirs.forEach(d=>dname[d.id]=d.name);
       const list=root.filter(m=>m.mimeType!==FOLDER).map(m=>({...m,rel:'KTV/'+m.name}));
-      // all singer folders in a few big queries, side by side
-      const groups=[]; for(let i=0;i<dirs.length;i+=40) groups.push(dirs.slice(i,i+40).map(d=>d.id));
-      const parts=await Promise.all(groups.map(g=>driveQuery(g)));
+      // every singer folder side by side (with an API key Drive only accepts one parent per query)
+      const parts=new Array(dirs.length);
+      await pool(dirs,8,async(d,i)=>{ parts[i]=(await driveQuery([d.id])).map(m=>({...m,parents:[d.id]})); });
       parts.flat().forEach(m=>{ if(m.mimeType===FOLDER) return; const p=(m.parents||[]).find(x=>dname[x]); list.push({...m,rel:'KTV/'+(p?dname[p]:'')+'/'+m.name}); });
       // 2) only project files that are new or changed are downloaded, 12 at a time
       const texts={}; const old=(cache&&cache.texts)||{};
