@@ -4498,10 +4498,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('toList').onclick=()=>{ try{ audio.pause(); }catch(e){} if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); };
   $('pfolder').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
   $('pfiles').onchange=async e=>{ const fl=[...e.target.files]; e.target.value=''; await scanFolder(fl); };
-  async function scanFolder(fl){
-    pfiles=fl; psongs=[]; const js=fl.filter(f=>/\.json$/i.test(f.name)&&!/^\./.test(f.name));
+  async function scanFolder(fl,quiet){
+    const js=fl.filter(f=>/\.json$/i.test(f.name)&&!/^\./.test(f.name));
     const flat=!fl.some(f=>f.webkitRelativePath&&f.webkitRelativePath.includes('/'));   // picked as files, not a folder
-    pmsg('正在讀取 '+js.length+' 個檔案…');
+    if(!quiet) pmsg('正在讀取 '+js.length+' 個檔案…');
+    const out=[];
     // "root/歌手/專案.ktv.json": the first folder under the chosen one is the singer / band
     const dirOf=f=>{ const p=(f.webkitRelativePath||'').split('/'); return p.length>2?nfc(p[1]):''; };
     const sameDir=(f,g)=>{ const a=(f.webkitRelativePath||'').split('/').slice(0,-1).join('/'), b=(g.webkitRelativePath||'').split('/').slice(0,-1).join('/'); return a===b; };
@@ -4514,9 +4515,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const isAud=x=>/\.(mp3|m4a|aac|wav|ogg|flac|mp4)$/i.test(x.name), stem=x=>nfc(x.name.replace(/\.[^.]+$/,''));
       const inst=fl.find(x=>{ const p=(x.webkitRelativePath||'').split('/'); return p.length===3&&nfc(p[1])==='伴奏'&&isAud(x)&&names.includes(stem(x)); })
         ||(!flat?null:fl.find(x=>isAud(x)&&names.includes(stem(x))&&!(o.audio&&sameName(x.name,o.audio.name))))||null;
-      psongs.push({o,f,media,inst,group:dirOf(f)}); } }catch(e){} }
+      out.push({o,f,media,inst,group:dirOf(f)}); } }catch(e){} }
+    pfiles=fl; psongs=out;
     psongs.sort((a,b)=>((a.group===''?1:0)-(b.group===''?1:0))||a.group.localeCompare(b.group,'zh-Hant')||String(a.o.title||a.f.name).localeCompare(String(b.o.title||b.f.name),'zh-Hant'));
-    renderSongs(); document.body.classList.add('list');
+    renderSongs(); if(quiet) return; document.body.classList.add('list');
     pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'沒有找到專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
   }
   function renderSongs(){
@@ -4564,7 +4566,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   class DriveFile{
     constructor(m,rel){ this.id=m.id; this.name=m.name; this.size=+m.size||0; this.type=m.mimeType||''; this.md5=m.md5Checksum||''; this.webkitRelativePath=rel; this._file=null; }
     url(){ return 'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(this.id)+'?alt=media&key='+encodeURIComponent(driveKey()); }
-    async text(){ const r=await fetch(this.url()); if(!r.ok) throw new Error('HTTP '+r.status); return await r.text(); }
+    async text(){ if(this._text!=null) return this._text; const r=await fetchT(this.url(),20000); if(!r.ok) throw new Error('HTTP '+r.status); return (this._text=await r.text()); }
     async fetch(onp){
       if(this._file) return this._file;
       const key='drive:'+this.id+':'+this.md5;
@@ -4576,23 +4578,58 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       return this._file;
     }
   }
-  async function driveList(folderId){
+  // fetch with a timeout: a request that hangs must not freeze the whole list
+  async function fetchT(url,ms){ const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),ms||15000);
+    try{ return await fetch(url,{signal:ac.signal}); }catch(e){ throw new Error(e&&e.name==='AbortError'?'連線逾時':((e&&e.message)||'連線失敗')); } finally{ clearTimeout(t); } }
+  async function retry(fn,n){ let e; for(let k=0;k<(n||2);k++){ try{ return await fn(); }catch(x){ e=x; await new Promise(r=>setTimeout(r,400*(k+1))); } } throw e; }
+  // one query covers many folders at once ("'a' in parents or 'b' in parents …")
+  async function driveQuery(parents){
     const out=[]; let tok='';
-    do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(`'${folderId}' in parents and trashed=false`)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
-      const r=await fetch(u); if(!r.ok){ let m=''; try{ m=(await r.json()).error.message; }catch(e){} throw new Error('HTTP '+r.status+(m?'：'+m:'')); }
-      const j=await r.json(); out.push(...(j.files||[])); tok=j.nextPageToken||''; }while(tok);
+    const q='('+parents.map(id=>`'${id}' in parents`).join(' or ')+') and trashed=false';
+    do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum,parents)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
+      const j=await retry(async()=>{ const r=await fetchT(u,20000); if(!r.ok){ let m=''; try{ m=(await r.json()).error.message; }catch(e){} throw new Error('HTTP '+r.status+(m?'：'+m:'')); } return r.json(); });
+      out.push(...(j.files||[])); tok=j.nextPageToken||''; }while(tok);
     return out;
   }
+  // run jobs with at most n in flight
+  async function pool(items,n,job){ let k=0; const run=async()=>{ while(k<items.length){ const i=k++; await job(items[i],i); } }; await Promise.all(Array.from({length:Math.min(n,items.length)},run)); }
+  const DCACHE='taigi-ktv-drive-cache';
+  function readDCache(){ try{ return JSON.parse(localStorage.getItem(DCACHE)||'null'); }catch(e){ return null; } }
+  function writeDCache(c){ try{ localStorage.setItem(DCACHE,JSON.stringify(c)); }catch(e){ try{ localStorage.removeItem(DCACHE); }catch(e2){} } }
+  function filesFrom(list,texts){ return list.map(m=>{ const f=new DriveFile(m,m.rel); const t=texts&&texts[m.id]; if(t&&t.m===(m.md5Checksum||'')) f._text=t.t; return f; }); }
+  let driveBusy=false;
   async function scanDrive(){
-    if(!driveKey()){ $('devKeyRow').style.display='flex'; $('devStat').textContent='先貼上 Google API 金鑰'; return; }
-    $('devStat').textContent='正在讀取 Drive 歌單…'; pmsg('正在讀取 Google Drive 歌單…');
+    if(driveBusy) return; driveBusy=true;
+    const st=m=>{ $('devStat').textContent=m; };
+    // 1) show the last list at once (no network), then check for changes behind it
+    const cache=readDCache(); let shown=false;
+    if(cache&&cache.list&&cache.list.length){ await scanFolder(filesFrom(cache.list,cache.texts)); shown=true; st('Drive 歌單：'+psongs.length+' 首（檢查更新中…）'); }
+    else { st('正在讀取 Drive 歌單…'); pmsg('正在讀取 Google Drive 歌單…'); }
     try{
-      const FOLDER='application/vnd.google-apps.folder'; const files=[];
-      const root=await driveList(DRIVE_FOLDER);
-      for(const m of root){ if(m.mimeType===FOLDER){ const kids=await driveList(m.id); for(const k of kids){ if(k.mimeType!==FOLDER) files.push(new DriveFile(k,'KTV/'+m.name+'/'+k.name)); } } else files.push(new DriveFile(m,'KTV/'+m.name)); }
-      await scanFolder(files);
-      $('devStat').textContent='Drive 歌單：'+psongs.length+' 首';
-    }catch(e){ const m=(e&&e.message)||''; $('devStat').textContent='讀不到 Drive：'+m; pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認資料夾是「知道連結的人都能檢視」，金鑰有啟用 Drive API。'); }
+      const FOLDER='application/vnd.google-apps.folder';
+      const root=await driveQuery([DRIVE_FOLDER]);
+      const dirs=root.filter(m=>m.mimeType===FOLDER), dname={}; dirs.forEach(d=>dname[d.id]=d.name);
+      const list=root.filter(m=>m.mimeType!==FOLDER).map(m=>({...m,rel:'KTV/'+m.name}));
+      // all singer folders in a few big queries, side by side
+      const groups=[]; for(let i=0;i<dirs.length;i+=40) groups.push(dirs.slice(i,i+40).map(d=>d.id));
+      const parts=await Promise.all(groups.map(g=>driveQuery(g)));
+      parts.flat().forEach(m=>{ if(m.mimeType===FOLDER) return; const p=(m.parents||[]).find(x=>dname[x]); list.push({...m,rel:'KTV/'+(p?dname[p]:'')+'/'+m.name}); });
+      // 2) only project files that are new or changed are downloaded, 12 at a time
+      const texts={}; const old=(cache&&cache.texts)||{};
+      const need=list.filter(m=>/\.json$/i.test(m.name)).filter(m=>{ const o=old[m.id]; if(o&&o.m===(m.md5Checksum||'')){ texts[m.id]=o; return false; } return true; });
+      let done=0; const total=need.length;
+      if(total){ const msg=()=>`正在下載歌曲資料 ${done}/${total}…`; st(msg()); if(!shown) pmsg(msg());
+        await pool(need,12,async m=>{ try{ const t=await retry(async()=>{ const r=await fetchT('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),6000); if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){} done++; st(msg()); if(!shown) pmsg(msg()); }); }
+      writeDCache({at:Date.now(),list,texts});
+      const sig=l=>l.map(m=>m.id+':'+(m.md5Checksum||'')+':'+m.rel).sort().join('|');
+      const changed=!shown||sig(list)!==sig(cache.list);
+      if(changed){ const inList=document.body.classList.contains('list'); await scanFolder(filesFrom(list,texts),shown&&!inList); }
+      const failed=list.filter(m=>/\.json$/i.test(m.name)&&!texts[m.id]).length;
+      st('Drive 歌單：'+psongs.length+' 首'+(changed&&shown?'（已更新）':'')+(failed?`，${failed} 個檔案讀不到`:''));
+    }catch(e){ const m=(e&&e.message)||'';
+      st((shown?'無法檢查更新，先用上次的歌單：':'讀不到 Drive：')+m);
+      if(!shown) pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認網路、資料夾是「知道連結的人都能檢視」。'); }
+    finally{ driveBusy=false; }
   }
   $('devLoad').onclick=scanDrive;
   (function route(){
