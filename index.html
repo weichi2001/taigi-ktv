@@ -192,6 +192,14 @@
   #landing .pick{width:220px;padding:26px 24px;border:1px solid var(--line);border-radius:16px;background:var(--card);cursor:pointer;text-align:center;font:inherit;color:inherit;transition:border-color .15s,box-shadow .15s}
   #landing .pick:hover{border-color:var(--accent);box-shadow:0 8px 28px rgba(0,0,0,.10)}
   #landing .pick b{display:block;font-size:22px}
+  #verTag{position:absolute;left:18px;bottom:14px;font-size:12px;color:var(--muted)}
+  #fbBtn{position:absolute;right:18px;bottom:14px;background:#f08a24;border-color:#f08a24;color:#fff;font-weight:700;padding:9px 16px;border-radius:999px;box-shadow:0 4px 14px rgba(240,138,36,.35)}
+  #fbBtn:hover{background:#e07a12;border-color:#e07a12}
+  #landing.fb #picks,#landing.fb #fbBtn,#landing.fb .brand.big{display:none}
+  #landing.fb #fbPanel{display:block!important}
+  #psearch{display:none;align-items:center;gap:8px;margin:0 0 8px;flex-wrap:wrap}
+  body.player.list #psearch.on{display:flex}
+  #psearch label{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:3px;cursor:pointer}
   #pbar{display:none;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
   #plist{display:none;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-top:6px}
   body.player main{grid-template-columns:1fr;max-width:1240px;margin:0 auto}
@@ -208,17 +216,30 @@
 </head>
 <body>
 <header>
-  <h1 class="brand">臺語歌廳 <span class="rom">Tâi-gí kua-thiann</span><span id="verTag" style="font-size:12px;font-weight:400;color:var(--muted);margin-left:10px;text-shadow:none">v0.52</span></h1>
+  <h1 class="brand">臺語歌廳 <span class="rom">Tâi-gí kua-thiann</span></h1>
   <span style="flex:1"></span>
   <button id="menuBtn" title="回到選擇畫面">☰ 選單</button>
   <button id="themeBtn" title="切換深色／淺色">🌙 深色</button>
 </header>
 <div id="landing" style="display:none">
   <div class="brand big">臺語歌廳<br><span class="rom">Tâi-gí kua-thiann</span></div>
-  <div class="picks">
+  <div class="picks" id="picks">
     <button class="pick" id="pickEditor"><b>✏️ 編輯器</b></button>
     <button class="pick" id="pickPlayer"><b>🎤 播放器</b></button>
   </div>
+  <div id="fbPanel" style="display:none;width:min(720px,100%)">
+    <div id="fbChoose" class="picks">
+      <button class="pick" id="fbBug"><b>🐞 Bug 回報</b></button>
+      <button class="pick" id="fbSong"><b>🎵 歌單建議</b></button>
+    </div>
+    <div id="fbForm" style="display:none">
+      <div class="row" style="margin:0 0 8px;align-items:center"><b id="fbTitle" style="font-size:18px"></b><span style="flex:1"></span><a id="fbExt" href="#" target="_blank" rel="noopener" style="font-size:13px;color:var(--muted)">在新分頁開啟 ↗</a></div>
+      <iframe id="fbFrame" title="表單" style="width:100%;height:min(68vh,760px);border:1px solid var(--line);border-radius:12px;background:#fff"></iframe>
+    </div>
+    <div style="text-align:center;margin-top:14px"><button id="fbBack">← 返回</button></div>
+  </div>
+  <span id="verTag">v1.0</span>
+  <button id="fbBtn">問題反饋</button>
 </div>
 <div id="focusCatcher" tabindex="-1" aria-hidden="true" style="position:fixed;width:1px;height:1px;opacity:0;left:-10px;top:-10px;outline:none"></div>
 <main>
@@ -353,6 +374,10 @@
           <button class="accent" id="devLoad">☁ 從 Google Drive 載入歌單</button>
           <span class="status" id="devStat" style="margin:0"></span>
         </div>
+        <div class="row" style="margin:6px 0 0;align-items:center">
+          <span style="font-size:13px;color:var(--muted)">問題反饋後台</span>
+          <button id="devFbBug">🐞 Bug 回報的回覆</button><button id="devFbSong">🎵 歌單建議的回覆</button>
+        </div>
         <div class="row" id="devKeyRow" style="margin:6px 0 0;align-items:center;display:none">
           <span style="font-size:13px;color:var(--muted)">Google API 金鑰</span>
           <input class="txt" id="devKey" placeholder="AIza…" style="flex:1;min-width:200px" autocomplete="off">
@@ -361,6 +386,9 @@
       </div>
     </div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
+    <div id="psearch"><input class="txt" id="pq" type="search" placeholder="🔍 搜尋" style="flex:1;min-width:180px;max-width:360px" autocomplete="off">
+      <label><input type="radio" name="pqBy" value="title" checked>歌名</label><label><input type="radio" name="pqBy" value="artist">歌手</label><label><input type="radio" name="pqBy" value="all">全部</label>
+      <span class="status" id="pqInfo" style="margin:0"></span></div>
     <div id="plist"></div>
     <div id="stageWrap">
       <div id="stage">
@@ -4521,15 +4549,24 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     renderSongs(); if(quiet) return; document.body.classList.add('list');
     pmsg(psongs.length?('找到 '+psongs.length+' 首歌，點一首開始'):'沒有找到專案檔（.ktv.json）。在編輯器按「下載專案檔」存下來的檔案，放進資料夾就會出現在這裡。');
   }
+  const fold=x=>nfc(String(x||'')).toLowerCase().replace(/\s+/g,'').replace(/臺/g,'台');
+  function songMatch(s,q,by){ if(!q) return true; const o=s.o;
+    const title=fold(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,'')), artist=fold((o.artist||'')+'|'+(s.group||''));
+    return by==='title'?title.includes(q):by==='artist'?artist.includes(q):(title.includes(q)||artist.includes(q)); }
   function renderSongs(){
-    let html='', last=null; const grouped=psongs.some(s=>s.group);
-    psongs.forEach((s,i)=>{ const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
+    $('psearch').classList.toggle('on',psongs.length>0);
+    const q=fold($('pq').value), by=(document.querySelector('input[name=pqBy]:checked')||{}).value||'title';
+    let html='', last=null, shown=0; const grouped=psongs.some(s=>s.group);
+    psongs.forEach((s,i)=>{ if(!songMatch(s,q,by)) return; shown++; const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
       if(grouped&&s.group!==last){ last=s.group; html+=`<div class="pgrp">${esc(s.group||'其他')}</div>`; }
       const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
       const artist=o.artist||s.group||'';
       html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・🎹 有伴奏':''}・${timed}/${o.lines.length} 句已對時</small></div>`; });
-    $('plist').innerHTML=html;
+    $('plist').innerHTML=html||(q?'<div class="status" style="grid-column:1/-1">找不到符合的歌</div>':'');
+    $('pqInfo').textContent=q?(shown+' / '+psongs.length+' 首'):'';
   }
+  $('pq').addEventListener('input',renderSongs); document.querySelectorAll('input[name=pqBy]').forEach(r=>r.addEventListener('change',()=>{ renderSongs(); $('pq').focus(); }));
+  $('pq').addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('pq').value=''; renderSongs(); } if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } });
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
   async function playSong(s){
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
@@ -4549,6 +4586,19 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
   }
+  // ---------- feedback (Google Forms): two public forms; their response pages are linked in developer mode
+  const FB={
+    bug:{title:'🐞 Bug 回報',form:'https://docs.google.com/forms/d/e/1FAIpQLSdv_9FJDW-mKsDsYPzRqoHiQzG3-L8fxEfl8qUulRX46SrJqw/viewform',admin:'https://docs.google.com/forms/d/1g6ppCxaMfuPvJG__gQMW-X9haDn_Qxx-R5_N5Fepbk0/edit#responses'},
+    song:{title:'🎵 歌單建議',form:'https://docs.google.com/forms/d/e/1FAIpQLScrolhAhGtDGyud-vJS8mWdvkCvYA-3MrALTyiu82GgNE8I8g/viewform',admin:'https://docs.google.com/forms/d/1Hz1H4-sJ2kXrRkQVqmduvDQ5r-EZ6de5Hix5VJ6eTzw/edit#responses'},
+  };
+  const fbEmbed=u=>u?(u.replace(/\/viewform.*$/,'/viewform')+'?embedded=true'):'';
+  function fbShow(k){ const F=FB[k]; $('fbChoose').style.display='none'; $('fbForm').style.display='block'; $('fbTitle').textContent=F.title;
+    if(!F.form){ $('fbFrame').style.display='none'; $('fbExt').style.display='none'; $('fbTitle').textContent=F.title+'（表單還沒設定）'; return; }
+    $('fbFrame').style.display=''; $('fbExt').style.display=''; $('fbExt').href=F.form; if($('fbFrame').dataset.k!==k){ $('fbFrame').src=fbEmbed(F.form); $('fbFrame').dataset.k=k; } }
+  $('fbBtn').onclick=()=>{ $('landing').classList.add('fb'); $('fbChoose').style.display='flex'; $('fbForm').style.display='none'; };
+  $('fbBug').onclick=()=>fbShow('bug'); $('fbSong').onclick=()=>fbShow('song');
+  $('fbBack').onclick=()=>{ if($('fbForm').style.display==='block'){ $('fbForm').style.display='none'; $('fbChoose').style.display='flex'; } else $('landing').classList.remove('fb'); };
+
   // ---------- developer mode: the song folder lives in a shared Google Drive folder
   // (the password only hides the button from students: the folder link itself is public)
   const DEV_HASH='cc56dfa083030e6b42fbc4e62ffb96fd050f0545180251346eff2cc389780f5e';
@@ -4632,6 +4682,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     finally{ driveBusy=false; }
   }
   $('devLoad').onclick=scanDrive;
+  const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
+  $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
   (function route(){
     const h=(location.hash||'').replace('#','');
     if(h==='editor'){ enterEditor(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
