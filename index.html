@@ -4561,7 +4561,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(grouped&&s.group!==last){ last=s.group; html+=`<div class="pgrp">${esc(s.group||'其他')}</div>`; }
       const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
       const artist=o.artist||s.group||'';
-      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・🎹 有伴奏':''}・${timed}/${o.lines.length} 句已對時</small></div>`; });
+      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・🎹 有伴奏':''}</small></div>`; });
     $('plist').innerHTML=html||(q?'<div class="status" style="grid-column:1/-1">找不到符合的歌</div>':'');
     $('pqInfo').textContent=q?(shown+' / '+psongs.length+' 首'):'';
   }
