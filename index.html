@@ -164,6 +164,9 @@
   #audio{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:fill;display:block}
   #ytHost{position:absolute;left:0;top:0;width:100%;height:100%;border:0;display:none;pointer-events:none;background:#000}
   #bgWrap.yt #audio{display:none} #bgWrap.yt #ytHost{display:block}
+  #scenVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:1;background:#000}
+  #bgWrap.scen #scenVid{display:block}
+  #bgWrap.scen #bgClip{opacity:0}
   #scrim{position:absolute;inset:0;pointer-events:none;background:rgba(0,0,0,var(--scrim,0));display:none;z-index:1}
   #bgWrap:not(.off)~#scrim{display:block}
   /* the background layers are positioned, so everything drawn over them needs a stacking context too */
@@ -274,6 +277,8 @@
         <button id="ytLoad">▶ 載入 YouTube</button>
       </div>
       <div class="status" id="ytMsg" style="margin-top:4px"></div>
+      <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="scenOn" style="width:16px;height:16px;accent-color:var(--accent)">啟用風景輪播 <span style="font-size:12px;color:var(--muted)">（沒有 MV 時，畫面改播風景，聲音照舊）</span></label>
+      <div class="status" id="scenMsg" style="margin-top:2px"></div>
       <div id="instBox" style="display:none;margin-top:8px">
         <label class="file"><input type="file" id="instFile" accept="audio/*,video/*"><span>🎹</span><span id="instName">載入伴唱音軌（選用，先用外部工具去好人聲）</span></label>
         <div class="status" style="margin-top:4px"><span id="instMsg"></span> <span id="instClear" style="display:none;color:var(--accent);cursor:pointer;text-decoration:underline">移除</span></div>
@@ -392,7 +397,7 @@
     <div id="plist"></div>
     <div id="stageWrap">
       <div id="stage">
-        <div id="bgWrap" class="off"><div id="bgClip"><video id="audio" playsinline></video><div id="ytHost"></div></div></div>
+        <div id="bgWrap" class="off"><div id="bgClip"><video id="audio" playsinline></video><div id="ytHost"></div></div><video id="scenVid" muted loop playsinline preload="none"></video></div>
         <div id="scrim"></div>
         <div id="stageTitle"></div>
         <div id="countdown"></div>
@@ -2624,7 +2629,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   ['songTitle','songArtist'].forEach(id=>$(id).addEventListener('input',()=>{updateTitle();save();}));
 
   // ---------- storage
-  function dataObj(){ return {v:3,yt:ytId||undefined,voc:{on:$('vocOn').checked,words:$('vocIn').value,color:$('vocColor').value},crop:{x:cropF.x,y:cropF.y,w:cropF.w,h:cropF.h,s:+$('scrimV').value,a:$('cropAsp').value},hap:$('hapIn').value,title:$('songTitle').value,artist:$('songArtist').value,lines:lines.map(l=>({h:l.h,r:l.r,a:l.a,b:l.b}))}; }
+  function dataObj(){ return {v:3,yt:ytId||undefined,scen:SCEN.on||undefined,voc:{on:$('vocOn').checked,words:$('vocIn').value,color:$('vocColor').value},crop:{x:cropF.x,y:cropF.y,w:cropF.w,h:cropF.h,s:+$('scrimV').value,a:$('cropAsp').value},hap:$('hapIn').value,title:$('songTitle').value,artist:$('songArtist').value,lines:lines.map(l=>({h:l.h,r:l.r,a:l.a,b:l.b}))}; }
   const nfc=x=>{ try{ return String(x||'').normalize('NFC'); }catch(e){ return String(x||''); } };
   const sameName=(a,b)=>nfc(a)===nfc(b);
   let PLAYER=false;   // player mode: play projects from a folder, never write the editor's state
@@ -2649,6 +2654,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     });
     $('lyricsIn').value=lines.map(l=>l.h+(l.r?'\n'+l.r:'')).join('\n');
     if(o.yt&&/^[A-Za-z0-9_-]{11}$/.test(o.yt)){ loadYT(o.yt,{quiet:true}); } else if(ytp){ clearYT(true); }
+    setScen(!!o.scen,true);
     { const v=o.voc||{}; $('vocOn').checked=!!v.on; $('vocIn').value=v.words||''; $('vocColor').value=v.color||'#ff4d4d'; $('vocBody').style.display=v.on?'block':'none'; }
     readVoc(); markVocab(); slotIdx[0]=slotIdx[1]=undefined;
     rebuild(); firstUntimed(); renderList(); renderRec(); updateTitle();
@@ -3323,9 +3329,28 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   })();
 
   function hasVideo(){ return !!ytp || vidEl.videoWidth>0; }
+  // ---------- 風景輪播: a looping landscape film that replaces the picture (the sound stays the song's)
+  const SCEN={on:false,url:'scenery.mp4',buf:null,dur:0};
+  const scenEl=$('scenVid');
+  const scenT=()=>{ const D=SCEN.dur||scenEl.duration||0; const t=audio.currentTime||0; return D>0?(t%D):0; };
+  function scenSync(force){ if(!SCEN.on||!scenEl.src) return; const want=scenT(); const D=scenEl.duration||0;
+    let d=Math.abs(scenEl.currentTime-want); if(D) d=Math.min(d,D-d);
+    if(force||d>0.6) try{ scenEl.currentTime=want; }catch(e){}
+    if(audio.paused){ if(!scenEl.paused) scenEl.pause(); } else if(scenEl.paused) scenEl.play().catch(()=>{}); }
+  function setScen(on,quiet){
+    SCEN.on=!!on; $('scenOn').checked=SCEN.on;
+    if(SCEN.on&&!scenEl.src){ scenEl.preload='auto'; scenEl.src=SCEN.url; $('scenMsg').textContent='載入風景影片中…'; }
+    syncVideoUI(); scenSync(true); if(!quiet) save();
+  }
+  scenEl.addEventListener('loadedmetadata',()=>{ SCEN.dur=scenEl.duration||0; $('scenMsg').textContent=''; scenSync(true); });
+  scenEl.addEventListener('error',()=>{ $('scenMsg').textContent='風景影片載入失敗'+(location.protocol==='file:'?'（離線版要把 scenery.mp4 放在同一個資料夾）':''); });
+  ['play','pause','seeking','ratechange'].forEach(ev=>audio.addEventListener(ev,()=>{ if(ev==='ratechange') try{ scenEl.playbackRate=audio.playbackRate; }catch(e){} scenSync(ev==='seeking'); }));
+  setInterval(()=>scenSync(false),1000);
+  $('scenOn').addEventListener('change',()=>{ setScen($('scenOn').checked); commit('風景輪播'); });
+  async function scenBuffer(){ if(SCEN.buf) return SCEN.buf; const r=await fetch(SCEN.url); if(!r.ok) throw new Error('HTTP '+r.status); SCEN.buf=await r.arrayBuffer(); return SCEN.buf; }
   function syncVideoUI(){
-    const on=hasVideo();
-    $('bgWrap').classList.toggle('off',!on); $('bgWrap').classList.toggle('yt',!!ytp); $('vidBox').style.display=on?'block':'none';
+    const on=hasVideo()||SCEN.on;
+    $('bgWrap').classList.toggle('off',!on); $('bgWrap').classList.toggle('yt',!!ytp); $('bgWrap').classList.toggle('scen',SCEN.on); $('vidBox').style.display=(hasVideo()&&!SCEN.on)?'block':'none';
     voxUI(); if(ytp&&!PLAYER) $('instBox').style.display='none';
         if(on){ applyCrop(); cropFrame(); }
   }
@@ -3549,7 +3574,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     lines=[]; F=[]; cur=0; sel=-1; undoStack=[]; playStop=null; curPid=null; fileHandle=null; fileName=null;
     ['songTitle','songArtist','lyricsIn','dataBox'].forEach(id=>$(id).value='');
     $('vocOn').checked=false; $('vocIn').value=''; $('vocColor').value='#ff4d4d'; $('vocBody').style.display='none'; readVoc();
-    cropF={x:0,y:0,w:1,h:1}; $('cropAsp').value='1.7778'; $('scrimV').value=35; applyCrop();
+    setScen(false,true); cropF={x:0,y:0,w:1,h:1}; $('cropAsp').value='1.7778'; $('scrimV').value=35; applyCrop();
     slotIdx[0]=slotIdx[1]=undefined; setSlot(0,null); setSlot(1,null); hideAsk();
     $('parseInfo').textContent=''; $('recStatus').textContent='';
     syncVideoUI(); renderList(); renderRec(); updateTitle(); edTitle(); drawTL(); save(); renderProjSel();
@@ -3611,16 +3636,17 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(!l.aligned&&!l.nor&&showR&&l.r){ g.textAlign='left'; const s=tm.a[0], e=tm.b[tm.b.length-1]; const p=Math.max(0,Math.min(1,(t-s)/Math.max(.2,e-s)));
         text(dotless(l.r),x0,yR,L.rs,'#fff',sr); if(p>0){ g.save(); g.beginPath(); g.rect(x0-2,yTop,L.romW*p+2,L.h+L.hs); g.clip(); g.font=`${L.rs}px Huninn`; g.fillStyle=fill; g.fillText(dotless(l.r),x0,yR); g.restore(); } }
     }
-    const vid=$('audio'), useVid=hasVideo(); const sc=scrimVal();
+    const scen=SCEN.on, vid=scen?scenEl:$('audio'), useVid=scen?true:hasVideo(); const sc=scrimVal();
     return function draw(t,frame){
       let painted=false;
       const src=frame||vid;
       if(frame || (useVid && vid.readyState>=2)){
         try{ const vw=frame?frame.displayWidth:vid.videoWidth, vh=frame?frame.displayHeight:vid.videoHeight;
-          const cw=Math.max(1,cropF.w*vw), ch=Math.max(1,cropF.h*vh);
-          const k=Math.min(W/cw,H/ch), dw=cw*k, dh=ch*k;
+          const C=scen?{x:0,y:0,w:1,h:1}:cropF;
+          const cw=Math.max(1,C.w*vw), ch=Math.max(1,C.h*vh);
+          const k=scen?Math.max(W/cw,H/ch):Math.min(W/cw,H/ch), dw=cw*k, dh=ch*k;
           g.fillStyle='#000'; g.fillRect(0,0,W,H);
-          g.drawImage(src, cropF.x*vw, cropF.y*vh, cw, ch, (W-dw)/2, (H-dh)/2, dw, dh);
+          g.drawImage(src, C.x*vw, C.y*vh, cw, ch, (W-dw)/2, (H-dh)/2, dw, dh);
           if(sc>0){ g.fillStyle='rgba(0,0,0,'+sc+')'; g.fillRect(0,0,W,H); }
           painted=true; }catch(e){}
       }
@@ -4221,9 +4247,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(cancelled) throw new Error('已取消');
 
       // ---------- picture plan
-      let useDecoder=false;
-      if(src&&src.video){ useDecoder=await DecoderSource.supported(src.video); if(!useDecoder) diag('  這個影像格式（'+src.video.codec+'）瀏覽器不能直接解，畫面改從播放器取'); }
-      const viaPlayer=!useDecoder&&hasVideo();
+      let useDecoder=false, PV=src&&src.video;
+      if(SCEN.on){ PV=null; try{ es('讀取風景影片…'); const sv=(await demuxMp4(await scenBuffer())).video; if(sv&&await DecoderSource.supported(sv)){ PV=sv; diag('  畫面：風景輪播（'+sv.seconds.toFixed(1)+' 秒循環）'); } else diag('  風景影片無法解碼'); }catch(e){ diag('  風景影片讀不到：'+emsg(e)); } }
+      if(PV){ useDecoder=SCEN.on?true:await DecoderSource.supported(PV); if(!useDecoder) diag('  這個影像格式（'+PV.codec+'）瀏覽器不能直接解，畫面改從播放器取'); }
+      const viaPlayer=!useDecoder&&hasVideo()&&!SCEN.on;
+      const LOOP=SCEN.on&&PV?Math.round(PV.seconds*1e6):0; let loopN=0;
 
       // ---------- output size and encoder (probe with a real flush at the real size)
       const LEV={2160:['33','34'],1440:['32','33'],1080:['28'],720:['1f']};
@@ -4277,7 +4305,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       let VF=0, VOUT=0, revive=0;
       const mkEnc=()=>{ venc=new VideoEncoder({output:(c,m)=>{ VOUT++; try{ muxer.addVideoChunk(c,m); }catch(e){ err=e; } },error:e=>{err=e;}}); venc.configure(vconf); };
       mkEnc();
-      if(useDecoder){ fs=new DecoderSource(src.video); fs.configure(); }
+      if(useDecoder){ fs=new DecoderSource(PV); fs.configure(); }
       let playerT=0;
       if(viaPlayer){ audio.muted=true; audio.volume=0; try{ audio.currentTime=0; }catch(e){} }
       const total=Math.ceil(DUR*FPS); let tEnc=performance.now(), firstGop=true;
@@ -4289,7 +4317,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         while(!done){ if(VOUT>seen){ seen=VOUT; t=performance.now(); } else if(performance.now()-t>idleMs) throw new Error('影像編碼器沒有回應（第 '+VF+' 格・已輸出 '+VOUT+'）');
           if(performance.now()-flushing>1500){ flushing=performance.now(); es('匯出影像… 編碼器處理中（已輸出 '+VOUT+' 格）'); } await yieldUI(); } if(ferr) throw ferr; }
       const getFrame=async(tUs,tSec)=>{
-        if(useDecoder) return await fs.at(tUs,yieldUI,()=>cancelled);
+        if(useDecoder){
+          if(LOOP){ const n=Math.floor(tUs/LOOP); if(n!==loopN){ loopN=n; fs.close(); fs=new DecoderSource(PV); fs.configure(); } return await fs.at(tUs-n*LOOP,yieldUI,()=>cancelled); }
+          return await fs.at(tUs,yieldUI,()=>cancelled); }
         if(viaPlayer){ // fallback: seek the player (slow but exact)
           if(Math.abs(audio.currentTime-tSec)>0.02){ await new Promise((res)=>{ const on=()=>{ audio.removeEventListener('seeked',on); res(); }; audio.addEventListener('seeked',on); audio.currentTime=tSec; setTimeout(()=>{ audio.removeEventListener('seeked',on); res(); },3000); }); }
           return null; }
@@ -4316,7 +4346,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
             else diag('  編碼器沒有反應（第 '+VF+' 格），重建一個再試一次');
             try{ venc.close(); }catch(e){} await new Promise(r=>setTimeout(r,400)); mkEnc();
             VF=0; VOUT=0; f0=0; tEnc=performance.now(); firstGop=true;
-            if(useDecoder){ fs.close(); fs=new DecoderSource(src.video); fs.configure(); }
+            if(useDecoder){ fs.close(); fs=new DecoderSource(PV); fs.configure(); loopN=0; }
             continue;
           }
           const e2=new Error(emsg(bad)); e2.enc=1; throw e2;
