@@ -133,7 +133,7 @@ body.anime .wrap{max-width:1100px}body.anime footer{color:#9c8e80;border-color:#
 body.anime .back{color:#b9ab9b}body.anime .sub{color:#b9ab9b}
 .hero{position:relative;border-radius:18px;overflow:hidden;padding:34px 26px 26px;min-height:250px;display:flex;flex-direction:column;justify-content:flex-end;gap:8px;background:linear-gradient(135deg,hsl(var(--h) 55% 32%),hsl(calc(var(--h) + 40) 50% 14%))}
 .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(20,17,15,.75),transparent 70%);pointer-events:none}
-.hero>*{position:relative;z-index:1}
+.hero>*:not(.himg){position:relative;z-index:1}
 .hero .kick{font-size:12px;background:#e24403;color:#fff;align-self:flex-start;padding:2px 9px;border-radius:5px}
 .hero h2{font-size:clamp(26px,5vw,40px);margin:0}.hero p{margin:0;color:#e6dccd;max-width:560px;font-size:14px}
 .hero .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
@@ -164,6 +164,13 @@ body.anime .back{color:#b9ab9b}body.anime .sub{color:#b9ab9b}
 .vw{z-index:30;align-items:center}.vbox{background:#1f1a17;width:min(1000px,96vw);border-radius:14px;overflow:hidden;color:#f1e9dd}
 .vh{display:flex;align-items:center;gap:10px;padding:10px 14px}.vh b{margin-right:auto}.vh span{font-size:12px;color:#b9ab9b}.vh .x{float:none}
 .vbox iframe{width:100%;height:72vh;border:0;background:#000;display:block}.vbox .tip{padding:8px 14px 12px;margin:0;font-size:13px;color:#b9ab9b}
+
+.pt{width:220px!important;aspect-ratio:16/10!important}
+@media(min-width:700px){.pt{width:260px!important}}
+.pt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.pt::before{content:'';position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.82),rgba(0,0,0,.05) 62%);z-index:1}
+.pt>*:not(img){position:relative;z-index:2}.pt .bd,.pt .st{position:absolute!important}
+.hero .himg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:.55}
 </style>
 </head>
 <body>
@@ -444,16 +451,16 @@ const foot=`<footer>資料來源：教育部《臺灣台語推薦用字 700 字�
 const MOE='https://twbangga.moe.edu.tw/classification', PTS='https://www.ptsplus.tv/zh/subject/695802cc-c1fe-4071-aea4-5bb21f0cee5a';
 // 片單來自兩個來源頁（2026-11-20 讀取）。lv=分級；hide:1 可暫時不給學生看
 const ANI=[
- {t:'百姓貴族 第一季',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'大發明家',id:'074BEBBB-7CA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'再得一勝！',id:'84E43C2D-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'銀之匙 第一季',id:'427C80FE-E07A-EF11-BC94-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'孤獨搖滾！',id:'E51312E4-E07A-EF11-BC94-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'天地創造設計部',id:'53F2649F-A92A-ED11-BC85-005056B2D58D',lv:'普遍級',s:['moe']},
- {t:'藥藥欲試－進擊阿茲海默',id:'7AFADA68-AA2A-ED11-BC85-005056B2D58D',lv:'普遍級',s:['moe'],free:1},
- {t:'工作細胞 第一季',id:'82E8EF53-E07A-EF11-BC94-005056B2D58D',lv:'保護級',s:['moe']},
- {t:'工作細胞!! 特別上映版',id:'B9A88D43-3142-EE11-BC8D-005056B2D58D',lv:'保護級',s:['moe']},
- {t:'異世界藥局',id:'85649697-3142-EE11-BC8D-005056B2D58D',lv:'保護級',s:['moe']},
+ {t:'百姓貴族 第一季',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',img:'68FF36EA-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'大發明家',id:'074BEBBB-7CA4-F011-BC9A-005056B2D58D',img:'5B27CAB0-7CA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'再得一勝！',id:'84E43C2D-7AA4-F011-BC9A-005056B2D58D',img:'666B8C24-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'銀之匙 第一季',id:'427C80FE-E07A-EF11-BC94-005056B2D58D',img:'457DF432-D89B-EF11-BC95-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'孤獨搖滾！',id:'E51312E4-E07A-EF11-BC94-005056B2D58D',img:'EFF5CF4B-D89B-EF11-BC95-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'天地創造設計部',id:'53F2649F-A92A-ED11-BC85-005056B2D58D',img:'51D77A5C-FE58-ED11-BC87-005056B2D58D',lv:'普遍級',s:['moe']},
+ {t:'藥藥欲試－進擊阿茲海默',id:'7AFADA68-AA2A-ED11-BC85-005056B2D58D',img:'AA307976-FE58-ED11-BC87-005056B2D58D',lv:'普遍級',s:['moe'],free:1},
+ {t:'工作細胞 第一季',id:'82E8EF53-E07A-EF11-BC94-005056B2D58D',img:'1B8EC73F-D89B-EF11-BC95-005056B2D58D',lv:'保護級',s:['moe']},
+ {t:'工作細胞!! 特別上映版',id:'B9A88D43-3142-EE11-BC8D-005056B2D58D',img:'40BCC310-DD9B-EF11-BC95-005056B2D58D',lv:'保護級',s:['moe']},
+ {t:'異世界藥局',id:'85649697-3142-EE11-BC8D-005056B2D58D',img:'EDC7121E-DD9B-EF11-BC95-005056B2D58D',lv:'保護級',s:['moe']},
  {t:'魔女守護者',pid:'419e0c83-bc3c-44ec-8f1a-9e871b1310ca',s:['pts']},{t:'電影版 搖曳露營△',pid:'943a5ca8-cf2f-4dda-814e-c366ea9a8f36',s:['pts']},{t:'拉麵赤貓（雙語版）',pid:'507256cb-d70f-4c16-82ee-a03b49141a2d',s:['pts']},
  {t:'路人超能100',pid:'8def8fbc-672b-4c7f-9cfe-0658d2968e31',s:['pts']},{t:'搖曳露營△（雙語版）',pid:'853ef88b-4f8e-4b14-8631-8d8825619149',s:['pts']},{t:'間諜家家酒（台語版）',pid:'cf7d9b53-9092-478e-875f-7deb8e2e18fd',s:['pts']},
  {t:'劇場版 排球少年！！垃圾場的決戰',pid:'96e46bba-d95e-4145-88b7-12ccfd415bc1',s:['pts']},{t:'葬送的芙莉蓮',pid:'8cda3019-c9c3-4ba0-a019-bfcb49c3c8bf',s:['pts']},{t:'東京地震8.0（雙語版）',pid:'8130bfba-1cc0-4613-ad3a-cee8d6402f0f',s:['pts']},
@@ -468,8 +475,10 @@ const hue=s=>{let h=0;for(const c of s)h=(h*31+c.charCodeAt(0))%360;return h};
 let aniSt={};try{aniSt=JSON.parse(localStorage.getItem('tgani')||'{}')||{}}catch(e){aniSt={}}
 const saveAni=()=>{try{localStorage.setItem('tgani',JSON.stringify(aniSt))}catch(e){}};
 S.an={src:'all',sheet:null,view:null};
+const IMG='https://twbangga.moe.edu.tw/server/crop/coverImage/';
 const aniTile=(a,i)=>`<button class="pt" data-act="asheet" data-i="${i}" style="--h:${hue(a.t)}">
-  <span class="bd ${a.lv==='保護級'?'pro':''}">${a.s.length>1?'兩處可看':SRC[a.s[0]].n.replace('教育部臺灣台語動畫網','教育部').replace('公視+','公視+')}</span>
+  ${a.img?`<img src="${IMG+a.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+  <span class="bd ${a.lv==='保護級'?'pro':''}">${a.s.length>1?'兩處可看':SRC[a.s[0]].n.replace('教育部臺灣台語動畫網','教育部')}</span>
   <span class="st">${aniSt[a.t]==2?'✓':aniSt[a.t]==1?'♥':''}</span><b>${esc(a.t)}</b><small>${a.lv||'台語配音'}</small></button>`;
 const aniRow=(title,sub,list)=>list.length?`<div class="rowh"><h3>${title}</h3><small>${sub}</small><div class="arr"><button data-act="ascroll" data-d="-1" aria-label="往左">‹</button><button data-act="ascroll" data-d="1" aria-label="往右">›</button></div></div>
   <div class="rowx">${list.map(a=>aniTile(a,ANI.indexOf(a))).join('')}</div>`:'';
@@ -489,7 +498,7 @@ function pAnime(){
   }
   return `<a class="back" href="#home">← 首頁</a><h2 class="hd">看動畫，學台語</h2>
    <p class="sub">用台語配音的動畫練聽力。點一部作品，看小任務，再前往官方平台觀看。</p>
-   <div class="hero" style="--h:${hue(pick.t)}"><span class="kick">今日推薦</span><h2 class="hd">${esc(pick.t)}</h2>
+   <div class="hero" style="--h:${hue(pick.t)}">${pick.img?`<img class="himg" src="${IMG+pick.img}" alt="" referrerpolicy="no-referrer" onerror="this.remove()">`:''}<span class="kick">今日推薦</span><h2 class="hd">${esc(pick.t)}</h2>
      <p>${pick.lv?pick.lv+'・':''}${pick.s.map(k=>SRC[k].n).join('、')}</p>
      <div class="acts"><button class="abtn" data-act="asheet" data-i="${pi}">看介紹與小任務</button></div></div>
    <div class="achips">${chip('all','全部')}${chip('moe','教育部台語動畫網')}${chip('pts','公視+')}${chip('mine',`我的片單${mine.length?' ('+mine.length+')':''}`)}</div>
