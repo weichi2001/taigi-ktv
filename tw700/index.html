@@ -444,7 +444,7 @@ const foot=`<footer>資料來源：教育部《臺灣台語推薦用字 700 字�
 const MOE='https://twbangga.moe.edu.tw/classification', PTS='https://www.ptsplus.tv/zh/subject/695802cc-c1fe-4071-aea4-5bb21f0cee5a';
 // 片單來自兩個來源頁（2026-11-20 讀取）。lv=分級；hide:1 可暫時不給學生看
 const ANI=[
- {t:'百姓貴族 第一季',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe','pts']},
+ {t:'百姓貴族 第一季',pid:'041f4a9b-0d1a-4f7c-ac51-a5d24004d039',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe','pts']},
  {t:'大發明家',id:'074BEBBB-7CA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
  {t:'再得一勝！',id:'84E43C2D-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
  {t:'銀之匙 第一季',id:'427C80FE-E07A-EF11-BC94-005056B2D58D',lv:'普遍級',s:['moe']},
@@ -454,12 +454,13 @@ const ANI=[
  {t:'工作細胞 第一季',id:'82E8EF53-E07A-EF11-BC94-005056B2D58D',lv:'保護級',s:['moe']},
  {t:'工作細胞!! 特別上映版',id:'B9A88D43-3142-EE11-BC8D-005056B2D58D',lv:'保護級',s:['moe']},
  {t:'異世界藥局',id:'85649697-3142-EE11-BC8D-005056B2D58D',lv:'保護級',s:['moe']},
- {t:'魔女守護者',s:['pts']},{t:'電影版 搖曳露營△',s:['pts']},{t:'拉麵赤貓（雙語版）',s:['pts']},
- {t:'路人超能100',s:['pts']},{t:'搖曳露營△（雙語版）',s:['pts']},{t:'間諜家家酒（台語版）',s:['pts']},
- {t:'劇場版 排球少年！！垃圾場的決戰',s:['pts']},{t:'葬送的芙莉蓮',s:['pts']},{t:'東京地震8.0（雙語版）',s:['pts']},
- {t:'白領羽球部',s:['pts']},{t:'凡爾賽玫瑰',s:['pts']},{t:'國王排名',s:['pts']},{t:'螢火之森',s:['pts']},
- {t:'工作細胞BLACK',s:['pts']},{t:'派對咖孔明 劇場版',s:['pts']},{t:'怪醫黑傑克 21',s:['pts']},{t:'怪醫黑傑克',s:['pts']}
+ {t:'魔女守護者',pid:'419e0c83-bc3c-44ec-8f1a-9e871b1310ca',s:['pts']},{t:'電影版 搖曳露營△',pid:'943a5ca8-cf2f-4dda-814e-c366ea9a8f36',s:['pts']},{t:'拉麵赤貓（雙語版）',pid:'507256cb-d70f-4c16-82ee-a03b49141a2d',s:['pts']},
+ {t:'路人超能100',pid:'8def8fbc-672b-4c7f-9cfe-0658d2968e31',s:['pts']},{t:'搖曳露營△（雙語版）',pid:'853ef88b-4f8e-4b14-8631-8d8825619149',s:['pts']},{t:'間諜家家酒（台語版）',pid:'cf7d9b53-9092-478e-875f-7deb8e2e18fd',s:['pts']},
+ {t:'劇場版 排球少年！！垃圾場的決戰',pid:'96e46bba-d95e-4145-88b7-12ccfd415bc1',s:['pts']},{t:'葬送的芙莉蓮',pid:'8cda3019-c9c3-4ba0-a019-bfcb49c3c8bf',s:['pts']},{t:'東京地震8.0（雙語版）',pid:'8130bfba-1cc0-4613-ad3a-cee8d6402f0f',s:['pts']},
+ {t:'白領羽球部',pid:'e479f53b-e749-413c-a7ed-dd032346d446',s:['pts']},{t:'凡爾賽玫瑰',pid:'99dff839-8a53-4b62-abda-7aed5c628407',s:['pts']},{t:'國王排名',pid:'f1c54b83-0406-41fd-989b-415872f363ef',s:['pts']},{t:'螢火之森',pid:'78e71e04-e248-4264-81e5-a9684d53d6e0',s:['pts']},
+ {t:'工作細胞BLACK',pid:'5c4f0001-e0f2-49c9-97cd-5f9850b23ced',s:['pts']},{t:'派對咖孔明 劇場版',pid:'cd66f483-f9a0-405a-8a34-5dbc9dbbf581',s:['pts']},{t:'怪醫黑傑克 21',pid:'625b06dd-6a43-4c66-883b-9055ef81906f',s:['pts']},{t:'怪醫黑傑克',pid:'3cddeb5c-fdc0-44d4-a550-a2f921c2b138',s:['pts']}
 ];
+const ptsUrl=a=>a.pid?'https://www.ptsplus.tv/zh/programs/'+a.pid:PTS;
 const moeUrl=a=>a.id?'https://twbangga.moe.edu.tw/animation/'+a.id:MOE;
 const SRC={moe:{n:'教育部臺灣台語動畫網',u:MOE,tip:'教育部網站，選「國、高中階段」，片名下標示限臺澎金馬及離島地區觀看。'},
            pts:{n:'公視+',u:PTS,tip:'公視+「經典動畫 台語配音也好好看」專題，部分作品需登入。'}};
@@ -511,9 +512,9 @@ function aniSheet(a){
    <ol><li>聽到一句喜歡的台語，按暫停，跟著唸一次。</li>
        <li>記下 3 個聽得懂的詞，到 <a href="#w700">700 字</a> 或右下角 🔎 查查看。</li>
        <li>有不確定的詞，用 <a href="${DICT}" target="_blank" rel="noopener" data-act="dict">教育部辭典</a> 查發音。</li></ol>
-   <div class="acts">${a.s.includes('pts')?`<button class="abtn" data-act="aview" data-u="${PTS}" data-t="${esc(a.t)}">▶ 在這裡看（公視+）</button>`:''}${a.s.includes('moe')?`<a class="abtn ${a.s.includes('pts')?'gh':''}" href="${moeUrl(a)}" target="_blank" rel="noopener">前往教育部動畫網 ↗</a>`:''}
+   <div class="acts">${a.s.includes('pts')?`<button class="abtn" data-act="aview" data-u="${ptsUrl(a)}" data-t="${esc(a.t)}">▶ 在這裡看（公視+）</button>`:''}${a.s.includes('moe')?`<a class="abtn ${a.s.includes('pts')?'gh':''}" href="${moeUrl(a)}" target="_blank" rel="noopener">前往教育部動畫網 ↗</a>`:''}
      <button class="abtn gh ${st==1?'on':''}" data-act="aset" data-v="1">♥ 想看</button><button class="abtn gh ${st==2?'on':''}" data-act="aset" data-v="2">✓ 看過了</button></div>
-   <p class="tip">${a.s.map(k=>SRC[k].tip).join('<br>')}<br>${a.s.includes('pts')?'公視+ 專題頁會顯示在這個視窗裡，從裡面找「'+esc(a.t.replace(/ ?第一季| ?特別上映版|（.*?）/g,''))+'」。':''}${a.s.includes('moe')?'教育部動畫網不允許被嵌進別的網頁，所以只能用新分頁開。':''}影片都在官方平台，這裡只做整理。</p>
+   <p class="tip">${a.s.map(k=>SRC[k].tip).join('<br>')}<br>${a.s.includes('pts')?'公視+ 會直接在這個視窗裡打開這部片的頁面。':''}${a.s.includes('moe')?'教育部動畫網不允許被嵌進別的網頁，所以只能用新分頁開。':''}影片都在官方平台，這裡只做整理。</p>
   </div></div>`;
 }
 
