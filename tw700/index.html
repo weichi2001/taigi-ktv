@@ -467,7 +467,7 @@ const ANI=[
  {t:'白領羽球部',pid:'e479f53b-e749-413c-a7ed-dd032346d446',s:['pts']},{t:'凡爾賽玫瑰',pid:'99dff839-8a53-4b62-abda-7aed5c628407',s:['pts']},{t:'國王排名',pid:'f1c54b83-0406-41fd-989b-415872f363ef',s:['pts']},{t:'螢火之森',pid:'78e71e04-e248-4264-81e5-a9684d53d6e0',s:['pts']},
  {t:'工作細胞BLACK',pid:'5c4f0001-e0f2-49c9-97cd-5f9850b23ced',s:['pts']},{t:'派對咖孔明 劇場版',pid:'cd66f483-f9a0-405a-8a34-5dbc9dbbf581',s:['pts']},{t:'怪醫黑傑克 21',pid:'625b06dd-6a43-4c66-883b-9055ef81906f',s:['pts']},{t:'怪醫黑傑克',pid:'3cddeb5c-fdc0-44d4-a550-a2f921c2b138',s:['pts']}
 ];
-const ptsUrl=a=>a.pid?'https://www.ptsplus.tv/zh/programs/'+a.pid:PTS;
+const ptsUrl=a=>a.pid?'https://www.ptsplus.tv/zh/programs/'+a.pid+(a.sid?'/seasons/'+a.sid:''):PTS;
 const moeUrl=a=>a.id?'https://twbangga.moe.edu.tw/animation/'+a.id:MOE;
 const SRC={moe:{n:'教育部臺灣台語動畫網',u:MOE,tip:'教育部網站，選「國、高中階段」，片名下標示限臺澎金馬及離島地區觀看。'},
            pts:{n:'公視+',u:PTS,tip:'公視+「經典動畫 台語配音也好好看」專題，部分作品需登入。'}};
@@ -477,9 +477,17 @@ const saveAni=()=>{try{localStorage.setItem('tgani',JSON.stringify(aniSt))}catch
 S.an={src:'all',sheet:null,view:null};
 const IMG='https://twbangga.moe.edu.tw/server/crop/coverImage/';
 const aniTile=(a,i)=>`<button class="pt" data-act="asheet" data-i="${i}" style="--h:${hue(a.t)}">
-  ${a.img?`<img src="${IMG+a.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
+  ${a.img||a.pimg?`<img src="${a.pimg||IMG+a.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">`:''}
   <span class="bd ${a.lv==='保護級'?'pro':''}">${a.s.length>1?'兩處可看':SRC[a.s[0]].n.replace('教育部臺灣台語動畫網','教育部')}</span>
   <span class="st">${aniSt[a.t]==2?'✓':aniSt[a.t]==1?'♥':''}</span><b>${esc(a.t)}</b><small>${a.lv||'台語配音'}</small></button>`;
+// 公視+ 片單由 GitHub Actions 每 8 小時更新 pts.json；載入失敗就用上面內建的備份片單
+fetch('pts.json',{cache:'no-cache'}).then(r=>r.ok?r.json():Promise.reject()).then(d=>{
+  if(!d||!d.items||d.items.length<10)return;
+  const keep=ANI.filter(a=>!a.pid);
+  ANI.length=0;keep.forEach(a=>ANI.push(a));
+  d.items.forEach(o=>ANI.push({t:o.t.replace(/（雙語版）$/,''),pid:o.pid,sid:o.sid,pimg:o.img,u:o.u,s:['pts']}));
+  S.an.sheet=null;if(location.hash==='#anime')render(true);
+}).catch(()=>{});
 const aniRow=(title,sub,list)=>list.length?`<div class="rowh"><h3>${title}</h3><small>${sub}</small><div class="arr"><button data-act="ascroll" data-d="-1" aria-label="往左">‹</button><button data-act="ascroll" data-d="1" aria-label="往右">›</button></div></div>
   <div class="rowx">${list.map(a=>aniTile(a,ANI.indexOf(a))).join('')}</div>`:'';
 function pAnime(){
@@ -516,7 +524,7 @@ function aniSheet(a){
   const st=aniSt[a.t]||0;
   return `<div class="sheetbg" data-act="aclose"><div class="sheet" role="dialog" aria-label="${esc(a.t)}">
    <button class="x" data-act="aclose" aria-label="關閉">×</button><h3 class="hd">${esc(a.t)}</h3>
-   <div class="meta">${a.lv?`<span>${a.lv}</span>`:''}<span>台語配音</span>${a.s.includes('moe')&&!a.free?'<span>限臺澎金馬及離島地區觀看</span>':''}</div>
+   <div class="meta">${a.lv?`<span>${a.lv}</span>`:''}<span>${a.u?'台語配音（待確認）':'台語配音'}</span>${a.s.includes('moe')&&!a.free?'<span>限臺澎金馬及離島地區觀看</span>':''}</div>
    <b>邊看邊學，三件小事</b>
    <ol><li>聽到一句喜歡的台語，按暫停，跟著唸一次。</li>
        <li>記下 3 個聽得懂的詞，到 <a href="#w700">700 字</a> 或右下角 🔎 查查看。</li>
