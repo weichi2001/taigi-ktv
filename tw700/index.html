@@ -444,7 +444,7 @@ const foot=`<footer>資料來源：教育部《臺灣台語推薦用字 700 字�
 const MOE='https://twbangga.moe.edu.tw/classification', PTS='https://www.ptsplus.tv/zh/subject/695802cc-c1fe-4071-aea4-5bb21f0cee5a';
 // 片單來自兩個來源頁（2026-11-20 讀取）。lv=分級；hide:1 可暫時不給學生看
 const ANI=[
- {t:'百姓貴族 第一季',pid:'041f4a9b-0d1a-4f7c-ac51-a5d24004d039',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe','pts']},
+ {t:'百姓貴族 第一季',id:'08C4F8F4-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
  {t:'大發明家',id:'074BEBBB-7CA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
  {t:'再得一勝！',id:'84E43C2D-7AA4-F011-BC9A-005056B2D58D',lv:'普遍級',s:['moe']},
  {t:'銀之匙 第一季',id:'427C80FE-E07A-EF11-BC94-005056B2D58D',lv:'普遍級',s:['moe']},
@@ -501,7 +501,7 @@ function aniView(v){
   return `<div class="sheetbg vw" data-act="aclose"><div class="vbox">
    <div class="vh"><b>${esc(v.t)}</b><span>公視+</span><a class="abtn gh" href="${v.u}" target="_blank" rel="noopener">新分頁開</a><button class="x" data-act="avclose" aria-label="關閉">×</button></div>
    <iframe src="${v.u}" title="${esc(v.t)}" allow="fullscreen; autoplay; encrypted-media" allowfullscreen referrerpolicy="no-referrer"></iframe>
-   <p class="tip">${sb?'目前是 claude.ai 預覽頁，瀏覽器會擋內嵌；放到獨立網頁（例如 GitHub Pages）才會顯示。':'公視+ 要登入才能播放；如果這裡沒有畫面，請按「新分頁開」。'}</p></div></div>`;
+   <p class="tip">${sb?'目前是 claude.ai 預覽頁，瀏覽器會擋內嵌；放到獨立網頁（例如 GitHub Pages）才會顯示。':'公視+ 要登入才能播放。有「版本」選單的片請選「台語版」；如果這裡沒有畫面，請按「新分頁開」。'}</p></div></div>`;
 }
 function aniSheet(a){
   const st=aniSt[a.t]||0;
