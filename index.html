@@ -5073,13 +5073,13 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     document.body.classList.add('stu','dark');
     { let m=document.querySelector('meta[name=theme-color]'); if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.append(m); } m.content='#000000'; }
     const side=document.createElement('aside'); side.id='stuSide';
-    side.innerHTML=`<div class="brand"><div class="bt">台語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">${IC.home}</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    side.innerHTML=`<div class="brand"><div class="bt">台語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回街仔路"><span class="hi">${IC.home}</span><span class="ht">回街仔路</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
     const sbSet=off=>{ document.body.classList.toggle('sb-off',off); const b=side.querySelector('#sbTog'); b.textContent=off?'»':'«'; b.title=off?'展開歌單':'收起歌單'; try{ localStorage.setItem('taigi-ktv-sb',off?'1':'0'); }catch(e){} };
     let sbOff=false; try{ sbOff=localStorage.getItem('taigi-ktv-sb')==='1'; }catch(e){}
     sbSet(sbOff);
     side.querySelector('#sbTog').onclick=()=>sbSet(!document.body.classList.contains('sb-off'));
     const top=document.createElement('div'); top.id='stuTop';
-    top.innerHTML=`<a id="stuHomeM" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網" aria-label="回台語自學網">${IC.home}</a><button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
+    top.innerHTML=`<a id="stuHomeM" href="https://weichi2001.github.io/taigi-site/" title="回街仔路" aria-label="回街仔路">${IC.home}</a><button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
     const qp=document.createElement('section'); qp.id='stuQp'; qp.hidden=true;
     qp.innerHTML=`<div class="qt"><b>播放佇列</b><button id="stuQclose" aria-label="關閉">${IC.close}</button></div><div id="stuQlist"></div>`;
     const ld=document.createElement('div'); ld.id='stuLoad';
