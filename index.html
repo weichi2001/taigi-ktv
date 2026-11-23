@@ -215,6 +215,103 @@
   .song.bad{opacity:.6}
   .pgrp{grid-column:1/-1;font-size:15px;font-weight:700;color:var(--accent);margin:10px 0 -2px;padding-bottom:4px;border-bottom:1px solid var(--line)}
   .pgrp:first-child{margin-top:0}
+
+  /* ===== 學生版（?student）：Spotify 風格的播放器介面 ===== */
+  body.stu{--sw:248px;--bar:84px;--g:#1ed760;background:#000;color:#fff;overflow-x:hidden}
+  body.stu header,body.stu #landing,body.stu #pbar,body.stu #devBox,body.stu #psearch,body.stu #splitter,body.stu #verTag{display:none!important}
+  body.stu{--bg:#121212;--ink:#fff;--muted:#a7a7a7;--line:#2a2a2a;--accent:#ff7a55;--card:#181818;--row:#242424}
+  #stuSide,#stuTop{display:none}
+  body.stu #stuSide{display:flex;position:fixed;left:8px;top:8px;bottom:8px;width:calc(var(--sw) - 8px);flex-direction:column;gap:6px;background:#121212;border-radius:12px;padding:18px 10px 12px;z-index:20;overflow:hidden}
+  body.stu.played #stuSide{bottom:calc(var(--bar) + 8px)}
+  #stuSide .brand{font-size:22px;font-weight:900;padding:0 10px 12px;line-height:1.15}
+  #stuSide .brand .rom{display:block;font-size:12px;font-weight:400;color:#a7a7a7;margin-top:3px}
+  #stuSide .hd{font-size:12px;color:#a7a7a7;letter-spacing:.08em;padding:12px 10px 4px}
+  #stuSide .lib{overflow:auto;flex:1;margin:0 -4px;padding:0 4px}
+  #stuSide .lib::-webkit-scrollbar{width:6px} #stuSide .lib::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:3px}
+  #stuSide .it{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border:0;border-radius:8px;background:transparent;color:#d0d0d0;font:inherit;font-size:15px;text-align:left;cursor:pointer}
+  #stuSide .it:hover{background:#1f1f1f;color:#fff} #stuSide .it.on{background:#2a2a2a;color:#fff}
+  #stuSide .it .cv{width:38px;height:38px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:16px;font-weight:700;color:#fff}
+  #stuSide .it .cv.all{border-radius:6px;background:linear-gradient(135deg,#ff7a55,#7c3aed)}
+  #stuSide .it span.nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #stuSide .it small{color:#8a8a8a;font-size:12px}
+  #stuSide .ft{display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 0;border-top:1px solid #242424}
+  #stuSide .ft button{flex:1;min-width:0;background:#1f1f1f;color:#cfcfcf;border:0;border-radius:999px;padding:8px 6px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  #stuSide .ft button:hover{background:#2c2c2c;color:#fff}
+  body.stu #stuTop{display:flex;position:fixed;top:8px;left:var(--sw);right:8px;height:60px;align-items:center;gap:10px;padding:0 24px;z-index:15;border-radius:12px 12px 0 0;background:linear-gradient(rgba(18,18,18,.96),rgba(18,18,18,.82));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  #stuTop button{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
+  #stuTop button:hover{background:rgba(255,255,255,.18)}
+  body.stu.list #stuBack{display:none}
+  #stuQ{flex:1;max-width:360px;background:#242424;border:1px solid transparent;color:#fff;border-radius:999px;padding:10px 16px 10px 40px;font:inherit;font-size:14px;outline:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23a7a7a7' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M20 20l-3.5-3.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center}
+  #stuQ:focus{border-color:#fff;background-color:#2a2a2a} #stuQ::placeholder{color:#8a8a8a}
+  body.stu:not(.list) #stuQ{display:none}
+  body.stu.player main{display:block;max-width:none;margin:8px 8px 8px var(--sw);padding:60px 0 0;background:#121212;border-radius:12px;min-height:calc(100vh - 16px)}
+  body.stu.played.player main{min-height:calc(100vh - var(--bar) - 16px)}
+  body.stu.played main{margin-bottom:calc(var(--bar) + 8px)}
+  body.stu .status#pmsg{margin:14px 28px 0;padding:10px 14px;border-radius:10px;background:#242424;color:#d8d8d8}
+  body.stu.player.list #plist{display:block;padding:0 14px 40px;margin:0}
+  #plist .head{padding:28px 14px 18px;margin:-60px -14px 8px;padding-top:88px;background:linear-gradient(180deg,var(--hue,#3a2a5a),#121212);border-radius:12px 12px 0 0}
+  #plist .head small{font-size:12px;font-weight:700;letter-spacing:.1em;color:#e6e6e6;display:block}
+  #plist .head h2{margin:4px 0 6px;font-size:clamp(28px,5vw,56px);line-height:1.1;font-weight:900}
+  #plist .head p{margin:0;color:#d0d0d0;font-size:14px}
+  #plist .acts{display:flex;gap:12px;align-items:center;padding:6px 14px 14px}
+  #plist .acts .pa{width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:#000;font-size:22px;cursor:pointer;display:grid;place-items:center;transition:transform .12s}
+  #plist .acts .pa:hover{transform:scale(1.06);filter:brightness(1.08)}
+  #plist .acts .sh{border:1px solid #5a5a5a;background:transparent;color:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-size:14px;cursor:pointer}
+  #plist .acts .sh:hover{border-color:#fff}
+  #plist .cols{display:grid;grid-template-columns:40px 1fr 120px;gap:12px;padding:6px 14px;color:#a7a7a7;font-size:12.5px;border-bottom:1px solid #2a2a2a;margin-bottom:6px}
+  body.stu .song{display:grid;grid-template-columns:40px 1fr 120px;gap:12px;align-items:center;padding:8px 14px;border:0;border-radius:8px;background:transparent;cursor:pointer;position:relative}
+  body.stu .song:hover{background:#242424}
+  body.stu .song .n{color:#a7a7a7;text-align:center;font-size:15px}
+  body.stu .song:hover .n{font-size:0} body.stu .song:hover .n::before{content:'▶';font-size:14px;color:#fff}
+  body.stu .song .tt{display:flex;align-items:center;gap:12px;min-width:0}
+  body.stu .song .tt .cv{width:44px;height:44px;border-radius:6px;flex:none;display:grid;place-items:center;font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+  body.stu .song .tt div{min-width:0}
+  body.stu .song b{display:block;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
+  body.stu .song small{display:block;margin:2px 0 0;color:#a7a7a7;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body.stu .song .tg{font-size:12px;color:#a7a7a7;text-align:right}
+  body.stu .song.now b,body.stu .song.now .n{color:var(--accent)} body.stu .song.now .n{font-size:0} body.stu .song.now .n::before{content:'♪';font-size:16px}
+  body.stu .song.bad{opacity:.45}
+  body.stu .pgrp{display:none}
+  /* 沒播歌時隱藏播放列；播放中時播放列固定在最下面（全螢幕時照舊） */
+  body.stu:not(.played) #stageWrap{display:none!important}
+  body.stu #stageWrap:not(:fullscreen):not(.pseudoFs){background:transparent;border-radius:0;overflow:visible}
+  body.stu.list #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{display:none}
+  body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:min(calc(100% - 40px),calc((100vh - var(--bar) - 130px)*16/9));margin:18px auto 0}
+  body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:14px;overflow:hidden}
+  body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{position:fixed;left:0;right:0;bottom:0;height:var(--bar);z-index:30;flex-wrap:nowrap;padding:0 18px;gap:10px;background:#000;border-top:1px solid #1c1c1c;color:#fff}
+  body.stu .stagebar button,body.stu .stagebar select{background:transparent;border:0;color:#d0d0d0;font:inherit}
+  body.stu .stagebar button:hover{color:#fff}
+  body.stu .stagebar select{background:#242424;border-radius:999px;padding:7px 10px;font-size:13px}
+  body.stu #playBtn{width:44px;height:44px;border-radius:50%;background:#fff!important;color:#000!important;padding:0;display:grid;place-items:center;flex:none}
+  body.stu #playBtn .tx,body.stu #restartBtn .tx,body.stu #fsBtn .tx{display:none}
+  body.stu #playBtn:hover{transform:scale(1.06)}
+  #stuNow{display:flex;align-items:center;gap:12px;flex:0 0 min(28vw,300px);min-width:0}
+  #stuNow .cv{width:56px;height:56px;border-radius:6px;flex:none;display:grid;place-items:center;font-size:24px;font-weight:700;color:#fff}
+  #stuNow div{min-width:0} #stuNow b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} #stuNow small{display:block;color:#a7a7a7;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body.stu #seek{flex:1;min-width:120px;accent-color:#fff} body.stu #seek:hover{accent-color:var(--accent)}
+  body.stu #timeLbl{color:#a7a7a7;font-size:12.5px;white-space:nowrap}
+  body.stu #vol{accent-color:#fff;width:90px}
+  body.stu #pnow{display:none}
+  @media (max-width:860px){
+    body.stu{--sw:0px;--bar:132px}
+    body.stu #stuSide{left:0;right:0;top:64px;bottom:auto;width:auto;height:auto;flex-direction:row;align-items:center;border-radius:0;padding:6px 10px;z-index:16;background:#121212;gap:4px}
+    body.stu.played #stuSide{bottom:auto}
+    #stuSide .brand,#stuSide .hd,#stuSide .ft{display:none}
+    #stuSide .lib{display:flex;gap:6px;overflow-x:auto;margin:0;padding:0}
+    #stuSide .it{width:auto;flex:none;padding:6px 14px;border-radius:999px;background:#242424;font-size:14px;gap:6px}
+    #stuSide .it .cv{display:none}
+    body.stu #stuTop{left:0;right:0;top:0;border-radius:0;padding:0 14px}
+    body.stu.player main{margin:0;border-radius:0;padding-top:116px}
+    body.stu.played main{margin-bottom:var(--bar)}
+    #plist .head{margin-top:-116px;padding-top:140px}
+    body.stu .song{grid-template-columns:28px 1fr}
+    body.stu .song .tg,#plist .cols span:last-child{display:none} #plist .cols{grid-template-columns:28px 1fr}
+    body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{flex-wrap:wrap;height:var(--bar);padding:8px 12px;align-content:center;row-gap:4px}
+    #stuNow{flex:1 1 100%} #stuNow .cv{width:40px;height:40px;font-size:18px}
+    body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:100%;margin-top:0}
+    body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:0}
+  }
 </style>
 </head>
 <body>
@@ -2632,6 +2729,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function dataObj(){ return {v:3,yt:ytId||undefined,scen:SCEN.on||undefined,voc:{on:$('vocOn').checked,words:$('vocIn').value,color:$('vocColor').value},crop:{x:cropF.x,y:cropF.y,w:cropF.w,h:cropF.h,s:+$('scrimV').value,a:$('cropAsp').value},hap:$('hapIn').value,title:$('songTitle').value,artist:$('songArtist').value,lines:lines.map(l=>({h:l.h,r:l.r,a:l.a,b:l.b}))}; }
   const nfc=x=>{ try{ return String(x||'').normalize('NFC'); }catch(e){ return String(x||''); } };
   const sameName=(a,b)=>nfc(a)===nfc(b);
+  const STU=/[?&]student(=|&|$)/.test(location.search)||location.hash==='#student';
   let PLAYER=false;   // player mode: play projects from a folder, never write the editor's state
   function save(){ if(PLAYER) return; try{ localStorage.setItem(LS,JSON.stringify(dataObj())); }catch(e){} }
   function loadObj(o){
@@ -4540,8 +4638,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   try{ const o=JSON.parse(localStorage.getItem(LS)||'null')||JSON.parse(localStorage.getItem('taigi-ktv-v2')||'null')||JSON.parse(localStorage.getItem('taigi-ktv-v1')||'null'); if(o) loadObj(o); }catch(e){}
   applyStyle(); updateTitle(); renderRec(); edTitle(); applyCrop(); commit('目前的內容');
   // ---------- landing + player mode
-  let pfiles=[], psongs=[];
-  const pmsg=m=>{ const el=$('pmsg'); el.textContent=m||''; el.style.display=m?'block':'none'; };
+  let pfiles=[], psongs=[], curI=-1;
+  const pmsg=m=>{ if(STU&&/^找到/.test(m||'')) m=''; const el=$('pmsg'); el.textContent=m||''; el.style.display=m?'block':'none'; };
   function enterEditor(){ $('landing').style.display='none'; }
   function enterPlayer(){
     PLAYER=true; document.body.classList.add('player','list'); $('landing').style.display='none';
@@ -4585,6 +4683,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const title=fold(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,'')), artist=fold((o.artist||'')+'|'+(s.group||''));
     return by==='title'?title.includes(q):by==='artist'?artist.includes(q):(title.includes(q)||artist.includes(q)); }
   function renderSongs(){
+    if(STU){ renderStu(); return; }
     $('psearch').classList.toggle('on',psongs.length>0);
     const q=fold($('pq').value), by=(document.querySelector('input[name=pqBy]:checked')||{}).value||'title';
     let html='', last=null, shown=0; const grouped=psongs.some(s=>s.group);
@@ -4600,6 +4699,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('pq').addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('pq').value=''; renderSongs(); } if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } });
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
   async function playSong(s){
+    curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU) stuMark();
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
     const o=JSON.parse(JSON.stringify(s.o)); pmsg('');
     if(!o.yt&&ytp) clearYT(true);
@@ -4616,6 +4716,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
+    if(STU){ try{ const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){} }
   }
   // ---------- feedback (Google Forms): two public forms; their response pages are linked in developer mode
   const FB={
@@ -4715,9 +4816,71 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
+  // ---------- 學生版（?student）：Spotify 風格介面，自動載入 Drive 歌單、沒有密碼和編輯功能
+  let stuGrp=null, stuShuf=false;
+  const hueOf=t=>{ let h=0; for(const c of String(t||'')) h=(h*31+c.codePointAt(0))%360; return h; };
+  const coverBg=t=>{ const h=hueOf(t); return `linear-gradient(135deg,hsl(${h},62%,46%),hsl(${(h+48)%360},68%,28%))`; };
+  const sTitle=x=>x.o.title||x.f.name.replace(/\.ktv\.json$|\.json$/i,'');
+  const sArtist=x=>x.o.artist||x.group||'';
+  const stuVisible=()=>{ const q=fold($('pq').value); const out=[]; psongs.forEach((x,i)=>{ if(stuGrp!==null&&x.group!==stuGrp) return; if(!songMatch(x,q,'all')) return; out.push(i); }); return out; };
+  function renderStu(){
+    const q=fold($('pq').value), groups=[]; const cnt={};
+    psongs.forEach(x=>{ const g=x.group||''; if(!(g in cnt)){ cnt[g]=0; groups.push(g); } cnt[g]++; });
+    if(stuGrp!==null&&!(stuGrp in cnt)) stuGrp=null;
+    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g=""><span class="cv all">♪</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
+      +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
+    const vis=stuVisible();
+    let html='';
+    if(psongs.length){
+      const ttl=stuGrp===null?'全部歌曲':stuGrp;
+      html+=`<div class="head" style="--hue:hsl(${hueOf(ttl)},45%,28%)"><small>${stuGrp===null?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div>`
+        +`<div class="acts"><button class="pa" data-a="play" title="播放">▶</button><button class="sh" data-a="shuf">🔀 隨機播放</button></div>`
+        +`<div class="cols"><span>#</span><span>歌名</span><span style="text-align:right">備註</span></div>`;
+    }
+    vis.forEach((i,n)=>{ const x=psongs[i], o=x.o; const bad=!o.yt&&o.audio&&!x.media;
+      html+=`<div class="song${bad?' bad':''}${i===curI?' now':''}" data-i="${i}"><span class="n">${n+1}</span><span class="tt"><span class="cv" style="background:${coverBg(sTitle(x))}">${esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div></span><span class="tg">${x.inst?'🎹 有伴奏':''}</span></div>`; });
+    if(!vis.length&&psongs.length) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">找不到符合的歌</div>';
+    $('plist').innerHTML=html;
+  }
+  function stuMark(){
+    const x=psongs[curI]; if(!x) return;
+    $('stuNow').innerHTML=`<span class="cv" style="background:${coverBg(sTitle(x))}">${esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>`;
+    document.querySelectorAll('#plist .song').forEach(el=>el.classList.toggle('now',+el.dataset.i===curI));
+  }
+  function stuStep(d,auto){
+    const vis=stuVisible(); if(!vis.length) return;
+    let to; if(stuShuf&&vis.length>1){ do{ to=vis[Math.floor(Math.random()*vis.length)]; }while(to===curI); }
+    else { const at=vis.indexOf(curI); to=at<0?vis[d>0?0:vis.length-1]:vis[(at+d+vis.length)%vis.length]; if(auto&&at===vis.length-1&&d>0&&vis.length>1&&!stuShuf) to=vis[0]; }
+    playSong(psongs[to]);
+  }
+  if(STU){
+    document.body.classList.add('stu','dark');
+    const side=document.createElement('aside'); side.id='stuSide';
+    side.innerHTML=`<div class="brand">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    const top=document.createElement('div'); top.id='stuTop';
+    top.innerHTML=`<button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
+    document.body.prepend(top); document.body.prepend(side);
+    const bar=document.querySelector('.stagebar');
+    const now=document.createElement('div'); now.id='stuNow'; bar.prepend(now);
+    const mk=(id,t,tt)=>{ const b=document.createElement('button'); b.id=id; b.title=tt; b.innerHTML='<span class="ic">'+t+'</span>'; return b; };
+    $('restartBtn').querySelector('.ic').textContent='↺';
+    const prev=mk('stuPrev','⏮','上一首'), next=mk('stuNext','⏭','下一首');
+    bar.insertBefore(prev,$('playBtn')); $('playBtn').after(next);
+    prev.onclick=()=>stuStep(-1); next.onclick=()=>stuStep(1);
+    $('stuLib').onclick=e=>{ const b=e.target.closest('.it'); if(!b) return; stuGrp=b.dataset.g===''?null:b.dataset.g; renderStu(); document.body.classList.add('list'); window.scrollTo(0,0); };
+    $('stuQ').addEventListener('input',()=>{ $('pq').value=$('stuQ').value; renderStu(); });
+    $('stuQ').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } if(e.key==='Escape'){ $('stuQ').value=''; $('pq').value=''; renderStu(); } });
+    $('plist').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b) return; if(b.dataset.a==='shuf'){ stuShuf=true; stuStep(1); } else { stuShuf=false; const v=stuVisible(); if(v.length) playSong(psongs[v[0]]); } });
+    // 回到歌單時音樂繼續播（像 Spotify），不要像編輯器那樣暫停
+    $('toList').onclick=()=>{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); window.scrollTo(0,0); };
+    $('stuBack').onclick=()=>$('toList').onclick();
+    audio.addEventListener('ended',()=>{ if(!rec) setTimeout(()=>stuStep(1,true),600); });
+    $('stuFbSong').onclick=()=>window.open(FB.song.form,'_blank','noopener'); $('stuFbBug').onclick=()=>window.open(FB.bug.form,'_blank','noopener');
+  }
   (function route(){
     const h=(location.hash||'').replace('#','');
-    if(h==='editor'){ enterEditor(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+    if(h==='editor'&&!STU){ enterEditor(); try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){} }
+    else if(STU){ enterPlayer(); pmsg('正在讀取歌單…'); scanDrive(); }
     else if(h==='player'){ enterPlayer(); }
     else $('landing').style.display='flex';
   })();
