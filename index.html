@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>臺語歌廳 Tâi-gí kua-thiann</title>
+<title>台語歌廳 Tâi-gí kua-thiann</title>
 <style>
   /* jf open 粉圓 2.1 (justfont, SIL OFL 1.1): Han + 台羅 tone marks */
   @font-face{font-family:"Huninn";src:url(huninn.woff2) format("woff2");font-display:swap;}
@@ -457,13 +457,13 @@
 </head>
 <body>
 <header>
-  <h1 class="brand">臺語歌廳 <span class="rom">Tâi-gí kua-thiann</span></h1>
+  <h1 class="brand">台語歌廳 <span class="rom">Tâi-gí kua-thiann</span></h1>
   <span style="flex:1"></span>
   <button id="menuBtn" title="回到選擇畫面">選單</button>
   <button id="themeBtn" title="切換深色／淺色">深色</button>
 </header>
 <div id="landing" style="display:none">
-  <div class="brand big">臺語歌廳<br><span class="rom">Tâi-gí kua-thiann</span></div>
+  <div class="brand big">台語歌廳<br><span class="rom">Tâi-gí kua-thiann</span></div>
   <div class="picks" id="picks">
     <button class="pick" id="pickEditor"><b>編輯器</b></button>
     <button class="pick" id="pickPlayer"><b>播放器</b></button>
@@ -3800,7 +3800,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // Chrome / Edge keep a handle so 儲存 writes back silently; elsewhere each save is a download.
   let fileHandle=null, fileName=null;
   const FS_OK=typeof window.showSaveFilePicker==='function';
-  const PTYPES=[{description:'臺語歌廳專案',accept:{'application/json':['.json']}}];
+  const PTYPES=[{description:'台語歌廳專案',accept:{'application/json':['.json']}}];
   const projBody=()=>({...dataObj(),name:projName(),updated:Date.now(),audio:lastFile?{name:lastFile.name,size:lastFile.size}:null});
   const suggestName=()=>(($('songTitle').value||'未命名').replace(/[\\/:*?"<>|]/g,'_'))+'.ktv.json';
   async function writeHandle(h){ const w=await h.createWritable(); await w.write(JSON.stringify(projBody())); await w.close(); }
@@ -5069,7 +5069,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     document.body.classList.add('stu','dark');
     { let m=document.querySelector('meta[name=theme-color]'); if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.append(m); } m.content='#000000'; }
     const side=document.createElement('aside'); side.id='stuSide';
-    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">${IC.home}</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    side.innerHTML=`<div class="brand"><div class="bt">台語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">${IC.home}</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
     const sbSet=off=>{ document.body.classList.toggle('sb-off',off); const b=side.querySelector('#sbTog'); b.textContent=off?'»':'«'; b.title=off?'展開歌單':'收起歌單'; try{ localStorage.setItem('taigi-ktv-sb',off?'1':'0'); }catch(e){} };
     let sbOff=false; try{ sbOff=localStorage.getItem('taigi-ktv-sb')==='1'; }catch(e){}
     sbSet(sbOff);
