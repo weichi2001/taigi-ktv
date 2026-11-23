@@ -275,6 +275,7 @@
   body.stu .pgrp{display:none}
   /* 沒播歌時隱藏播放列；播放中時播放列固定在最下面（全螢幕時照舊） */
   body.stu:not(.played) #stageWrap{display:none!important}
+  body.stu.player.list.played #stageWrap{display:block}
   body.stu #stageWrap:not(:fullscreen):not(.pseudoFs){background:transparent;border-radius:0;overflow:visible}
   body.stu.list #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{display:none}
   body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:min(calc(100% - 40px),calc((100vh - var(--bar) - 130px)*16/9));margin:18px auto 0}
@@ -312,6 +313,57 @@
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:100%;margin-top:0}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:0}
   }
+
+  /* ---- 學生版：放大鏡（查辭典）---- */
+  #fab,#mini{display:none}
+  body.stu #fab{display:block;position:fixed;right:20px;bottom:calc(var(--bar) + 18px);z-index:40;width:54px;height:54px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .25s,bottom .3s}
+  body.stu:not(.played) #fab{bottom:20px}
+  body.stu #fab:hover{transform:scale(1.07)} body.stu #fab:active{transform:scale(.94)}
+  body.stu #fab.gone{transform:scale(.3) rotate(-120deg);opacity:0;pointer-events:none}
+  body.stu #mini{--ink:#615045;--ink2:#7a6a5e;--okbg:#e9f2e1;--ok:#4f8a3a;position:fixed;z-index:41;left:0;right:0;bottom:var(--bar);height:62vh;display:flex;flex-direction:column;color:#615045;
+    font-family:Huninn,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;border-radius:24px 24px 0 0;
+    background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,248,238,.52));backdrop-filter:blur(34px) saturate(1.9) brightness(1.04);-webkit-backdrop-filter:blur(34px) saturate(1.9) brightness(1.04);
+    border:1px solid rgba(255,255,255,.75);box-shadow:0 -12px 44px rgba(0,0,0,.4),inset 0 1.5px 0 rgba(255,255,255,.95),inset 0 0 40px rgba(255,255,255,.18);
+    transform-origin:calc(100% - 44px) calc(100% - 20px);transform:translateY(36px) scale(.9);opacity:0;pointer-events:none;filter:blur(6px);
+    transition:transform .5s cubic-bezier(.22,1.15,.36,1),opacity .28s ease,filter .3s}
+  body.stu #mini[hidden]{display:none}
+  body.stu #mini.show{transform:none;opacity:1;pointer-events:auto;filter:none}
+  @media(min-width:861px){body.stu #mini{left:auto;right:18px;bottom:calc(var(--bar) + 18px);width:400px;height:min(680px,calc(100vh - var(--bar) - 36px));border-radius:24px;transform:translateY(20px) scale(.82)}
+    body.stu #mini.show{transform:none}
+    body.stu:not(.played) #mini{bottom:18px;height:min(680px,calc(100vh - 36px))}
+    body.stu.player main{transition:margin-right .5s cubic-bezier(.45,.05,.2,1)} body.stu.mini-on.player main{margin-right:428px}
+    body.stu #stuTop{transition:right .5s cubic-bezier(.45,.05,.2,1)} body.stu.mini-on #stuTop{right:428px}}
+  #mini .mtop{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 6px}
+  #mini .mtt b{font-size:22px;display:block;line-height:1.2;color:#4a3b30} #mini .mtt span{font-size:12px;color:var(--ink2)}
+  #mini .mx-close{font:inherit;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.8);color:#615045;cursor:pointer}
+  #mini .msb{display:flex;align-items:center;gap:8px;margin:8px 16px 4px;padding:0 14px;height:48px;border-radius:16px;background:rgba(255,255,255,.55);border:1px solid rgba(255,255,255,.8);box-shadow:inset 0 1px 2px rgba(97,80,69,.08);color:var(--ink2)}
+  #mini .msb:focus-within{background:rgba(255,255,255,.85);border-color:var(--accent)}
+  #mini .msb input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:17px;color:#4a3b30;padding:0}
+  #mini .mb{overflow:auto;padding:4px 16px 24px;flex:1;-webkit-overflow-scrolling:touch}
+  #mini .note{font-size:14px;line-height:1.8;padding:6px 2px;color:#615045} #mini .cnt{font-size:13px;color:var(--ink2);margin:10px 2px 2px}
+  #mini .btn{font:inherit;font-size:14px;padding:9px 16px;border-radius:99px;border:1px solid rgba(97,80,69,.18);background:rgba(255,255,255,.55);color:#615045;cursor:pointer;text-decoration:none;display:inline-block}
+  #mini .acts{display:flex;gap:8px;margin:14px 0 4px}
+  #mini .mr{background:linear-gradient(135deg,rgba(255,255,255,.7),rgba(255,255,255,.4));border:1px solid rgba(255,255,255,.8);border-radius:18px;padding:14px 16px;margin:10px 0;box-shadow:0 6px 20px rgba(60,40,20,.08),inset 0 1px 0 rgba(255,255,255,.9);animation:mrIn .45s cubic-bezier(.22,1.1,.36,1) both}
+  #mini .mr:nth-of-type(2){animation-delay:.04s} #mini .mr:nth-of-type(3){animation-delay:.08s} #mini .mr:nth-of-type(n+4){animation-delay:.12s}
+  @keyframes mrIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  #mini .mr .mt{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  #mini .mr .w{font-size:30px;line-height:1.25;font-weight:400;color:#3d3027} #mini .mr .r{font-size:17px;color:#e24403;margin-top:2px;font-weight:600}
+  #mini .tl,#mini .r{font-family:Huninn,Andika,"Noto Sans","Segoe UI",system-ui,"PingFang TC","Microsoft JhengHei",sans-serif}
+  #mini .mr .au{flex:none;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;color:#fff;background:linear-gradient(135deg,#ff7a3d,#e24403);box-shadow:0 5px 14px rgba(226,68,3,.35);display:flex;align-items:center;justify-content:center;transition:transform .15s}
+  #mini .mr .au:active{transform:scale(.94)}
+  #mini .mr .alt{font-size:13px;color:var(--ink2);margin-top:8px}
+  #mini .mr .sns{list-style:none;margin:10px 0 0;padding:0} #mini .mr .sns li{display:block;padding:3px 0}
+  #mini .mr .sl{display:flex;gap:8px;align-items:baseline;font-size:15px;line-height:1.7;color:#4a3b30}
+  #mini .mr .pos{flex:none;font-family:"Noto Sans TC",sans-serif;font-size:12px;padding:1px 8px;border-radius:7px;background:rgba(255,255,255,.6);color:var(--ink2)}
+  #mini .mr .sx{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .45s cubic-bezier(.22,1,.36,1),opacity .35s ease}
+  #mini .mr .sxi{overflow:hidden;min-height:0} #mini .mr.open .sx{grid-template-rows:1fr;opacity:1} #mini .mr .sx.empty,#mini .mr.open .sx.empty{display:none} #mini .mr .oth{margin-top:2px}
+  #mini .mr .ex{padding:8px 12px;margin:5px 0 3px;border-left:3px solid #f0b99a;background:rgba(255,236,220,.5);border-radius:0 10px 10px 0}
+  #mini .mr .ex .hd{font-size:17px;color:#3d3027} #mini .mr .ex .tl{font-size:13px;color:var(--ink2)} #mini .mr .ex .h{font-size:14px;color:#4a3b30}
+  #mini .mr .macts{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(97,80,69,.2)}
+  #mini .mr .ml{font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;border:0;background:rgba(255,255,255,.55);color:#615045;cursor:pointer;text-decoration:none}
+  #mini .mr .ml:hover{background:rgba(226,68,3,.12);color:#e24403}
+  #miniToast{position:fixed;left:50%;bottom:calc(var(--bar) + 30px);transform:translateX(-50%);z-index:60;background:#222;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s} #miniToast.on{opacity:1}
+  @media(prefers-reduced-motion:reduce){body.stu #fab,body.stu #mini,#mini .mr,#mini .mr .sx,body.stu.player main,body.stu #stuTop{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
@@ -4698,7 +4750,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('pq').addEventListener('input',renderSongs); document.querySelectorAll('input[name=pqBy]').forEach(r=>r.addEventListener('change',()=>{ renderSongs(); $('pq').focus(); }));
   $('pq').addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('pq').value=''; renderSongs(); } if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } });
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
-  async function playSong(s){
+  async function playSong(s,force){
+    if(STU&&!force&&curI>=0&&psongs[curI]===s){ document.body.classList.remove('list'); stuMark(); setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0); return; }
     curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU) stuMark();
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
     const o=JSON.parse(JSON.stringify(s.o)); pmsg('');
@@ -4851,7 +4904,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const vis=stuVisible(); if(!vis.length) return;
     let to; if(stuShuf&&vis.length>1){ do{ to=vis[Math.floor(Math.random()*vis.length)]; }while(to===curI); }
     else { const at=vis.indexOf(curI); to=at<0?vis[d>0?0:vis.length-1]:vis[(at+d+vis.length)%vis.length]; if(auto&&at===vis.length-1&&d>0&&vis.length>1&&!stuShuf) to=vis[0]; }
-    playSong(psongs[to]);
+    playSong(psongs[to],true);
   }
   if(STU){
     document.body.classList.add('stu','dark');
@@ -4876,6 +4929,97 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('stuBack').onclick=()=>$('toList').onclick();
     audio.addEventListener('ended',()=>{ if(!rec) setTimeout(()=>stuStep(1,true),600); });
     $('stuFbSong').onclick=()=>window.open(FB.song.form,'_blank','noopener'); $('stuFbBug').onclick=()=>window.open(FB.bug.form,'_blank','noopener');
+
+  // ---- 學生版放大鏡：查教育部臺灣台語常用詞辭典（資料用自學站每週更新的 dict.json／ex.json）----
+  (function(){
+    const BASE='https://weichi2001.github.io/taigi-site/', SU='https://sutian.moe.edu.tw/', G=id=>document.getElementById(id);
+    const fab=document.createElement('button'); fab.id='fab'; fab.setAttribute('aria-label','查辭典'); fab.textContent='🔎';
+    const mini=document.createElement('section'); mini.id='mini'; mini.hidden=true; mini.setAttribute('aria-label','查辭典');
+    mini.innerHTML=`<div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉">✕</button></div>
+      <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="漢字、台羅、華語都可以" autocomplete="off" enterkeyhint="search"></label><div class="mb" id="mb"></div>`;
+    const tst=document.createElement('div'); tst.id='miniToast';
+    document.body.append(fab,mini,tst);
+    const mq=G('mq'), mb=G('mb');
+    let tt=0; const toast2=m=>{ tst.textContent=m; tst.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>tst.classList.remove('on'),2400); };
+    const norm=x=>x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
+    const hasHan=x=>/\p{Script=Han}/u.test(x), clean=x=>x.replace(/【[^】]*】/g,'');
+    const inW700=new Set();
+    let DX=null,DXS='idle',EXD=null,mlim=30,exAsk=false;
+    function dxLoad(){
+      if(DXS!=='idle') return; DXS='load';
+      fetch(BASE+'dict.json').then(r=>r.ok?r.json():Promise.reject()).then(a=>{
+        DX=a.map(e=>({id:e[0],h:e[1],hc:clean(e[1]),r:e[2],c:e[3],a:e[4],ap:e[7]||'',s:e[5],v:e[6],k:norm(e[2]+' '+e[6].map(x=>x[1]).join(' ')),ks:[norm(e[2])].concat(e[6].map(x=>norm(x[1]))),d:e[5].map(x=>x[1]).join('')}));
+        DXS='ok'; draw();
+      }).catch(()=>{ DXS='err'; draw(); });
+    }
+    function exLoad(cb){ if(EXD){ cb(); return; } fetch(BASE+'ex.json').then(r=>r.json()).then(x=>{ EXD=x; cb(); }).catch(()=>{ EXD={}; cb(); }); }
+    // 華語查詢：解釋裡整段剛好等於查詢字排最前，越前面的義項、義項越少越優先
+    function gl(e,raw){ let best=4;
+      e.s.forEach(([p,d],i)=>{ d.split(/[、，；,;。]/).forEach((g,j)=>{ g=g.replace(/[（(].*?[）)]/g,'').trim(); if(!g.includes(raw)) return;
+        const v=(g===raw?1.5:g.startsWith(raw)||g.endsWith(raw)?2.6:3.6)+i*0.04+j*0.05+e.s.length*0.005+(/^【文】/.test(e.r)?0.1:0); if(v<best) best=v; }); });
+      return best; }
+    const CM={};
+    function cmap(c){ if(c in CM) return CM[c]; if(DX.some(e=>e.hc===c)) return CM[c]=c; let best=null,bs=9;
+      for(const e of DX){ if(e.hc.length!==1||e.hc===c) continue;
+        e.s.forEach(([p,d],i)=>d.split(/[、，；,;。]/).forEach((g,j)=>{ if(g.trim()!==c) return; const v=i*0.04+j*0.02+(/^【文】/.test(e.r)?0.1:0); if(v<bs){ bs=v; best=e.hc; } })); }
+      return CM[c]=best||c; }
+    function dxFind(raw){
+      const k=norm(raw),han=hasHan(raw),out=[]; const tr=han&&raw.length>=2?[...raw].map(cmap).join(''):raw;
+      for(const e of DX){ let sc=9;
+        if(han){ if(e.hc===raw) sc=0; else if(e.hc.startsWith(raw)) sc=1; else if(e.hc.includes(raw)) sc=2; else if(e.v.some(x=>clean(x[0]).includes(raw))) sc=3; else if(e.d.includes(raw)) sc=gl(e,raw);
+          if(tr!==raw&&sc>2){ if(e.hc===tr) sc=1.6; else if(e.hc.startsWith(tr)) sc=1.7; else if(e.hc.includes(tr)) sc=1.9; }
+        }else if(k){ if(e.ks.includes(k)) sc=0; else if(e.ks.some(x=>x.startsWith(k))) sc=1; else if(e.k.includes(k)) sc=2; }
+        if(sc===9&&han&&EXD){ const L=EXD[e.id]; if(L&&L.some(x=>x[2].includes(raw))) sc=5; }
+        if(sc<3&&(e.hc.length>6||/[，。！？]/.test(e.hc))) sc+=2;
+        if(sc<9) out.push([sc,e]); }
+      return out.sort((x,y)=>x[0]-y[0]||x[1].id-y[1].id).map(x=>x[1]); }
+    const dictUrl=w=>SU+'zh-hant/tshiau/?lui=tai_su&tsha='+encodeURIComponent(w);
+    function dxRow(e){
+      const sn=e.s.map(([p,d,sid])=>`<li data-sid="${sid||''}"><div class="sl">${p?`<span class="pos">${esc(p)}</span>`:''}<span>${esc(d)}</span></div><div class="sx"><div class="sxi"></div></div></li>`);
+      return `<article class="mr" data-id="${e.id}"><div class="mt"><div class="mw"><div class="w">${esc(e.hc||e.h)}</div><div class="r tl">${esc(e.r)}</div></div>
+        ${e.a?`<button class="au" data-au="${e.id}" data-ap="${e.ap}" aria-label="聽發音"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`:''}</div>
+        ${e.v.length?`<div class="alt">又唸作　${e.v.map(x=>esc(x[0])+' <span class="tl">'+esc(x[1])+'</span>').join('、')}</div>`:''}
+        <ol class="sns">${sn.join('')}</ol><div class="sx oth"><div class="sxi"></div></div>
+        <div class="macts"><button class="ml" data-tg="${e.id}">看例句 ▾</button><a class="ml" href="${SU}zh-hant/su/${e.id}/" target="_blank" rel="noopener">教育部原頁 ↗</a></div></article>`; }
+    function draw(){
+      const raw=mq.value.trim();
+      if(!raw){ mb.innerHTML=`<p class="note">輸入漢字、台羅或華語都可以，例如：舅媽、a-kim、阿母、學校。<br>查的是教育部臺灣台語常用詞辭典，約 ${DX?DX.length.toLocaleString():'三萬'} 個詞目，點 🔊 聽發音。</p>`; return; }
+      if(DXS==='load'||DXS==='idle'){ mb.innerHTML='<p class="note">辭典載入中…</p>'; return; }
+      if(DXS==='err'){ mb.innerHTML=`<p class="note">辭典暫時載不進來。可以直接到教育部辭典查：</p><div class="acts"><a class="btn" href="${dictUrl(raw)}" target="_blank" rel="noopener">到教育部辭典查「${esc(raw)}」</a></div>`; return; }
+      if(hasHan(raw)&&!EXD&&!exAsk){ exAsk=true; exLoad(()=>{ if(mq.value.trim()===raw) draw(); }); }
+      const r=dxFind(raw);
+      mb.innerHTML=(r.length?`<p class="cnt">找到 ${r.length} 筆</p>`+r.slice(0,mlim).map(dxRow).join('')+(r.length>mlim?'<div class="acts" style="justify-content:center"><button class="btn" id="mmore">再看更多</button></div>':'')
+        :`<p class="note">辭典裡沒有「${esc(raw)}」。可以換個寫法，或華語換個說法再試。</p>`)
+        +`<div class="acts"><a class="btn" href="${dictUrl(raw)}" target="_blank" rel="noopener">到教育部辭典查「${esc(raw)}」</a></div>`; }
+    let cur=null;
+    mb.addEventListener('click',e=>{
+      const au=e.target.closest('[data-au]');
+      if(au){ const id=+au.dataset.au; if(cur) cur.pause(); const ap=au.dataset.ap;
+        const src=SU+'media/senn/mp3/imtong/'+(ap?ap+'/'+id+'1.mp3':'subak/'+Math.floor(id/1000)+'/'+id+'.mp3'); const me=cur=new Audio(src);
+        me.play().catch(err=>{ if(err&&err.name==='AbortError') return; if(cur!==me) return; const a2=new Audio(src+'?r='+Date.now()); cur=a2; a2.play().catch(e2=>{ if(e2&&e2.name==='AbortError') return; if(cur===a2) toast2('這個詞的音檔播不出來'); }); }); return; }
+      const tg=e.target.closest('[data-tg]');
+      if(tg){ const row=tg.closest('.mr'), id=row.dataset.id, open=!row.classList.contains('open');
+        const fill=()=>{ if(!row.dataset.done){ row.dataset.done=1; const L=(EXD&&EXD[id])||[];
+            const html=x=>`<div class="ex"><div class="hd">${esc(x[0])}</div><div class="tl">${esc(x[1])}</div><div class="h">${esc(x[2])}</div></div>`; const left=[];
+            L.forEach(x=>{ const li=x[3]!=null?row.querySelector(`li[data-sid="${x[3]}"] .sxi`):null; if(li) li.insertAdjacentHTML('beforeend',html(x)); else left.push(x); });
+            const o=row.querySelector('.oth .sxi');
+            if(left.length) o.innerHTML=(L.length>left.length?'<p class="note">其他例句</p>':'')+left.map(html).join('');
+            if(!L.length) o.innerHTML='<p class="note">這個詞目沒有例句。</p>';
+            row.querySelectorAll('.sx').forEach(x=>{ if(!x.textContent.trim()) x.classList.add('empty'); }); }
+          void row.offsetHeight; row.classList.toggle('open',open); tg.textContent=open?'收起例句 ▴':'看例句 ▾'; };
+        if(open&&!row.dataset.done) exLoad(fill); else fill(); return; }
+      if(e.target.id==='mmore'){ mlim+=30; draw(); } });
+    let mt=0;
+    // 開關時，舞台（影片）跟著右移／回位，順順滑過去：main 的 margin-right 有 transition，開的時候同步重排歌詞
+    const relayout=()=>{ let n=0; const f=()=>{ try{ applyStyle(); applyCrop(); relayoutHy(); }catch(e){} if(++n<14) requestAnimationFrame(f); }; f(); };
+    function open(o){ clearTimeout(mt);
+      if(o){ mini.hidden=false; void mini.offsetWidth; document.body.classList.add('mini-on'); mini.classList.add('show'); fab.classList.add('gone'); dxLoad(); draw(); mt=setTimeout(()=>mq.focus({preventScroll:true}),380); }
+      else { mq.blur(); mini.classList.remove('show'); fab.classList.remove('gone'); document.body.classList.remove('mini-on'); mt=setTimeout(()=>{ mini.hidden=true; },420); }
+      relayout(); }
+    fab.addEventListener('click',()=>open(true)); G('mclose').addEventListener('click',()=>open(false));
+    mq.addEventListener('input',()=>{ mlim=30; draw(); });
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&mini.classList.contains('show')) open(false); });
+  })();
   }
   (function route(){
     const h=(location.hash||'').replace('#','');
