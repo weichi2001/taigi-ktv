@@ -223,7 +223,19 @@
   #stuSide,#stuTop{display:none}
   body.stu #stuSide{display:flex;position:fixed;left:8px;top:8px;bottom:8px;width:calc(var(--sw) - 8px);flex-direction:column;gap:6px;background:#121212;border-radius:12px;padding:18px 10px 12px;z-index:20;overflow:hidden}
   body.stu.played #stuSide{bottom:calc(var(--bar) + 8px)}
-  #stuSide .brand{font-size:22px;font-weight:900;padding:0 10px 12px;line-height:1.15}
+  #stuSide .brand{font-size:22px;font-weight:900;padding:0 10px 12px;line-height:1.15;display:flex;align-items:flex-start;gap:8px}
+  #stuSide .brand .bt{flex:1;min-width:0}
+  #sbTog{flex:none;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:#a7a7a7;cursor:pointer;display:grid;place-items:center;font-size:17px;margin-top:-2px}
+  #sbTog:hover{background:#242424;color:#fff}
+  body.stu #stuSide,body.stu.player main,body.stu #stuTop{transition:width .28s cubic-bezier(.22,1,.36,1),margin-left .28s cubic-bezier(.22,1,.36,1),left .28s cubic-bezier(.22,1,.36,1)}
+  @media (min-width:861px){
+    body.stu.sb-off{--sw:88px}
+    body.stu.sb-off #stuSide{padding:18px 10px 12px;align-items:stretch}
+    body.stu.sb-off #stuSide .brand{padding:0 0 12px;justify-content:center}
+    body.stu.sb-off #stuSide .brand .bt,body.stu.sb-off #stuSide .hd,body.stu.sb-off #stuSide .it .nm,body.stu.sb-off #stuSide .it small,body.stu.sb-off #stuSide .ft{display:none}
+    body.stu.sb-off #stuSide .it{justify-content:center;padding:7px 0}
+  }
+  @media (max-width:860px){ #sbTog{display:none} }
   #stuSide .brand .rom{display:block;font-size:12px;font-weight:400;color:#a7a7a7;margin-top:3px}
   #stuSide .hd{font-size:12px;color:#a7a7a7;letter-spacing:.08em;padding:12px 10px 4px}
   #stuSide .lib{overflow:auto;flex:1;margin:0 -4px;padding:0 4px}
@@ -289,7 +301,7 @@
   body.stu #playBtn:hover{transform:scale(1.06)}
   #stuNow{display:flex;align-items:center;gap:12px;flex:0 0 min(28vw,300px);min-width:0}
   #stuNow .cv{width:56px;height:56px;border-radius:6px;flex:none;display:grid;place-items:center;font-size:24px;font-weight:700;color:#fff}
-  #stuNow div{min-width:0} #stuNow b{display:block;font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} #stuNow small{display:block;color:#a7a7a7;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  body.stu.list.played #stuNow{cursor:pointer} body.stu.list.played #stuNow:hover b{text-decoration:underline} #stuNow div{min-width:0} #stuNow b{display:block;font-size:15px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} #stuNow small{display:block;margin-top:4px;line-height:1.3;color:#a7a7a7;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   body.stu #seek{flex:1;min-width:120px;accent-color:#fff} body.stu #seek:hover{accent-color:var(--accent)}
   body.stu #timeLbl{color:#a7a7a7;font-size:12.5px;white-space:nowrap}
   body.stu #vol{accent-color:#fff;width:90px}
@@ -4936,9 +4948,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     psongs.forEach(x=>{ const g=x.group||''; if(!(g in cnt)){ cnt[g]=0; groups.push(g); } cnt[g]++; });
     if(stuGrp!==null&&stuGrp!==FAV_K&&!(stuGrp in cnt)) stuGrp=null;
     const nfav=psongs.filter(x=>favs.has(sKey(x))).length;
-    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g=""><span class="cv all">♪</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
-      +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}"><span class="cv fav">♥</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
-      +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
+    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">♪</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
+      +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}" title="我的最愛"><span class="cv fav">♥</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
+      +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}" title="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
     const vis=stuVisible();
     let html='';
     if(psongs.length){
@@ -5001,7 +5013,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   if(STU){
     document.body.classList.add('stu','dark');
     const side=document.createElement('aside'); side.id='stuSide';
-    side.innerHTML=`<div class="brand">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    const sbSet=off=>{ document.body.classList.toggle('sb-off',off); const b=side.querySelector('#sbTog'); b.textContent=off?'»':'«'; b.title=off?'展開歌單':'收起歌單'; try{ localStorage.setItem('taigi-ktv-sb',off?'1':'0'); }catch(e){} };
+    let sbOff=false; try{ sbOff=localStorage.getItem('taigi-ktv-sb')==='1'; }catch(e){}
+    sbSet(sbOff);
+    side.querySelector('#sbTog').onclick=()=>sbSet(!document.body.classList.contains('sb-off'));
     const top=document.createElement('div'); top.id='stuTop';
     top.innerHTML=`<button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
     const qp=document.createElement('section'); qp.id='stuQp'; qp.hidden=true;
@@ -5034,6 +5050,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         else { const i=+qa.dataset.qa; if(curI<0){ buildQueue(i); playSong(psongs[i],true); toast2s('開始播放'); } else { const at=stuQ.indexOf(curI); stuQ=stuQ.filter(z=>z!==i||z===curI); const pos=stuQ.indexOf(curI); stuQ.splice(pos+1,0,i); stuQDraw(); toast2s('已加入佇列：'+sTitle(psongs[i])); } }
         return; } },true);
     $('plist').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b) return; if(b.dataset.a==='shuf'){ stuShuf=!stuShuf; stuModes(); if(stuShuf){ const v=stuVisible(); if(v.length){ const i=v[Math.floor(Math.random()*v.length)]; playSong(psongs[i]); } } else if(curI>=0) buildQueue(curI); } else { const v=stuVisible(); if(v.length) playSong(psongs[v[0]]); } });
+    now.addEventListener('click',e=>{ if(e.target.closest('#stuHeart')) return; if(document.body.classList.contains('list')&&curI>=0&&psongs[curI]) playSong(psongs[curI]); });
     bar.addEventListener('click',e=>{ const h=e.target.closest('#stuHeart'); if(!h) return; const x=psongs[curI]; if(!x) return; const k=sKey(x); favs.has(k)?favs.delete(k):favs.add(k); saveFav(); h.classList.toggle('on',favs.has(k)); renderStu(); });
     // 回到歌單時音樂繼續播（像 Spotify），不要像編輯器那樣暫停
     $('toList').onclick=()=>{ if(document.fullscreenElement) document.exitFullscreen().catch(()=>{}); document.body.classList.add('list'); window.scrollTo(0,0); };
