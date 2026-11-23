@@ -152,6 +152,18 @@
   #stageWrap.pseudoFs{position:fixed;inset:0;z-index:60;border-radius:0;height:100dvh}
   body.pseudoFsBody{overflow:hidden}
   .stagebar .ic+.tx{margin-left:5px}
+  :root{--ico-play:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15l13-7.5z'/%3E%3C/svg%3E");--ico-note:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 17.5V5l11-2v12.5' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='6.5' cy='17.5' r='2.7'/%3E%3Ccircle cx='17.5' cy='15.5' r='2.7'/%3E%3C/svg%3E")}
+  .svgi{width:1.15em;height:1.15em;vertical-align:-.2em;flex:none;display:inline-block}
+  .stagebar .ic{display:inline-flex;align-items:center}
+  body.stu .stagebar .ic .svgi{width:22px;height:22px}
+  body.stu #plist .acts .pa .svgi{width:24px;height:24px;margin-left:2px}
+  #plist .acts .sh{display:inline-flex;align-items:center;gap:7px} #plist .acts .sh .svgi{width:17px;height:17px}
+  body.stu #stuSide .it .cv.all .svgi,body.stu #stuSide .it .cv.fav .svgi{width:55%;height:55%;color:#fff;vertical-align:middle}
+  #stuSide .ft .home .hi{display:inline-flex} #stuSide .ft .home .hi .svgi{width:18px;height:18px}
+  #stuHomeM .svgi{width:20px;height:20px}
+  body.stu #fab .svgi{width:26px;height:26px;vertical-align:middle} body.stu #stageWrap #fab .svgi{display:none}
+  #stuQp .qt button .svgi,#stuQlist .qx .svgi,#mini .mx-close .svgi{width:16px;height:16px;vertical-align:middle}
+  #volIcon{display:inline-flex;align-items:center} #volIcon .svgi{width:20px;height:20px}
   @media (max-width:700px){ .stagebar{gap:6px;padding:8px 10px} .stagebar .tx{display:none} .stagebar button{padding:7px 10px} #seek{min-width:90px} #timeLbl{font-size:12px} }
   @media (hover:none){ #stageWrap:fullscreen .stagebar:hover,#stageWrap.pseudoFs .stagebar:hover{opacity:0} #stageWrap:fullscreen.barOn .stagebar,#stageWrap.pseudoFs.barOn .stagebar{opacity:1} }
   #lineList .li{grid-template-columns:24px 26px 96px 1fr}
@@ -280,14 +292,14 @@
   body.stu .song{display:grid;grid-template-columns:40px 1fr 120px;gap:12px;align-items:center;padding:8px 14px;border:0;border-radius:8px;background:transparent;cursor:pointer;position:relative}
   body.stu .song:hover{background:#242424}
   body.stu .song .n{color:#a7a7a7;text-align:center;font-size:15px}
-  body.stu .song:hover .n{font-size:0} body.stu .song:hover .n::before{content:'▶';font-size:14px;color:#fff}
+  body.stu .song:hover .n{font-size:0} body.stu .song:hover .n::before{content:'';display:inline-block;width:15px;height:15px;vertical-align:middle;background:#fff;-webkit-mask:var(--ico-play) center/contain no-repeat;mask:var(--ico-play) center/contain no-repeat}
   body.stu .song .tt{display:flex;align-items:center;gap:12px;min-width:0}
   body.stu .song .tt .cv{width:44px;height:44px;border-radius:6px;flex:none;display:grid;place-items:center;font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.35)}
   body.stu .song .tt div{min-width:0}
   body.stu .song b{display:block;font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff}
   body.stu .song small{display:block;margin:2px 0 0;color:#a7a7a7;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   body.stu .song .tg{font-size:12px;color:#a7a7a7;text-align:right}
-  body.stu .song.now b,body.stu .song.now .n{color:var(--accent)} body.stu .song.now .n{font-size:0} body.stu .song.now .n::before{content:'♪';font-size:16px}
+  body.stu .song.now b,body.stu .song.now .n{color:var(--accent)} body.stu .song.now .n{font-size:0} body.stu .song.now .n::before{content:'';display:inline-block;width:16px;height:16px;vertical-align:middle;background:var(--accent);-webkit-mask:var(--ico-note) center/contain no-repeat;mask:var(--ico-note) center/contain no-repeat}
   body.stu .song.bad{opacity:.45}
   body.stu .pgrp{display:none}
   /* 沒播歌時隱藏播放列；播放中時播放列固定在最下面（全螢幕時照舊） */
@@ -447,14 +459,14 @@
 <header>
   <h1 class="brand">臺語歌廳 <span class="rom">Tâi-gí kua-thiann</span></h1>
   <span style="flex:1"></span>
-  <button id="menuBtn" title="回到選擇畫面">☰ 選單</button>
-  <button id="themeBtn" title="切換深色／淺色">🌙 深色</button>
+  <button id="menuBtn" title="回到選擇畫面">選單</button>
+  <button id="themeBtn" title="切換深色／淺色">深色</button>
 </header>
 <div id="landing" style="display:none">
   <div class="brand big">臺語歌廳<br><span class="rom">Tâi-gí kua-thiann</span></div>
   <div class="picks" id="picks">
-    <button class="pick" id="pickEditor"><b>✏️ 編輯器</b></button>
-    <button class="pick" id="pickPlayer"><b>🎤 播放器</b></button>
+    <button class="pick" id="pickEditor"><b>編輯器</b></button>
+    <button class="pick" id="pickPlayer"><b>播放器</b></button>
   </div>
   <div id="fbPanel" style="display:none;width:min(720px,100%)">
     <div id="fbChoose" class="picks">
@@ -480,7 +492,7 @@
         <button id="projOpenBtn">開啟專案檔</button><input type="file" id="projOpen" accept=".json,application/json" style="display:none">
         <button class="primary" id="projSave" title="⌘S / Ctrl+S">儲存</button>
         <button id="projSaveAs">另存新檔</button>
-        <button class="accent" id="expOpen">⬇ 匯出影片</button>
+        <button class="accent" id="expOpen">匯出影片</button>
       </div>
       <div class="row" id="oldProjRow" style="display:none;align-items:center">
         <span style="font-size:13px;color:var(--muted)">瀏覽器裡的舊專案</span>
@@ -496,17 +508,17 @@
     <div class="section">
       <div class="step">STEP 1</div>
       <h2>載入音檔</h2>
-      <label class="file"><input type="file" id="audioFile" accept="audio/*,video/*"><span>🎵</span><span id="audioName">選擇音檔或影片（mp3 / m4a / wav / mp4 / mov）</span></label>
+      <label class="file"><input type="file" id="audioFile" accept="audio/*,video/*"><span></span><span id="audioName">選擇音檔或影片（mp3 / m4a / wav / mp4 / mov）</span></label>
       <div class="status" id="waveStatus"></div>
       <div class="row" style="margin-top:8px;align-items:center;gap:6px">
         <input class="txt" id="ytUrl" placeholder="或貼上 YouTube 連結（上課直接播，不能匯出）" style="flex:1;min-width:160px">
-        <button id="ytLoad">▶ 載入 YouTube</button>
+        <button id="ytLoad">載入 YouTube</button>
       </div>
       <div class="status" id="ytMsg" style="margin-top:4px"></div>
       <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:14px;cursor:pointer"><input type="checkbox" id="scenOn" style="width:16px;height:16px;accent-color:var(--accent)">啟用風景輪播 <span style="font-size:12px;color:var(--muted)">（沒有 MV 時，畫面改播風景，聲音照舊）</span></label>
       <div class="status" id="scenMsg" style="margin-top:2px"></div>
       <div id="instBox" style="display:none;margin-top:8px">
-        <label class="file"><input type="file" id="instFile" accept="audio/*,video/*"><span>🎹</span><span id="instName">載入伴唱音軌（選用，先用外部工具去好人聲）</span></label>
+        <label class="file"><input type="file" id="instFile" accept="audio/*,video/*"><span></span><span id="instName">載入伴唱音軌（選用，先用外部工具去好人聲）</span></label>
         <div class="status" style="margin-top:4px"><span id="instMsg"></span> <span id="instClear" style="display:none;color:var(--accent);cursor:pointer;text-decoration:underline">移除</span></div>
       </div>
       <div id="vidBox" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)">
@@ -543,7 +555,7 @@
         <input class="txt" id="songArtist" placeholder="演唱者" style="width:120px">
       </div>
       <div class="row" style="margin-top:8px;margin-bottom:0;align-items:center;gap:8px">
-        <button id="lyrSearch" title="到「臺語歌真正正字歌詞網」查這首歌的正字歌詞" style="display:inline-flex;align-items:center;gap:6px">🔍 查正字歌詞</button>
+        <button id="lyrSearch" title="到「臺語歌真正正字歌詞網」查這首歌的正字歌詞" style="display:inline-flex;align-items:center;gap:6px">查正字歌詞</button>
       </div>
       <textarea id="lyricsIn" style="margin-top:6px" placeholder="一行漢字、下一行台羅，依序貼上（可直接從 Word 複製）。&#10;華語或外語那幾句，下面那行寫一個 x 就好。"></textarea>
       <p class="hint">一行漢字、一行台羅。字數和音節數對不上的句子會標紅。華語或外語的句子，下面那行寫一個 <b>x</b>。</p>
@@ -588,11 +600,11 @@
   <div id="splitter" title="拖曳調整左右寬度"></div>
 
   <div>
-    <div id="pbar"><b>🎤 播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
-      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>📁 選擇資料夾</label>
-      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">📄 選擇檔案</label>
-      <button id="devBtn" title="開發者模式">🔧</button>
-      <button id="toList">☰ 歌單</button><button id="toEditor">✏️ 編輯器</button><button id="toMenu">⌂ 選單</button></div>
+    <div id="pbar"><b>播放器</b><span id="pnow" class="status" style="margin:0"></span><span style="flex:1"></span>
+      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px"><input type="file" id="pfolder" webkitdirectory multiple>選擇資料夾</label>
+      <label class="file" style="padding:7px 12px;border-style:solid;font-size:14px" title="手機、平板沒有資料夾選擇時，直接多選專案檔和歌曲檔"><input type="file" id="pfiles" multiple accept=".json,application/json,audio/*,video/*">選擇檔案</label>
+      <button id="devBtn" title="開發者模式">開發者</button>
+      <button id="toList">歌單</button><button id="toEditor">編輯器</button><button id="toMenu">⌂ 選單</button></div>
     <div id="devBox" style="display:none;margin:0 0 10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft)">
       <div id="devAsk" class="row" style="margin:0;align-items:center">
         <span style="font-size:14px;font-weight:700">開發者模式</span>
@@ -601,8 +613,8 @@
       </div>
       <div id="devIn" style="display:none">
         <div class="row" style="margin:0;align-items:center">
-          <span style="font-size:14px;font-weight:700">🔧 開發者模式</span>
-          <button class="accent" id="devLoad">☁ 從 Google Drive 載入歌單</button>
+          <span style="font-size:14px;font-weight:700">開發者模式</span>
+          <button class="accent" id="devLoad">從 Google Drive 載入歌單</button>
           <span class="status" id="devStat" style="margin:0"></span>
         </div>
         <div class="row" style="margin:6px 0 0;align-items:center">
@@ -617,7 +629,7 @@
       </div>
     </div>
     <div class="status" id="pmsg" style="display:none;margin:0 0 8px"></div>
-    <div id="psearch"><input class="txt" id="pq" type="search" placeholder="🔍 搜尋" style="flex:1;min-width:180px;max-width:360px" autocomplete="off">
+    <div id="psearch"><input class="txt" id="pq" type="search" placeholder="搜尋" style="flex:1;min-width:180px;max-width:360px" autocomplete="off">
       <label><input type="radio" name="pqBy" value="title" checked>歌名</label><label><input type="radio" name="pqBy" value="artist">歌手</label><label><input type="radio" name="pqBy" value="all">全部</label>
       <span class="status" id="pqInfo" style="margin:0"></span></div>
     <div id="plist"></div>
@@ -633,22 +645,22 @@
         <div id="stageEmpty">先在左邊載入音檔或影片，貼上歌詞並按「讀入歌詞」。</div>
       </div>
       <div class="stagebar">
-        <button id="playBtn"><span class="ic">▶</span><span class="tx">播放</span></button>
-        <button id="restartBtn" title="從頭"><span class="ic">⏮</span><span class="tx">從頭</span></button>
+        <button id="playBtn"><span class="ic"></span><span class="tx">播放</span></button>
+        <button id="restartBtn" title="從頭"><span class="ic"></span><span class="tx">從頭</span></button>
         <input type="range" id="seek" min="0" max="1000" value="0">
         <span id="timeLbl">0:00 / 0:00</span>
         <label id="vocQuickWrap" title="顯示教學生字" style="display:none;align-items:center;gap:4px;cursor:pointer;font-size:13px;white-space:nowrap"><input type="checkbox" id="vocQuick" style="width:15px;height:15px;accent-color:var(--accent)">生</label>
         <select id="voxSel" title="人聲"><option value="orig">原唱</option><option value="inst">伴唱音軌</option><option value="kara">簡易消人聲</option></select>
-        <span id="volWrap" title="音量"><span id="volIcon" style="cursor:pointer">🔊</span><input type="range" id="vol" min="0" max="100" value="100"></span>
-        <button id="fsBtn" title="全螢幕"><span class="ic">⛶</span><span class="tx">全螢幕</span></button>
+        <span id="volWrap" title="音量"><span id="volIcon" style="cursor:pointer"></span><input type="range" id="vol" min="0" max="100" value="100"></span>
+        <button id="fsBtn" title="全螢幕"><span class="ic"></span><span class="tx">全螢幕</span></button>
       </div>
     </div>
 
     <div class="card" id="rec" style="margin-top:14px">
       <div class="step">STEP 3 · 跟唱對時間</div>
       <div class="bar">
-        <button class="accent" id="recBtn">⏺ 開始跟唱</button>
-        <button id="undoBtn" disabled>↩ 退一字</button>
+        <button class="accent" id="recBtn">● 開始跟唱</button>
+        <button id="undoBtn" disabled>退一字</button>
         <span class="grow"></span>
         <label style="font-size:13px;color:var(--muted)">速度 <select id="rate"><option value="0.5">0.5×</option><option value="0.75" selected>0.75×</option><option value="0.9">0.9×</option><option value="1">1×</option></select></label>
       </div>
@@ -662,7 +674,7 @@
         <summary>微調（選用）：拖曳時間線</summary>
         <div class="head" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
           <span id="edTitle" style="font-weight:700;flex:1;min-width:160px">點下方列表的一句</span>
-          <button id="edPrev">◀ 上一句</button><button id="edNext">下一句 ▶</button><button class="primary" id="edPlay">▶ 播放這句</button>
+          <button id="edPrev">‹ 上一句</button><button id="edNext">下一句 ›</button><button class="primary" id="edPlay">播放這句</button>
         </div>
         <canvas id="tl" style="width:100%;height:160px;display:block;border:1px solid var(--line);border-radius:10px;background:#fbfaf7;touch-action:none"></canvas>
         <p class="hint">拖曳直線＝改那個字的開始時間，紅線＝句尾。</p>
@@ -3057,12 +3069,12 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     rec=true; undoStack=[]; playStop=null; gotKey=false; lastTapT=null;
     seekBefore(cur);
     audio.playbackRate=+$('rate').value; primeInst();
-    audio.play().then(()=>{ paintKeyMon(); }).catch(err=>{ blocked('音樂播不起來（'+(err&&err.name||'')+'）—— 先按一次上面的 ▶ 播放，再按「開始跟唱」'); rec=false; setRecUI(false); });
+    audio.play().then(()=>{ paintKeyMon(); }).catch(err=>{ blocked('音樂播不起來（'+(err&&err.name||'')+'）—— 先按一次上面的播放鈕，再按「開始跟唱」'); rec=false; setRecUI(false); });
     $('recBtn').textContent='■ 停止'; setRecUI(true); setTimeout(parkFocus,0);
     renderRec(); paintKeyMon();
   }
   function setRecUI(on){
-    $('recBtn').textContent=on?'■ 停止':'⏺ 開始跟唱';
+    $('recBtn').textContent=on?'■ 停止':'● 開始跟唱';
     $('undoBtn').disabled=!on; $('tapBtn').disabled=!on; $('endBtn').disabled=!on;
     $('rec').classList.toggle('live',on);
   }
@@ -3074,7 +3086,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   function stopRec(msg){
     rec=false; audio.pause(); audio.playbackRate=1; setRecUI(false); commit('跟唱');
-    $('recStatus').innerHTML=msg||'<b>已停止跟唱</b>　要繼續對時間請再按「⏺ 開始跟唱」'; save(); renderList(); renderRec(); drawTL();
+    $('recStatus').innerHTML=msg||'<b>已停止跟唱</b>　要繼續對時間請再按「● 開始跟唱」'; save(); renderList(); renderRec(); drawTL();
   }
   $('recBtn').onclick=()=>rec?stopRec('已停止，再按「開始跟唱」會從目前標示的字繼續'):startRec();
   // snapshot helpers for undo
@@ -3124,7 +3136,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     // jump the cursor to the first char of the next line
     const g=F.findIndex(([i,k])=>i===li+1&&k===0); cur=g<0?F.length:g;
     flash('endBtn');
-    if(cur>=F.length){ stopRec('全部對好了！按上面的 ▶ 播放看看'); return; }
+    if(cur>=F.length){ stopRec('全部對好了！按上面的播放鈕看看'); return; }
     renderRec(); markListThrottled(); save();
   }
   function undo(){
@@ -3169,7 +3181,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(exporting) return;
     if(!rec && (isTap||isEnd)){
       e.preventDefault();
-      $('recStatus').innerHTML='<b style="color:var(--accent)">你按了 '+(isTap?'Z':'X')+'，但現在<u>沒有在跟唱</u> —— 請先按上面的「⏺ 開始跟唱」</b>';
+      $('recStatus').innerHTML='<b style="color:var(--accent)">你按了 '+(isTap?'Z':'X')+'，但現在<u>沒有在跟唱</u> —— 請先按上面的「● 開始跟唱」</b>';
       const rb=$('recBtn'); rb.classList.add('down'); setTimeout(()=>rb.classList.remove('down'),900);
       try{ $('rec').scrollIntoView({block:'center',behavior:'smooth'}); }catch(err){}
       paintKeyMon(); return;
@@ -3375,15 +3387,40 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{applyStyle();applyCrop();requestAnimationFrame(relayoutHy);}));
   try{ new ResizeObserver(()=>{ applyStyle(); applyCrop(); relayoutHy(); }).observe($('stage')); }catch(e){}
 
+  // ---------- 圖示：全部用自己畫的向量圖，不用 emoji（不同裝置的 emoji 長相不一樣）
+  const _s=(d,o)=>'<svg class="svgi" viewBox="0 0 24 24" aria-hidden="true"'+(o||'')+'>'+d+'</svg>';
+  const _st=d=>_s(d,' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"');
+  const IC={
+    play:_s('<path d="M7 4.5v15l13-7.5z" fill="currentColor"/>'),
+    pause:_s('<path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" fill="currentColor"/>'),
+    prev:_s('<path d="M5.5 5h2.2v14H5.5zM20 5.2v13.6L9 12z" fill="currentColor"/>'),
+    next:_s('<path d="M16.3 5h2.2v14h-2.2zM4 5.2v13.6L15 12z" fill="currentColor"/>'),
+    restart:_st('<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4.5 4v4.5H9"/>'),
+    shuf:_st('<path d="M3 7h3.5c4.5 0 5.5 10 10.5 10H21"/><path d="M3 17h3.5c1.6 0 2.8-.9 3.8-2.1M21 7h-4c-1.8 0-3 .9-4 2.1"/><path d="M18 4l3 3-3 3M18 14l3 3-3 3"/>'),
+    rep:_st('<path d="M17 2.5l3.5 3.5-3.5 3.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/>'),
+    rep1:_st('<path d="M17 2.5l3.5 3.5-3.5 3.5"/><path d="M3.5 11V9.5A3.5 3.5 0 0 1 7 6h13.5"/><path d="M7 21.5L3.5 18 7 14.5"/><path d="M20.5 13v1.5A3.5 3.5 0 0 1 17 18H3.5"/><path d="M11 10.5l1.6-1v6"/>'),
+    queue:_st('<path d="M4 6.5h16M4 12h16M4 17.5h9"/>'),
+    fs:_st('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
+    vol0:_s('<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+    vol1:_s('<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 9a4 4 0 0 1 0 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+    vol2:_s('<path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.2a8 8 0 0 1 0 11.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'),
+    search:_st('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/>'),
+    note:_s('<path d="M9 17.5V5l11-2v12.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.7" fill="currentColor"/><circle cx="17.5" cy="15.5" r="2.7" fill="currentColor"/>'),
+    heart:_s('<path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5.5 6.2 5.5c1.9 0 3.4 1 4.3 2.4h3C14.4 6.5 15.9 5.5 17.8 5.5c3.2 0 5 3.1 3.7 6.3C19.5 16.4 12 21 12 21z" fill="currentColor"/>'),
+    home:_st('<path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/>'),
+    close:_st('<path d="M6 6l12 12M18 6L6 18"/>')
+  };
+
   // ---------- transport (normal playback always 1×)
   // On iPhone / iPad an <audio> may only start inside a tap. The instrumental normally starts from
   // the song's own 'play' event, which is not a tap, so every tap that starts the song also pokes it.
   function primeInst(){ if(!instFile||!instEl.paused) return; try{ instSeek(true); const p=instEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
   function togglePlay(){ if(!audio.src) return; if(audio.paused){ playStop=null; audio.playbackRate=1; primeInst(); audio.play().catch(()=>{}); } else audio.pause(); }
   $('playBtn').onclick=()=>{ if(exporting) return; if(rec) stopRec(''); togglePlay(); };
-  const playLbl=(ic,tx)=>{ const b=$('playBtn'); b.querySelector('.ic').textContent=ic; b.querySelector('.tx').textContent=tx; b.title=tx; };
-  audio.addEventListener('play',()=>playLbl('⏸','暫停'));
-  audio.addEventListener('pause',()=>playLbl('▶','播放'));
+  const playLbl=(ic,tx)=>{ const b=$('playBtn'); b.querySelector('.ic').innerHTML=IC[ic]; b.querySelector('.tx').textContent=tx; b.title=tx; };
+  audio.addEventListener('play',()=>playLbl('pause','暫停'));
+  audio.addEventListener('pause',()=>playLbl('play','播放'));
+  playLbl('play','播放'); $('fsBtn').querySelector('.ic').innerHTML=IC.fs; $('restartBtn').querySelector('.ic').innerHTML=IC.restart;
   audio.addEventListener('ended',()=>{ if(rec) stopRec('歌放完了。還沒按到的字可以點那個字、再按「開始跟唱」補。'); });
   $('restartBtn').onclick=()=>{ audio.currentTime=0; };
   $('rate').onchange=()=>{ if(rec) audio.playbackRate=+$('rate').value; };
@@ -4002,7 +4039,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(!ab){ diag('  音檔解碼失敗：'+why); throw new Error('音檔解不開（'+why+'）'); }
       diag('  音檔解碼 OK・'+ab.duration.toFixed(1)+' 秒'+(vdur?('（檔案本身 '+vdur.toFixed(1)+' 秒）'):''));
       if(vdur&&ab.duration<vdur-1.5){
-        diag('  ⚠ 這個瀏覽器解不開這支檔案後面的聲音，只拿得到 '+ab.duration.toFixed(1)+' 秒');
+        diag('  注意：這個瀏覽器解不開這支檔案後面的聲音，只拿得到 '+ab.duration.toFixed(1)+' 秒');
         diag('  　 影片會做到 '+ab.duration.toFixed(1)+' 秒為止。要整首的話，請用 STEP 1 的「另外載入歌曲音檔」放這首歌的 mp3／m4a');
       }
       const cv=document.createElement('canvas');
@@ -4115,7 +4152,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       for(let i=0;i<n&&!cancelled&&!err;i+=STEP){ const len=Math.min(STEP,n-i); const d=new Float32Array(len*2); d.set(c0.subarray(i,i+len),0); d.set(c1.subarray(i,i+len),len);
         const ad=new AudioData({format:'f32-planar',sampleRate:SR,numberOfFrames:len,numberOfChannels:2,timestamp:Math.round(i/SR*1e6),data:d}); aenc.encode(ad); ad.close();
         if(aenc.encodeQueueSize>40){ es('處理聲音… '+Math.round(i/n*100)+'%'); await drain(aenc,20,'聲音'); } }
-      try{ await Promise.race([aenc.flush(),new Promise((_,rj)=>setTimeout(()=>rj(new Error('聲音編碼器沒有回應')),60000))]); }catch(e){ diag('  ⚠ 聲音收尾：'+emsg(e)); }
+      try{ await Promise.race([aenc.flush(),new Promise((_,rj)=>setTimeout(()=>rj(new Error('聲音編碼器沒有回應')),60000))]); }catch(e){ diag('  注意：聲音收尾：'+emsg(e)); }
       diag('  聲音編碼完成・'+AOUT+' 個封包');
       if(err) throw err;
       // video
@@ -4235,10 +4272,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       try{
         const AC2=window.OfflineAudioContext||window.webkitOfflineAudioContext;
         const back=await new Promise((res,rej)=>{ blob.arrayBuffer().then(bb=>{ const q=new AC2(2,1,SR).decodeAudioData(bb,res,rej); if(q&&q.then) q.then(res,rej); },rej); });
-        if(back.duration<ab.duration*0.9){ diag('  ⚠ 成品的聲音只有 '+back.duration.toFixed(1)+' 秒（應該 '+ab.duration.toFixed(1)+' 秒）'); if(acodec==='aac') forceOpus=true; }
+        if(back.duration<ab.duration*0.9){ diag('  注意：成品的聲音只有 '+back.duration.toFixed(1)+' 秒（應該 '+ab.duration.toFixed(1)+' 秒）'); if(acodec==='aac') forceOpus=true; }
         else diag('  成品檢查：聲音 '+back.duration.toFixed(1)+' 秒，正常');
       }catch(e2){
-        diag('  ⚠ 成品的聲音讀不出來（'+emsg(e2)+'）'+(acodec==='aac'?'；下次匯出會改用 Opus 聲音格式':''));
+        diag('  注意：成品的聲音讀不出來（'+emsg(e2)+'）'+(acodec==='aac'?'；下次匯出會改用 Opus 聲音格式':''));
         if(acodec==='aac') forceOpus=true;
       }
       $('expFill').style.width='100%';
@@ -4248,7 +4285,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       es(`完成！花了 ${secs} 秒（${(blob.size/1048576).toFixed(1)} MB），請在跳出的視窗確認下載`);
       try{ await dl.save({filename:($('songTitle').value||'KTV')+'.mp4',data:blob}); es(`${OFFLINE?'影片已存到「下載」資料夾':'影片已下載'}（花了 ${secs} 秒・${H}p・${how}・聲音 ${acodec==='aac'?'AAC':'Opus'}）`+dropped+(acodec==='aac'?'':'　※這台電腦的 AAC 編碼器不能用，聲音存成 Opus，QuickTime 可能播不出聲音，用 Chrome、VLC 或 PotPlayer 播沒問題')); }catch(e){ es(dlErr(e)); }
     }catch(e){ try{ venc.state!=='closed'&&venc.close(); }catch(e2){} try{ aenc.state!=='closed'&&aenc.close(); }catch(e2){}
-      diag('  ✗ 中斷：'+emsg(e)); failEnc=!!(e&&e.enc);
+      diag('  失敗：中斷：'+emsg(e)); failEnc=!!(e&&e.enc);
       if(failEnc&&/^avc1\.64/.test(lastCodec)&&!avoidHigh){ avoidHigh=true; diag('  下一輪改用較單純的編碼規格'); }
       if(/編碼器/.test(emsg(e))) try{
         const probe2=async(withVideo)=>{
@@ -4434,7 +4471,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
             let off=0; for(const d of pcm.chunks){ for(let c=0;c<ch;c++){ const tmp=new Float32Array(d.numberOfFrames); d.copyTo(tmp,{planeIndex:c,format:'f32-planar'}); ab.getChannelData(c).set(tmp,off); } off+=d.numberOfFrames; d.close(); }
             pcm.chunks=null;
           }
-          if(ab.numberOfChannels<2){ diag('  ⚠ 這首是單聲道，中央消除法做不了，聲音維持原唱'); }
+          if(ab.numberOfChannels<2){ diag('  注意：這首是單聲道，中央消除法做不了，聲音維持原唱'); }
           else {
             const oc=new (window.OfflineAudioContext||window.webkitOfflineAudioContext)(2,ab.length,ab.sampleRate);
             const sn=oc.createBufferSource(); sn.buffer=ab; buildKaraoke(oc,sn).connect(oc.destination); sn.start(0);
@@ -4591,7 +4628,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       let chk='';
       try{ const back=await demuxMp4(await blob.arrayBuffer());
         chk='影像 '+(back.video?back.video.seconds.toFixed(1)+' 秒':'無')+'・聲音 '+(back.audio?back.audio.seconds.toFixed(1)+' 秒':'無');
-        if(!back.audio||back.audio.seconds<DUR*0.9){ diag('  ⚠ 成品檢查：'+chk+'（聲音不完整）'); if(plan.kind==='enc'&&plan.codec==='aac'){ forceOpus=true; diag('  下次匯出改用 Opus 聲音格式'); } }
+        if(!back.audio||back.audio.seconds<DUR*0.9){ diag('  注意：成品檢查：'+chk+'（聲音不完整）'); if(plan.kind==='enc'&&plan.codec==='aac'){ forceOpus=true; diag('  下次匯出改用 Opus 聲音格式'); } }
         else diag('  成品檢查 OK：'+chk);
       }catch(e){ diag('  成品檢查做不了（'+emsg(e)+'）'); }
       const secs=((performance.now()-t0)/1000).toFixed(0);
@@ -4605,7 +4642,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       cleanup(); if(viaPlayer){ audio.muted=!!musicFile; audio.volume=+$('vol').value/100; }
       return true;
     }catch(e){
-      diag('  ✗ 中斷：'+emsg(e)); failEnc=!!(e&&e.enc);
+      diag('  失敗：中斷：'+emsg(e)); failEnc=!!(e&&e.enc);
       cleanup(); if(hasVideo()){ audio.muted=!!musicFile; audio.volume=+$('vol').value/100; }
       if(/已取消/.test(emsg(e))){ es('已取消匯出'); $('expBar').style.display='none'; return true; }
       es('匯出中斷：'+emsg(e));
@@ -4621,24 +4658,24 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     diagReset(); failEnc=false; avoidHigh=false;
     let ok=await exportV2();
     if(ok) return;
-    if(failEnc){ diag('→ 用保守設定再試一次'); ok=await exportV2(); if(ok) return; }
-    diag('→ 改走舊的播放器路線');
+    if(failEnc){ diag('› 用保守設定再試一次'); ok=await exportV2(); if(ok) return; }
+    diag('› 改走舊的播放器路線');
     ok=await exportFast(false);
     if(!ok&&!failEnc) ok=await exportFast(true,0,0,hasVideo());   // with an MV, the GPU canvas is a common culprit
     // Everything here keeps the full picture quality; only the way the frames are produced changes.
     if(!ok&&!failEnc) for(const pl of (hasVideo()
           ? [{cpu:1,rate:2,note:'把影片放慢到 2 倍速'},{cpu:1,rate:1,note:'再放慢到 1 倍速'}]
           : [{cpu:1,note:'改用不經顯示晶片的畫布'}])){
-      diag('→ '+pl.note+'重來'); es(pl.note+'重新匯出…');
+      diag('› '+pl.note+'重來'); es(pl.note+'重新匯出…');
       ok=await exportFast(true,0,pl.rate,pl.cpu); if(ok) break;
     }
     while(!ok){                       // the size that broke may still work one step smaller
       const next=[1440,1080,720].filter(v=>v<lastTryH).shift();
       if(!next) break;
-      diag('→ '+lastTryH+'p 編到一半就停住，改用 '+next+'p 重來'); es('這台電腦編 '+lastTryH+'p 會中途停住，改用 '+next+'p 重新匯出…');
+      diag('› '+lastTryH+'p 編到一半就停住，改用 '+next+'p 重來'); es('這台電腦編 '+lastTryH+'p 會中途停住，改用 '+next+'p 重新匯出…');
       ok=await exportFast(true,next,1,true);
     }
-    if(!ok){ diag('→ 改用即時錄製（跟歌一樣長；畫面品質較差）'); exportVideo(); }
+    if(!ok){ diag('› 改用即時錄製（跟歌一樣長；畫面品質較差）'); exportVideo(); }
   };
 
   $('expCancel').onclick=()=>{ if(expCancel) expCancel(); };
@@ -4719,7 +4756,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---------- volume
   (function(){
     const v=$('vol'), ic=$('volIcon'); let last=100;
-    const paint=()=>{ const n=+v.value; audio.volume=n/100; try{ if(VOL_OK) instEl.volume=(voxMode==='inst')?n/100:0; }catch(e){} ic.textContent=n===0?'🔇':n<50?'🔉':'🔊';
+    const paint=()=>{ const n=+v.value; audio.volume=n/100; try{ if(VOL_OK) instEl.volume=(voxMode==='inst')?n/100:0; }catch(e){} ic.innerHTML=n===0?IC.vol0:n<50?IC.vol1:IC.vol2;
       try{ localStorage.setItem('taigi-ktv-vol',String(n)); }catch(e){} };
     try{ const sv=localStorage.getItem('taigi-ktv-vol'); if(sv!=null) v.value=sv; }catch(e){}
     v.addEventListener('input',paint);
@@ -4748,7 +4785,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---------- light / dark
   (function(){
     const b=$('themeBtn');
-    const paint=()=>{ const d=document.body.classList.contains('dark'); b.textContent=d?'☀️ 淺色':'🌙 深色';
+    const paint=()=>{ const d=document.body.classList.contains('dark'); b.textContent=d?'淺色':'深色';
       try{ localStorage.setItem('taigi-ktv-theme',d?'dark':'light'); }catch(e){} };
     try{ let t=localStorage.getItem('taigi-ktv-theme');
       if(!t&&window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches) t='dark';
@@ -4773,7 +4810,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function enterPlayer(){
     PLAYER=true; document.body.classList.add('player','list'); $('landing').style.display='none';
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
-    pmsg('先按「📁 選擇資料夾」，選放專案檔（.ktv.json）和歌曲檔的資料夾');
+    pmsg('先按「選擇資料夾」，選放專案檔（.ktv.json）和歌曲檔的資料夾');
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
   }
   $('pickEditor').onclick=enterEditor; $('pickPlayer').onclick=enterPlayer;
@@ -4818,9 +4855,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     let html='', last=null, shown=0; const grouped=psongs.some(s=>s.group);
     psongs.forEach((s,i)=>{ if(!songMatch(s,q,by)) return; shown++; const o=s.o; const timed=o.lines.filter(l=>l.a&&l.a[0]!=null).length;
       if(grouped&&s.group!==last){ last=s.group; html+=`<div class="pgrp">${esc(s.group||'其他')}</div>`; }
-      const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'▶ YouTube':(o.audio&&o.audio.name?(s.media?'🎵 '+o.audio.name:'⚠ 資料夾裡找不到 '+o.audio.name):'（沒有記錄音檔）');
+      const bad=!o.yt&&o.audio&&!s.media; const src=o.yt?'YouTube':(o.audio&&o.audio.name?(s.media?o.audio.name:'找不到音檔：'+o.audio.name):'（沒有記錄音檔）');
       const artist=o.artist||s.group||'';
-      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・🎹 有伴奏':''}</small></div>`; });
+      html+=`<div class="song${bad?' bad':''}" data-i="${i}"><b>${esc(o.title||s.f.name.replace(/\.ktv\.json$|\.json$/i,''))}</b><small>${esc(artist)}</small><small>${esc(src)}${s.inst?'・有伴奏':''}</small></div>`; });
     $('plist').innerHTML=html||(q?'<div class="status" style="grid-column:1/-1">找不到符合的歌</div>':'');
     $('pqInfo').textContent=q?(shown+' / '+psongs.length+' 首'):'';
   }
@@ -4966,20 +5003,20 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     psongs.forEach(x=>{ const g=x.group||''; if(!(g in cnt)){ cnt[g]=0; groups.push(g); } cnt[g]++; });
     if(stuGrp!==null&&stuGrp!==FAV_K&&!(stuGrp in cnt)) stuGrp=null;
     const nfav=psongs.filter(x=>favs.has(sKey(x))).length;
-    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">♪</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
-      +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}" title="我的最愛"><span class="cv fav">♥</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
+    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">${IC.note}</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
+      +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}" title="我的最愛"><span class="cv fav">${IC.heart}</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
       +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}" title="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
     const vis=stuVisible();
     let html='';
     if(psongs.length){
       const ttl=stuGrp===null?'全部歌曲':stuGrp===FAV_K?'我的最愛':stuGrp;
       html+=`<div class="head" style="--hue:hsl(${hueOf(ttl)},45%,28%)"><small>${stuGrp===null||stuGrp===FAV_K?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div>`
-        +`<div class="acts"><button class="pa" data-a="play" title="播放">▶</button><button class="sh${stuShuf?' on':''}" data-a="shuf">🔀 隨機播放</button></div>`
+        +`<div class="acts"><button class="pa" data-a="play" title="播放">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`
         +`<div class="cols"><span>#</span><span>歌名</span><span style="text-align:right">備註</span></div>`;
-      if(stuGrp===FAV_K&&!vis.length) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">還沒有收藏。點歌曲右邊的 ♡ 就會放進來（存在這台裝置的瀏覽器裡）。</div>';
+      if(stuGrp===FAV_K&&!vis.length) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">還沒有收藏。點歌曲右邊的愛心就會放進來（存在這台裝置的瀏覽器裡）。</div>';
     }
     vis.forEach((i,n)=>{ const x=psongs[i], o=x.o; const bad=!o.yt&&o.audio&&!x.media; const fv=favs.has(sKey(x));
-      html+=`<div class="song${bad?' bad':''}${i===curI?' now':''}" data-i="${i}"><span class="n">${n+1}</span><span class="tt"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div></span><span class="tg">${x.inst?'<em>🎹 有伴奏</em>':''}<button class="qa" data-qa="${i}" title="加入播放佇列">＋</button><button class="hr${fv?' on':''}" data-fav="${i}" title="${fv?'取消收藏':'加入我的最愛'}">${HEART}</button></span></div>`; });
+      html+=`<div class="song${bad?' bad':''}${i===curI?' now':''}" data-i="${i}"><span class="n">${n+1}</span><span class="tt"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div></span><span class="tg">${x.inst?'<em>有伴奏</em>':''}<button class="qa" data-qa="${i}" title="加入播放佇列">＋</button><button class="hr${fv?' on':''}" data-fav="${i}" title="${fv?'取消收藏':'加入我的最愛'}">${HEART}</button></span></div>`; });
     if(!vis.length&&psongs.length&&stuGrp!==FAV_K) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">找不到符合的歌</div>';
     $('plist').innerHTML=html;
   }
@@ -5010,7 +5047,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function stuQDraw(){
     const box=$('stuQlist'); if(!box) return;
     const at=stuQ.indexOf(curI); const cur=psongs[curI];
-    const row=(i,k,rm)=>{ const x=psongs[i]; return `<div class="qi" data-qi="${i}"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(x.o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>${rm?`<button class="qx" data-qx="${k}" title="從佇列移除">✕</button>`:''}</div>`; };
+    const row=(i,k,rm)=>{ const x=psongs[i]; return `<div class="qi" data-qi="${i}"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(x.o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>${rm?`<button class="qx" data-qx="${k}" title="從佇列移除">${IC.close}</button>`:''}</div>`; };
     let html='';
     if(cur) html+=`<div class="qh">正在播放</div>`+row(curI,-1,false);
     const next=at<0?stuQ:stuQ.slice(at+1);
@@ -5021,7 +5058,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function stuModes(){
     const sh=$('stuShuf'), rp=$('stuRep'); if(!sh) return;
     sh.classList.toggle('on',stuShuf); rp.classList.toggle('on',stuRep!=='off');
-    rp.querySelector('.ic').textContent=stuRep==='one'?'🔂':'🔁';
+    rp.querySelector('.ic').innerHTML=stuRep==='one'?IC.rep1:IC.rep;
     rp.title=stuRep==='off'?'重複播放：關':stuRep==='all'?'重複播放：整個佇列':'重複播放：單曲';
     sh.title=stuShuf?'隨機播放：開':'隨機播放：關';
     const b=document.querySelector('#plist .sh'); if(b) b.classList.toggle('on',stuShuf);
@@ -5032,22 +5069,21 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     document.body.classList.add('stu','dark');
     { let m=document.querySelector('meta[name=theme-color]'); if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.append(m); } m.content='#000000'; }
     const side=document.createElement('aside'); side.id='stuSide';
-    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">⌂</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">${IC.home}</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
     const sbSet=off=>{ document.body.classList.toggle('sb-off',off); const b=side.querySelector('#sbTog'); b.textContent=off?'»':'«'; b.title=off?'展開歌單':'收起歌單'; try{ localStorage.setItem('taigi-ktv-sb',off?'1':'0'); }catch(e){} };
     let sbOff=false; try{ sbOff=localStorage.getItem('taigi-ktv-sb')==='1'; }catch(e){}
     sbSet(sbOff);
     side.querySelector('#sbTog').onclick=()=>sbSet(!document.body.classList.contains('sb-off'));
     const top=document.createElement('div'); top.id='stuTop';
-    top.innerHTML=`<a id="stuHomeM" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網" aria-label="回台語自學網">⌂</a><button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
+    top.innerHTML=`<a id="stuHomeM" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網" aria-label="回台語自學網">${IC.home}</a><button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
     const qp=document.createElement('section'); qp.id='stuQp'; qp.hidden=true;
-    qp.innerHTML=`<div class="qt"><b>播放佇列</b><button id="stuQclose" aria-label="關閉">✕</button></div><div id="stuQlist"></div>`;
+    qp.innerHTML=`<div class="qt"><b>播放佇列</b><button id="stuQclose" aria-label="關閉">${IC.close}</button></div><div id="stuQlist"></div>`;
     const ld=document.createElement('div'); ld.id='stuLoad';
     document.body.prepend(top); document.body.prepend(side); document.body.append(qp,ld);
     const bar=document.querySelector('.stagebar');
     const now=document.createElement('div'); now.id='stuNow'; bar.prepend(now);
     const mk=(id,t,tt)=>{ const b=document.createElement('button'); b.id=id; b.title=tt; b.innerHTML='<span class="ic">'+t+'</span>'; return b; };
-    $('restartBtn').querySelector('.ic').textContent='↺';
-    const shf=mk('stuShuf','🔀','隨機播放'), prev=mk('stuPrev','⏮','上一首'), next=mk('stuNext','⏭','下一首'), rep=mk('stuRep','🔁','重複播放'), qb=mk('stuQbtn','☰','播放佇列');
+    const shf=mk('stuShuf',IC.shuf,'隨機播放'), prev=mk('stuPrev',IC.prev,'上一首'), next=mk('stuNext',IC.next,'下一首'), rep=mk('stuRep',IC.rep,'重複播放'), qb=mk('stuQbtn',IC.queue,'播放佇列');
     bar.insertBefore(shf,$('playBtn')); bar.insertBefore(prev,$('playBtn')); $('playBtn').after(next); next.after(rep); $('fsBtn').before(qb);
     stuModes();
     shf.onclick=()=>{ stuShuf=!stuShuf; if(curI>=0) buildQueue(curI); stuModes(); stuQDraw(); toast2s(stuShuf?'隨機播放：開':'隨機播放：關'); };
@@ -5097,7 +5133,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const w=window.__stuWord(chars,idx,jn); const els=us.slice(w.a,w.b+1);
       if(els.length===lkEls.length&&els.every((x,i)=>x===lkEls[i])) return;
       const first=!lkEls.length; cancelAnimationFrame(raf); lkEls=els;
-      tip.textContent='🔎 查「'+w.word+'」';
+      tip.textContent='查「'+w.word+'」';
       if(first){ hl.style.transition='none'; tip.style.transition='none'; }
       place(); void hl.offsetWidth; hl.style.transition=''; tip.style.transition=''; hl.classList.add('on'); tip.classList.add('on'); });
     $('stage').addEventListener('mouseleave',clearLk);
@@ -5109,9 +5145,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // ---- 學生版放大鏡：查教育部臺灣台語常用詞辭典（資料用自學站每週更新的 dict.json／ex.json）----
   (function(){
     const BASE='https://weichi2001.github.io/taigi-site/', SU='https://sutian.moe.edu.tw/', G=id=>document.getElementById(id);
-    const fab=document.createElement('button'); fab.id='fab'; fab.setAttribute('aria-label','查辭典'); fab.textContent='🔎';
+    const fab=document.createElement('button'); fab.id='fab'; fab.setAttribute('aria-label','查辭典'); fab.innerHTML=IC.search;
     const mini=document.createElement('section'); mini.id='mini'; mini.hidden=true; mini.setAttribute('aria-label','查辭典');
-    mini.innerHTML=`<div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉">✕</button></div>
+    mini.innerHTML=`<div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉">${IC.close}</button></div>
       <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="漢字、台羅、華語都可以" autocomplete="off" enterkeyhint="search"></label><div class="mb" id="mb"></div>`;
     const tst=document.createElement('div'); tst.id='miniToast';
     document.body.append(fab,mini,tst);
@@ -5165,7 +5201,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         <div class="macts"><button class="ml" data-tg="${e.id}">看例句 ▾</button><a class="ml" href="${SU}zh-hant/su/${e.id}/" target="_blank" rel="noopener">教育部原頁 ↗</a></div></article>`; }
     function draw(){
       const raw=mq.value.trim();
-      if(!raw){ mb.innerHTML=`<p class="note">輸入漢字、台羅或華語都可以，例如：舅媽、a-kim、阿母、學校。<br>查的是教育部臺灣台語常用詞辭典，約 ${DX?DX.length.toLocaleString():'三萬'} 個詞目，點 🔊 聽發音。</p>`; return; }
+      if(!raw){ mb.innerHTML=`<p class="note">輸入漢字、台羅或華語都可以，例如：舅媽、a-kim、阿母、學校。<br>查的是教育部臺灣台語常用詞辭典，約 ${DX?DX.length.toLocaleString():'三萬'} 個詞目，點喇叭鈕聽發音。</p>`; return; }
       if(DXS==='load'||DXS==='idle'){ mb.innerHTML='<p class="note">辭典載入中…</p>'; return; }
       if(DXS==='err'){ mb.innerHTML=`<p class="note">辭典暫時載不進來。可以直接到教育部辭典查：</p><div class="acts"><a class="btn" href="${dictUrl(raw)}" target="_blank" rel="noopener">到教育部辭典查「${esc(raw)}」</a></div>`; return; }
       if(hasHan(raw)&&!EXD&&!exAsk){ exAsk=true; exLoad(()=>{ if(mq.value.trim()===raw) draw(); }); }
