@@ -400,9 +400,11 @@
     body.stu:not(.list) #mini{top:86px;height:auto;bottom:calc(var(--bar) + 18px)}}
   @media(max-width:860px){ body.stu #stuQp{left:0;right:0;top:auto;bottom:var(--bar);width:auto;height:58vh;border-radius:20px 20px 0 0} }
   body.stu .lyr > .u{cursor:pointer}
-  body.stu .lyr > .u .uh,body.stu .lyr > .u .ur{transition:text-shadow .22s ease,color .22s ease}
-  body.stu .lyr > .u.lk .layer .uh,body.stu .lyr > .u.lk .layer .ur{text-shadow:var(--ol2),0 0 6px rgba(255,170,130,.95),0 0 16px rgba(255,122,85,.85),0 0 30px rgba(255,122,85,.6)}
-  body.stu .lyr > .u.lk .base .uh,body.stu .lyr > .u.lk .base .ur{color:#fff}
+  #stuHl{display:none}
+  body.stu #stuHl{display:block;position:fixed;z-index:49;pointer-events:none;border-radius:14px;border:2px solid rgba(255,190,160,.98);background:rgba(255,122,85,.13);
+    box-shadow:0 0 0 1px rgba(255,122,85,.55),0 0 16px rgba(255,122,85,.75),0 0 38px rgba(255,122,85,.4),inset 0 0 14px rgba(255,150,110,.28);
+    opacity:0;transition:opacity .16s,left .16s cubic-bezier(.22,1,.36,1),top .16s cubic-bezier(.22,1,.36,1),width .16s cubic-bezier(.22,1,.36,1),height .16s cubic-bezier(.22,1,.36,1)}
+  body.stu #stuHl.on{opacity:1}
   #stuTip{display:none}
   body.stu #stuTip{display:block;position:fixed;z-index:50;transform:translate(-50%,-100%) translateY(6px);padding:6px 13px;border-radius:99px;font-size:14px;white-space:nowrap;pointer-events:none;color:#3d2a20;
     background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(255,236,222,.82));border:1px solid rgba(255,255,255,.9);box-shadow:0 6px 20px rgba(0,0,0,.4),0 0 14px rgba(255,122,85,.45);opacity:0;transition:opacity .18s,transform .22s cubic-bezier(.22,1.15,.36,1)}
@@ -5040,7 +5042,16 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('stuFbSong').onclick=()=>window.open(FB.song.form,'_blank','noopener'); $('stuFbBug').onclick=()=>window.open(FB.bug.form,'_blank','noopener');
     // 歌詞的字：滑過去整個詞發光（含連字符的詞就是整個詞），上方浮出「查○○」提示；點一下查辭典
     const tip=document.createElement('div'); tip.id='stuTip'; document.body.append(tip);
-    let lkEls=[]; const clearLk=()=>{ lkEls.forEach(el=>el.classList.remove('lk')); lkEls=[]; tip.classList.remove('on'); };
+    const hl=document.createElement('div'); hl.id='stuHl'; document.body.append(hl);
+    let lkEls=[], raf=0;
+    const PAD=7;
+    const clearLk=()=>{ cancelAnimationFrame(raf); lkEls=[]; hl.classList.remove('on'); tip.classList.remove('on'); };
+    const place=()=>{
+      if(!lkEls.length||!lkEls[0].isConnected){ clearLk(); return; }
+      let l=1e9,t=1e9,r=-1e9,b=-1e9; lkEls.forEach(el=>{ const q=el.getBoundingClientRect(); l=Math.min(l,q.left); t=Math.min(t,q.top); r=Math.max(r,q.right); b=Math.max(b,q.bottom); });
+      hl.style.left=(l-PAD)+'px'; hl.style.top=(t-PAD)+'px'; hl.style.width=(r-l+PAD*2)+'px'; hl.style.height=(b-t+PAD*2)+'px';
+      tip.style.left=((l+r)/2)+'px'; tip.style.top=(t-PAD-12)+'px';
+      raf=requestAnimationFrame(place); };
     const unitsOf=u=>{ const us=[...u.parentElement.children].filter(c=>c.classList.contains('u')); return {us,chars:us.map(c=>{ const h=c.querySelector('.base .uh'); return h?h.textContent:''; }),jn:us.map(c=>c.classList.contains('jn')),idx:us.indexOf(u)}; };
     const noLk=()=>document.fullscreenElement||$('stageWrap').classList.contains('pseudoFs')||!window.__stuWord;
     $('stage').addEventListener('mouseover',e=>{
@@ -5049,9 +5060,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const {us,chars,jn,idx}=unitsOf(u); if(!/\p{Script=Han}/u.test(chars[idx])){ clearLk(); return; }
       const w=window.__stuWord(chars,idx,jn); const els=us.slice(w.a,w.b+1);
       if(els.length===lkEls.length&&els.every((x,i)=>x===lkEls[i])) return;
-      clearLk(); lkEls=els; els.forEach(el=>el.classList.add('lk'));
-      const r1=els[0].getBoundingClientRect(), r2=els[els.length-1].getBoundingClientRect();
-      tip.textContent='🔎 查「'+w.word+'」'; tip.style.left=((r1.left+r2.right)/2)+'px'; tip.style.top=(Math.min(r1.top,r2.top)-16)+'px'; tip.classList.add('on'); });
+      const first=!lkEls.length; cancelAnimationFrame(raf); lkEls=els;
+      tip.textContent='🔎 查「'+w.word+'」';
+      if(first){ hl.style.transition='none'; tip.style.transition='none'; }
+      place(); void hl.offsetWidth; hl.style.transition=''; tip.style.transition=''; hl.classList.add('on'); tip.classList.add('on'); });
     $('stage').addEventListener('mouseleave',clearLk);
     $('stage').addEventListener('click',e=>{
       if(noLk()) return;
