@@ -333,6 +333,13 @@
 
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
+  /* 全螢幕：底下工作列純黑、不透明一點；放大鏡移到右上角 */
+  body.stu #stageWrap:fullscreen .stagebar,body.stu #stageWrap.pseudoFs .stagebar{background:rgba(0,0,0,.94);border-top:1px solid #1c1c1c;color:#fff}
+  body.stu #stageWrap:fullscreen .stagebar select,body.stu #stageWrap.pseudoFs .stagebar select{background:#242424}
+  body.stu #stageWrap #fab{top:16px;bottom:auto;right:16px;z-index:62;width:48px;height:48px;font-size:20px}
+  body.stu #stageWrap #mini{left:auto;right:16px;top:16px;bottom:calc(var(--bar) + 12px);width:min(400px,calc(100vw - 32px));height:auto;z-index:63;border-radius:24px;transform-origin:calc(100% - 30px) 40px;transform:translateY(-8px) scale(.86)}
+  body.stu #stageWrap #mini.show{transform:none}
+  body.stu #stageWrap #miniToast{z-index:64}
   body.stu #fab{display:block;position:fixed;right:20px;bottom:calc(var(--bar) + 18px);z-index:40;width:54px;height:54px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:22px;box-shadow:0 4px 14px rgba(0,0,0,.4);cursor:pointer;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .25s,bottom .3s}
   body.stu:not(.played) #fab{bottom:20px}
   body.stu #fab:hover{transform:scale(1.07)} body.stu #fab:active{transform:scale(.94)}
@@ -5076,7 +5083,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       tip.style.left=((l+r)/2)+'px'; tip.style.top=(t-PAD-12)+'px';
       raf=requestAnimationFrame(place); };
     const unitsOf=u=>{ const us=[...u.parentElement.children].filter(c=>c.classList.contains('u')); return {us,chars:us.map(c=>{ const h=c.querySelector('.base .uh'); return h?h.textContent:''; }),jn:us.map(c=>c.classList.contains('jn')),idx:us.indexOf(u)}; };
-    const noLk=()=>document.fullscreenElement||$('stageWrap').classList.contains('pseudoFs')||!window.__stuWord;
+    const noLk=()=>!window.__stuWord;
     $('stage').addEventListener('mouseover',e=>{
       if(noLk()){ clearLk(); return; }
       const u=e.target.closest('.lyr > .u'); if(!u){ clearLk(); return; }
@@ -5102,6 +5109,12 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="漢字、台羅、華語都可以" autocomplete="off" enterkeyhint="search"></label><div class="mb" id="mb"></div>`;
     const tst=document.createElement('div'); tst.id='miniToast';
     document.body.append(fab,mini,tst);
+    // 全螢幕時只有 #stageWrap 看得到，所以把放大鏡、提示、外框搬進去；離開再搬回來
+    const sw=G('stageWrap');
+    const fsSync=()=>{ const inFs=(document.fullscreenElement||document.webkitFullscreenElement)===sw||sw.classList.contains('pseudoFs'); const host=inFs?sw:document.body;
+      [fab,mini,tst,G('stuTip'),G('stuHl')].forEach(el=>{ if(el&&el.parentNode!==host) host.append(el); }); };
+    ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,fsSync));
+    new MutationObserver(fsSync).observe(sw,{attributes:true,attributeFilter:['class']});
     const mq=G('mq'), mb=G('mb');
     let tt=0; const toast2=m=>{ tst.textContent=m; tst.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>tst.classList.remove('on'),2400); };
     const norm=x=>x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
