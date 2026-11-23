@@ -399,7 +399,14 @@
     body.stu.q-on.player main{margin-right:386px} body.stu.q-on #stuTop{right:386px}
     body.stu:not(.list) #mini{top:86px;height:auto;bottom:calc(var(--bar) + 18px)}}
   @media(max-width:860px){ body.stu #stuQp{left:0;right:0;top:auto;bottom:var(--bar);width:auto;height:58vh;border-radius:20px 20px 0 0} }
-  body.stu .lyr > .u{cursor:pointer} body.stu .lyr > .u:hover .base .uh{text-decoration:underline dotted;text-underline-offset:6px}
+  body.stu .lyr > .u{cursor:pointer}
+  body.stu .lyr > .u .uh,body.stu .lyr > .u .ur{transition:text-shadow .22s ease,color .22s ease}
+  body.stu .lyr > .u.lk .layer .uh,body.stu .lyr > .u.lk .layer .ur{text-shadow:var(--ol2),0 0 6px rgba(255,170,130,.95),0 0 16px rgba(255,122,85,.85),0 0 30px rgba(255,122,85,.6)}
+  body.stu .lyr > .u.lk .base .uh,body.stu .lyr > .u.lk .base .ur{color:#fff}
+  #stuTip{display:none}
+  body.stu #stuTip{display:block;position:fixed;z-index:50;transform:translate(-50%,-100%) translateY(6px);padding:6px 13px;border-radius:99px;font-size:14px;white-space:nowrap;pointer-events:none;color:#3d2a20;
+    background:linear-gradient(160deg,rgba(255,255,255,.92),rgba(255,236,222,.82));border:1px solid rgba(255,255,255,.9);box-shadow:0 6px 20px rgba(0,0,0,.4),0 0 14px rgba(255,122,85,.45);opacity:0;transition:opacity .18s,transform .22s cubic-bezier(.22,1.15,.36,1)}
+  body.stu #stuTip.on{opacity:1;transform:translate(-50%,-100%)}
   body.stu #stageWrap:fullscreen .lyr > .u,body.stu #stageWrap.pseudoFs .lyr > .u{cursor:default}
   @media(prefers-reduced-motion:reduce){body.stu #stuQp{transition:none!important}}
 </style>
@@ -5031,12 +5038,25 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('stuBack').onclick=()=>$('toList').onclick();
     audio.addEventListener('ended',()=>{ if(!rec) setTimeout(()=>stuStep(1,true),600); });
     $('stuFbSong').onclick=()=>window.open(FB.song.form,'_blank','noopener'); $('stuFbBug').onclick=()=>window.open(FB.bug.form,'_blank','noopener');
-    // 點歌詞的字 → 放大鏡自動查（取包含這個字、辭典裡有的最長詞）
+    // 歌詞的字：滑過去整個詞發光（含連字符的詞就是整個詞），上方浮出「查○○」提示；點一下查辭典
+    const tip=document.createElement('div'); tip.id='stuTip'; document.body.append(tip);
+    let lkEls=[]; const clearLk=()=>{ lkEls.forEach(el=>el.classList.remove('lk')); lkEls=[]; tip.classList.remove('on'); };
+    const unitsOf=u=>{ const us=[...u.parentElement.children].filter(c=>c.classList.contains('u')); return {us,chars:us.map(c=>{ const h=c.querySelector('.base .uh'); return h?h.textContent:''; }),jn:us.map(c=>c.classList.contains('jn')),idx:us.indexOf(u)}; };
+    const noLk=()=>document.fullscreenElement||$('stageWrap').classList.contains('pseudoFs')||!window.__stuWord;
+    $('stage').addEventListener('mouseover',e=>{
+      if(noLk()){ clearLk(); return; }
+      const u=e.target.closest('.lyr > .u'); if(!u){ clearLk(); return; }
+      const {us,chars,jn,idx}=unitsOf(u); if(!/\p{Script=Han}/u.test(chars[idx])){ clearLk(); return; }
+      const w=window.__stuWord(chars,idx,jn); const els=us.slice(w.a,w.b+1);
+      if(els.length===lkEls.length&&els.every((x,i)=>x===lkEls[i])) return;
+      clearLk(); lkEls=els; els.forEach(el=>el.classList.add('lk'));
+      const r1=els[0].getBoundingClientRect(), r2=els[els.length-1].getBoundingClientRect();
+      tip.textContent='🔎 查「'+w.word+'」'; tip.style.left=((r1.left+r2.right)/2)+'px'; tip.style.top=(Math.min(r1.top,r2.top)-16)+'px'; tip.classList.add('on'); });
+    $('stage').addEventListener('mouseleave',clearLk);
     $('stage').addEventListener('click',e=>{
-      if(document.fullscreenElement||$('stageWrap').classList.contains('pseudoFs')) return;
+      if(noLk()) return;
       const u=e.target.closest('.lyr > .u'); if(!u||!window.__stuLook) return;
-      const lyr=u.parentElement; const us=[...lyr.children].filter(c=>c.classList.contains('u'));
-      window.__stuLook(us.map(c=>{ const h=c.querySelector('.base .uh'); return h?h.textContent:''; }),us.indexOf(u)); });
+      const {chars,jn,idx}=unitsOf(u); window.__stuLook(chars,idx,jn); });
 
   // ---- 學生版放大鏡：查教育部臺灣台語常用詞辭典（資料用自學站每週更新的 dict.json／ex.json）----
   (function(){
@@ -5126,14 +5146,22 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       relayout(); }
     window.__stuMiniClose=()=>{ if(mini.classList.contains('show')) open(false); };
     // 從歌詞點字：先填單字，辭典載好後換成「包含這個字、辭典裡有的最長詞」
-    window.__stuLook=async(chars,idx)=>{
-      const t=chars[idx]||''; if(!hasHan(t)) return;
-      window.__stuQclose&&window.__stuQclose(); open(true); mq.value=t; mlim=30; draw();
-      try{ await dxLoad(); }catch(e){} if(!hcSet) return;
-      const s=chars.join(''); let pos=0; for(let i=0;i<idx;i++) pos+=chars[i].length; const end=pos+t.length;
-      let best=t;
-      outer: for(let L=Math.min(5,s.length);L>=1;L--) for(let st=Math.max(0,end-L);st<=pos&&st+L<=s.length;st++){ const c=s.slice(st,st+L); if(/^\p{Script=Han}+$/u.test(c)&&hcSet.has(c)){ best=c; break outer; } }
-      mq.value=best; draw(); };
+    // 找出「包含被點到的字、辭典裡有的最長詞」；辭典還沒載好或查不到時，用台羅的連字符分出來的詞
+    const isHan=c=>/^\p{Script=Han}+$/u.test(c);
+    window.__stuWord=(chars,idx,jn)=>{
+      const offs=[]; let s=''; chars.forEach(c=>{ offs.push(s.length); s+=c; });
+      const pos=offs[idx], end=pos+chars[idx].length, unitOf=p=>{ for(let k=offs.length-1;k>=0;k--) if(offs[k]<=p) return k; return 0; };
+      let a=idx,b=idx;
+      if(hcSet){ outer: for(let L=Math.min(5,s.length);L>=1;L--) for(let st=Math.max(0,end-L);st<=pos&&st+L<=s.length;st++){ const c=s.slice(st,st+L); if(isHan(c)&&hcSet.has(c)){ a=unitOf(st); b=unitOf(st+L-1); break outer; } } }
+      if(b-a<1){ let x=idx,y=idx; while(x>0&&jn[x-1]) x--; while(y<chars.length-1&&jn[y]) y++; if(y-x>b-a){ a=x; b=y; } }
+      const word=chars.slice(a,b+1).join('').replace(/[^\p{Script=Han}]/gu,'')||chars[idx];
+      return {a,b,word}; };
+    window.__stuLook=async(chars,idx,jn)=>{
+      if(!hasHan(chars[idx]||'')) return;
+      window.__stuQclose&&window.__stuQclose(); open(true);
+      try{ await dxLoad(); }catch(e){}
+      const w=window.__stuWord(chars,idx,jn||[]); mq.value=w.word; mlim=30; draw(); };
+    setTimeout(()=>{ try{ dxLoad(); }catch(e){} },3000);
     fab.addEventListener('click',()=>{ window.__stuQclose&&window.__stuQclose(); open(true); }); G('mclose').addEventListener('click',()=>open(false));
     mq.addEventListener('input',()=>{ mlim=30; draw(); });
     document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&mini.classList.contains('show')) open(false); });
