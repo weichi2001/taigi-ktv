@@ -248,6 +248,11 @@
   #stuSide .it small{color:#8a8a8a;font-size:12px}
   #stuSide .ft{display:flex;gap:6px;flex-wrap:wrap;padding:8px 4px 0;border-top:1px solid #242424}
   #stuSide .ft button{flex:1;min-width:0;background:#1f1f1f;color:#cfcfcf;border:0;border-radius:999px;padding:8px 6px;font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+  #stuSide .ft .home{flex:1 1 100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 6px;border-radius:999px;background:#1f1f1f;color:#e6e6e6;font-size:13px;text-decoration:none;white-space:nowrap}
+  #stuSide .ft .home:hover{background:#2c2c2c;color:#fff} #stuSide .ft .home .hi{font-size:16px;line-height:1}
+  #stuHomeM{display:none}
+  @media (min-width:861px){ body.stu.sb-off #stuSide .ft{display:flex;border-top:0;padding:8px 0 0} body.stu.sb-off #stuSide .ft button,body.stu.sb-off #stuSide .ft .ht{display:none} body.stu.sb-off #stuSide .ft .home{flex:none;width:100%;padding:10px 0} }
+  @media (max-width:860px){ #stuHomeM{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#242424;color:#e6e6e6;text-decoration:none;font-size:18px} }
   #stuSide .ft button:hover{background:#2c2c2c;color:#fff}
   body.stu #stuTop{display:flex;position:fixed;top:8px;left:var(--sw);right:8px;height:60px;align-items:center;gap:10px;padding:0 24px;z-index:15;border-radius:12px 12px 0 0;background:linear-gradient(rgba(18,18,18,.96),rgba(18,18,18,.82));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   #stuTop button{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
@@ -5012,14 +5017,15 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function stuProg(g,t){ const el=$('stuLoad'); if(!el) return; if(!t){ el.style.width='0'; el.style.opacity=0; return; } el.style.opacity=1; el.style.width=Math.min(100,g/t*100)+'%'; }
   if(STU){
     document.body.classList.add('stu','dark');
+    { let m=document.querySelector('meta[name=theme-color]'); if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.append(m); } m.content='#000000'; }
     const side=document.createElement('aside'); side.id='stuSide';
-    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
+    side.innerHTML=`<div class="brand"><div class="bt">臺語歌廳<span class="rom">Tâi-gí kua-thiann</span></div><button id="sbTog" aria-label="收起或展開側邊欄">«</button></div><div class="hd">歌單</div><div class="lib" id="stuLib"></div><div class="ft"><a id="stuHome" class="home" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網"><span class="hi">⌂</span><span class="ht">回台語自學網</span></a><button id="stuFbSong">歌單建議</button><button id="stuFbBug">問題回報</button></div>`;
     const sbSet=off=>{ document.body.classList.toggle('sb-off',off); const b=side.querySelector('#sbTog'); b.textContent=off?'»':'«'; b.title=off?'展開歌單':'收起歌單'; try{ localStorage.setItem('taigi-ktv-sb',off?'1':'0'); }catch(e){} };
     let sbOff=false; try{ sbOff=localStorage.getItem('taigi-ktv-sb')==='1'; }catch(e){}
     sbSet(sbOff);
     side.querySelector('#sbTog').onclick=()=>sbSet(!document.body.classList.contains('sb-off'));
     const top=document.createElement('div'); top.id='stuTop';
-    top.innerHTML=`<button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
+    top.innerHTML=`<a id="stuHomeM" href="https://weichi2001.github.io/taigi-site/" title="回台語自學網" aria-label="回台語自學網">⌂</a><button id="stuBack">‹ 歌單</button><input id="stuQ" type="search" placeholder="想聽什麼歌？" autocomplete="off">`;
     const qp=document.createElement('section'); qp.id='stuQp'; qp.hidden=true;
     qp.innerHTML=`<div class="qt"><b>播放佇列</b><button id="stuQclose" aria-label="關閉">✕</button></div><div id="stuQlist"></div>`;
     const ld=document.createElement('div'); ld.id='stuLoad';
