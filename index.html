@@ -5219,8 +5219,13 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     mb.addEventListener('click',e=>{
       const au=e.target.closest('[data-au]');
       if(au){ const id=+au.dataset.au; if(cur) cur.pause(); const ap=au.dataset.ap;
-        const src=SU+'media/senn/mp3/imtong/'+(ap?ap+'/'+id+'1.mp3':'subak/'+Math.floor(id/1000)+'/'+id+'.mp3'); const me=cur=new Audio(src);
-        me.play().catch(err=>{ if(err&&err.name==='AbortError') return; if(cur!==me) return; const a2=new Audio(src+'?r='+Date.now()); cur=a2; a2.play().catch(e2=>{ if(e2&&e2.name==='AbortError') return; if(cur===a2) toast2('這個詞的音檔播不出來'); }); }); return; }
+        const src=SU+'media/senn/mp3/imtong/'+(ap?ap+'/'+id+'1.mp3':'subak/'+Math.floor(id/1000)+'/'+id+'.mp3');
+        let tries=0; const attempt=u=>{ const me=cur=new Audio(u); me.preload='auto';
+          me.play().catch(err=>{ if(err&&err.name==='AbortError') return; if(cur!==me) return;
+            if(err&&err.name==='NotAllowedError'){ toast2('瀏覽器擋住了自動播放，請再按一次喇叭'); return; }
+            if(++tries<3) setTimeout(()=>{ if(cur===me) attempt(src+'?r='+Date.now()+tries); },350*tries);
+            else toast2('這個詞的音檔暫時播不出來，請稍後再按一次'); }); };
+        attempt(src); return; }
       const tg=e.target.closest('[data-tg]');
       if(tg){ const row=tg.closest('.mr'), id=row.dataset.id, open=!row.classList.contains('open');
         const fill=()=>{ if(!row.dataset.done){ row.dataset.done=1; const L=(EXD&&EXD[id])||[];
