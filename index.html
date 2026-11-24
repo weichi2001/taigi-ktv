@@ -373,8 +373,10 @@
   @media(min-width:861px){body.stu #mini{left:auto;right:18px;bottom:calc(var(--bar) + 18px);width:400px;height:min(680px,calc(100vh - var(--bar) - 36px));border-radius:24px;transform:translateY(20px) scale(.82)}
     body.stu #mini.show{transform:none}
     body.stu:not(.played) #mini{bottom:18px;height:min(680px,calc(100vh - 36px))}
-    body.stu.player main{transition:margin-right .5s cubic-bezier(.45,.05,.2,1)} body.stu.mini-on.player main{margin-right:428px}
-    body.stu #stuTop{transition:right .5s cubic-bezier(.45,.05,.2,1)} body.stu.mini-on #stuTop{right:428px}}
+    /* 放大鏡打開：只有影片往左讓位，歌單、上方列、底下工作列都不動 */
+    body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){--vw:min(calc(100% - 40px),calc((100vh - var(--bar) - 130px)*16/9));width:var(--vw);margin:18px 0 0 calc((100% - var(--vw))/2);transition:width .5s cubic-bezier(.45,.05,.2,1),margin-left .5s cubic-bezier(.45,.05,.2,1)}
+    body.stu.mini-on:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){--vw:min(calc(100% - 468px),calc((100vh - var(--bar) - 130px)*16/9))}
+    body.stu.mini-on:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){margin-left:calc((100% - 428px - var(--vw))/2)}}
   #mini .mtop{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 6px}
   #mini .mtt b{font-size:22px;display:block;line-height:1.2;color:#4a3b30} #mini .mtt span{font-size:12px;color:var(--ink2)}
   #mini .mx-close{font:inherit;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.5);box-shadow:inset 0 1px 0 rgba(255,255,255,.8);color:#615045;cursor:pointer}
