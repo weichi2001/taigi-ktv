@@ -5282,6 +5282,15 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   if(document.fonts) document.fonts.addEventListener('loadingdone',()=>relayoutHy());
   requestAnimationFrame(loop);
 })();
+
+  // ---- 嵌在街仔路裡面時：回街仔路改成切換外層頁面，不要在框裡再開一次整站 ----
+  if(window.top!==window.self){
+    document.addEventListener('click',e=>{
+      const a=e.target.closest&&e.target.closest('a[href^="https://weichi2001.github.io/taigi-site/"]'); if(!a) return;
+      e.preventDefault();
+      try{ window.top.location.hash='#home'; }catch(x){ window.top.location.href=a.href; }
+    },true);
+  }
 </script>
   </div>
 
