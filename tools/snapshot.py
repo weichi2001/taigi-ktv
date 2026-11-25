@@ -4,7 +4,8 @@ KEY=re.search(r'AIza[0-9A-Za-z_-]+',src).group(0)
 ROOT=re.search(r"DRIVE_FOLDER\s*=\s*'([^']+)'",src).group(1)
 FOLDER='application/vnd.google-apps.folder'
 def get(u):
-    with urllib.request.urlopen(u,timeout=30) as r: return r.read().decode('utf-8')
+    req=urllib.request.Request(u,headers={'Referer':'https://weichi2001.github.io/taigi-ktv/'})
+    with urllib.request.urlopen(req,timeout=30) as r: return r.read().decode('utf-8')
 def q(pid):
     out=[];tok=''
     while True:
