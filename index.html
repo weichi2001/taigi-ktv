@@ -4947,13 +4947,19 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // fetch with a timeout: a request that hangs must not freeze the whole list
   async function fetchT(url,ms){ const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),ms||15000);
     try{ return await fetch(url,{signal:ac.signal}); }catch(e){ throw new Error(e&&e.name==='AbortError'?'連線逾時':((e&&e.message)||'連線失敗')); } finally{ clearTimeout(t); } }
+  // fetch + read the body under ONE timeout (a stalled body read used to hang the list on slow phones)
+  async function fetchB(url,ms,as){ const ac=new AbortController(); const t=setTimeout(()=>ac.abort(),ms||15000);
+    try{ const r=await fetch(url,{signal:ac.signal});
+      if(!r.ok){ let m=''; if(as==='json'){ try{ m=(await r.json()).error.message; }catch(e){} } throw new Error('HTTP '+r.status+(m?'：'+m:'')); }
+      return as==='json'?await r.json():await r.text();
+    }catch(e){ throw new Error(e&&e.name==='AbortError'?'連線逾時':((e&&e.message)||'連線失敗')); } finally{ clearTimeout(t); } }
   async function retry(fn,n){ let e; for(let k=0;k<(n||2);k++){ try{ return await fn(); }catch(x){ e=x; await new Promise(r=>setTimeout(r,400*(k+1))); } } throw e; }
   // one query covers many folders at once ("'a' in parents or 'b' in parents …")
   async function driveQuery(parents){
     const out=[]; let tok='';
     const q='('+parents.map(id=>`'${id}' in parents`).join(' or ')+') and trashed=false';
     do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum,parents)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
-      const j=await retry(async()=>{ const r=await fetchT(u,20000); if(!r.ok){ let m=''; try{ m=(await r.json()).error.message; }catch(e){} throw new Error('HTTP '+r.status+(m?'：'+m:'')); } return r.json(); });
+      const j=await retry(()=>fetchB(u,20000,'json'),3);
       out.push(...(j.files||[])); tok=j.nextPageToken||''; }while(tok);
     return out;
   }
@@ -4985,7 +4991,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const need=list.filter(m=>/\.json$/i.test(m.name)).filter(m=>{ const o=old[m.id]; if(o&&o.m===(m.md5Checksum||'')){ texts[m.id]=o; return false; } return true; });
       let done=0; const total=need.length;
       if(total){ const msg=()=>`正在下載歌曲資料 ${done}/${total}…`; st(msg()); if(!shown) pmsg(msg());
-        await pool(need,12,async m=>{ try{ const t=await retry(async()=>{ const r=await fetchT('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),6000); if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){} done++; st(msg()); if(!shown) pmsg(msg()); }); }
+        await pool(need,6,async m=>{ try{ const t=await retry(()=>fetchB('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),9000,'text'),3); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){} done++; st(msg()); if(!shown) pmsg(msg()); }); }
       writeDCache({at:Date.now(),list,texts});
       const sig=l=>l.map(m=>m.id+':'+(m.md5Checksum||'')+':'+m.rel).sort().join('|');
       const changed=!shown||sig(list)!==sig(cache.list);
