@@ -345,6 +345,9 @@
     body.stu #stuSide{box-sizing:border-box}
     body.stu.player main{margin:0;border-radius:0;padding-top:116px}
     body.stu.played main{margin-bottom:var(--bar)}
+    body.stu.player.list #plist{padding-bottom:110px}
+    body.stu.list #fab{width:48px;height:48px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));transition:transform .25s,opacity .25s}
+    body.stu.list.scrolling #fab{opacity:0;transform:scale(.7);pointer-events:none}
     #plist .head{margin-top:-116px;padding-top:140px}
     body.stu .song{grid-template-columns:28px 1fr}
     body.stu .song .tg,#plist .cols span:last-child{display:none} #plist .cols{grid-template-columns:28px 1fr}
@@ -4846,6 +4849,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     // "root/歌手/專案.ktv.json": the first folder under the chosen one is the singer / band
     const dirOf=f=>{ const p=(f.webkitRelativePath||'').split('/'); return p.length>2?nfc(p[1]):''; };
     const sameDir=(f,g)=>{ const a=(f.webkitRelativePath||'').split('/').slice(0,-1).join('/'), b=(g.webkitRelativePath||'').split('/').slice(0,-1).join('/'); return a===b; };
+    // fetch any Drive project files that are not cached yet in parallel (with timeouts) instead of one by one
+    await pool(js.filter(f=>f instanceof DriveFile&&f._text==null),6,async f=>{ try{ await f.text(); }catch(e){} });
     for(const f of js){ try{ const o=JSON.parse(await f.text()); if(o&&Array.isArray(o.lines)){
       let media=null; if(o.audio&&o.audio.name){ const c=fl.filter(x=>sameName(x.name,o.audio.name)); media=c.find(x=>sameDir(x,f))||c[0]||null; }
       // 伴奏/<同名>.mp3 next to the singer folders: the same base name as the project file (or the song title).
@@ -4932,7 +4937,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   class DriveFile{
     constructor(m,rel){ this.id=m.id; this.name=m.name; this.size=+m.size||0; this.type=m.mimeType||''; this.md5=m.md5Checksum||''; this.webkitRelativePath=rel; this._file=null; }
     url(){ return 'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(this.id)+'?alt=media&key='+encodeURIComponent(driveKey()); }
-    async text(){ if(this._text!=null) return this._text; const r=await fetchT(this.url(),20000); if(!r.ok) throw new Error('HTTP '+r.status); return (this._text=await r.text()); }
+    async text(){ if(this._text!=null) return this._text; return (this._text=await retry(()=>fetchB(this.url(),12000,'text'),2)); }
     async fetch(onp){
       if(this._file) return this._file;
       const key='drive:'+this.id+':'+this.md5;
@@ -5006,6 +5011,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
+  // phone: hide the search button while scrolling so it never covers a song's buttons
+  (function(){ let t; addEventListener('scroll',()=>{ document.body.classList.add('scrolling'); clearTimeout(t); t=setTimeout(()=>document.body.classList.remove('scrolling'),700); },{passive:true}); })();
   // ---------- 學生版（?student）：Spotify 風格介面，自動載入 Drive 歌單、沒有密碼和編輯功能
   const FAV_K='__fav__';
   let stuGrp=null, stuShuf=false, stuRep='off', stuQ=[], favs=new Set();
