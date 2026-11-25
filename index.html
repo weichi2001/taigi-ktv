@@ -423,6 +423,11 @@
     body.stu #stageWrap.pseudoFs.rot .stagebar{padding:6px calc(14px + var(--sab,0px)) 6px calc(14px + var(--sat,0px))}
     body.stu #stageWrap.pseudoFs.rot.barOn #stage{padding-bottom:74px}
     body.stu #stageWrap.pseudoFs.rot #stage{padding-left:calc(var(--sat,0px) + 36px);padding-right:calc(5% + var(--sab,0px))}
+    /* 手機版不提供伴奏／原聲切換 */
+    body.stu #voxSel{display:none!important}
+    /* 真的橫放時：瀏海／Home 指示條在左右兩側，字幕與工作列都要躲開 */
+    body.stu #stageWrap.pseudoFs:not(.rot) #stage,body.stu #stageWrap:fullscreen:not(.rot) #stage{padding-left:calc(var(--sal,0px) + 36px);padding-right:calc(5% + var(--sar,0px))}
+    body.stu #stageWrap.pseudoFs:not(.rot) .stagebar,body.stu #stageWrap:fullscreen:not(.rot) .stagebar{padding-left:calc(14px + var(--sal,0px));padding-right:calc(14px + var(--sar,0px))}
   }
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
@@ -5009,6 +5014,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(STU){ try{ vidEl.loop=false; const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }
     // the instrumental comes in the background; the song is already playing
     let instF=s.inst||null;
+    if(instF&&matchMedia('(max-width:940px)').matches) instF=null;   // 手機版不用伴奏
     if(instF){ try{
       if(instF instanceof DriveFile){ pmsg('正在準備伴奏…'); instF=await instF.fetch((g,tt)=>{ if(my===playTok&&tt) pmsg('正在準備伴奏… '+Math.round(g/tt*100)+'%'); }); }
       if(my===playTok){ pmsg(''); setInst(instF); setVox('orig'); }
@@ -5116,7 +5122,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(!shown) pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認網路、資料夾是「知道連結的人都能檢視」。'); }
     finally{ driveBusy=false; }
   }
-  addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') { document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); if(typeof d.top==='number') document.documentElement.style.setProperty('--sat',Math.max(0,Math.min(80,d.top))+'px'); } });
+  addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') { document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); if(typeof d.top==='number') document.documentElement.style.setProperty('--sat',Math.max(0,Math.min(80,d.top))+'px');  const R=document.documentElement.style; if(typeof d.left==='number') R.setProperty('--sal',Math.max(0,Math.min(80,d.left))+'px'); if(typeof d.right==='number') R.setProperty('--sar',Math.max(0,Math.min(80,d.right))+'px'); } });
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
