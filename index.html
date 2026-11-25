@@ -5266,8 +5266,14 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const place=()=>{
       if(!lkEls.length||!lkEls[0].isConnected){ clearLk(); return; }
       let l=1e9,t=1e9,r=-1e9,b=-1e9; lkEls.forEach(el=>{ const q=el.getBoundingClientRect(); l=Math.min(l,q.left); t=Math.min(t,q.top); r=Math.max(r,q.right); b=Math.max(b,q.bottom); });
-      hl.style.left=(l-PAD)+'px'; hl.style.top=(t-PAD)+'px'; hl.style.width=(r-l+PAD*2)+'px'; hl.style.height=(b-t+PAD*2)+'px';
-      tip.style.left=((l+r)/2)+'px'; tip.style.top=(t-PAD-12)+'px';
+      // 全螢幕轉 90 度時，高亮框和提示要放進轉過的畫面裡，座標也轉回畫面自己的方向
+      const sw=$('stageWrap'), rot=sw.classList.contains('rot'), host=rot?sw:document.body;
+      if(hl.parentNode!==host) host.append(hl,tip);
+      if(rot){ const W=innerWidth, L=t, T=W-r, w=b-t, h=r-l;
+        hl.style.left=(L-PAD)+'px'; hl.style.top=(T-PAD)+'px'; hl.style.width=(w+PAD*2)+'px'; hl.style.height=(h+PAD*2)+'px';
+        tip.style.left=(L+w/2)+'px'; tip.style.top=(T-PAD-12)+'px'; }
+      else { hl.style.left=(l-PAD)+'px'; hl.style.top=(t-PAD)+'px'; hl.style.width=(r-l+PAD*2)+'px'; hl.style.height=(b-t+PAD*2)+'px';
+        tip.style.left=((l+r)/2)+'px'; tip.style.top=(t-PAD-12)+'px'; }
       raf=requestAnimationFrame(place); };
     const unitsOf=u=>{ const us=[...u.parentElement.children].filter(c=>c.classList.contains('u')); return {us,chars:us.map(c=>{ const h=c.querySelector('.base .uh'); return h?h.textContent:''; }),jn:us.map(c=>c.classList.contains('jn')),idx:us.indexOf(u)}; };
     const noLk=()=>!window.__stuWord;
