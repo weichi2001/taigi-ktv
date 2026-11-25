@@ -423,7 +423,10 @@
     body.stu #stageWrap.pseudoFs.rot .stagebar{padding:6px calc(14px + var(--sab,0px)) 6px calc(14px + var(--sat,0px))}
     body.stu #stageWrap.pseudoFs.rot.barOn #stage{padding-bottom:74px}
     body.stu #stageWrap.pseudoFs.rot #stage{padding-left:calc(var(--sat,0px) + 36px);padding-right:calc(5% + var(--sab,0px))}
-    /* 手機版不提供伴奏／原聲切換 */
+    /* 手機版不提供伴奏／原聲切換；歌單的歌名要完整顯示 */
+    body.stu .song .tg em{display:none}
+    body.stu .song,body.stu #plist .cols{grid-template-columns:28px 1fr auto!important}
+    body.stu .song b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35}
     body.stu #voxSel{display:none!important}
     /* 真的橫放時：瀏海／Home 指示條在左右兩側，字幕與工作列都要躲開 */
     body.stu #stageWrap.pseudoFs:not(.rot) #stage,body.stu #stageWrap:fullscreen:not(.rot) #stage{padding-left:calc(var(--sal,0px) + 36px);padding-right:calc(5% + var(--sar,0px))}
