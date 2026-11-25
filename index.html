@@ -357,12 +357,28 @@
     body.stu .song{grid-template-columns:28px 1fr}
     body.stu .song .tg,#plist .cols span:last-child{display:none} #plist .cols{grid-template-columns:28px 1fr}
     body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{flex-wrap:wrap;height:var(--bar);padding:8px 12px calc(8px + var(--sab,0px));box-sizing:border-box;align-content:center;row-gap:4px}
+    /* 播放畫面：不顯示分類，影片舞台撐滿上方列和底部播放列之間 */
+    body.stu:not(.list) #stuSide{display:none}
+    body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){position:fixed;left:0;right:0;top:60px;bottom:var(--bar);width:auto;height:auto;margin:0;background:#000;border-radius:0;overflow:hidden}
+    body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{aspect-ratio:auto;height:100%;padding:0 4.5% 16px;border-radius:0}
+    /* 放大鏡（查辭典）放在右上角，不蓋影片和字幕 */
+    body.stu>#fab{top:8px;right:14px;bottom:auto;width:44px;height:44px;z-index:40;font-size:0;box-shadow:none;background:var(--accent)}
+    body.stu:not(.played)>#fab,body.stu.list>#fab{bottom:auto}
+    body.stu.list.scrolling>#fab{opacity:1;transform:none;pointer-events:auto}
+    body.stu.list #stuTop{padding-right:68px}
+    /* 辭典：底部面板，上緣可拖 */
+    body.stu #mini{height:58vh;border-radius:22px 22px 0 0;transition:transform .45s cubic-bezier(.22,1.15,.36,1),opacity .25s,filter .3s}
+    body.stu #mini.dragging{transition:none}
+    body.stu:not(.played) #mini{bottom:0}
+    body.stu #mini .mgrip{display:block;flex:none;height:24px;position:relative;cursor:ns-resize;touch-action:none}
+    #mini .mgrip::after{content:'';position:absolute;left:50%;top:9px;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:rgba(97,80,69,.35)}
+    #mini .mtop{touch-action:none;padding-top:0}
     #stuNow{flex:1 1 100%;order:1} #stuNow .cv{width:44px;height:44px;font-size:19px}
     body.stu .stagebar{padding-top:10px!important;row-gap:2px!important;gap:0!important}
     body.stu #seek{order:2;flex:1 1 100%;min-width:0;height:20px;margin:0}
     body.stu #timeLbl{order:3;flex:1 1 100%;text-align:right;font-size:11.5px;margin:-2px 2px 4px}
     body.stu #stuShuf,body.stu #stuPrev,body.stu #playBtn,body.stu #stuNext,body.stu #stuRep{order:4;flex:1 1 0;display:grid;place-items:center;height:52px}
-    body.stu #playBtn{flex:0 0 60px;width:52px;height:52px;margin:0 auto}
+    body.stu #playBtn{flex:0 0 56px;width:56px;height:56px;margin:0 auto;border-radius:50%}
     body.stu .stagebar::after{content:'';order:5;flex:0 0 100%;height:0}
     body.stu #restartBtn,body.stu #vocQuickWrap,body.stu #voxSel,body.stu #stuQbtn,body.stu #fsBtn{order:6;flex:1 1 0;height:34px;display:grid;place-items:center;justify-content:center;font-size:13px;padding:0 4px}
     body.stu #voxSel{flex:2 1 0;margin:0 6px}
@@ -373,6 +389,7 @@
 
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
+  #mini .mgrip{display:none}
   /* 全螢幕：底下工作列純黑、不透明一點；放大鏡移到右上角 */
   body.stu #stageWrap:fullscreen .stagebar,body.stu #stageWrap.pseudoFs .stagebar{background:rgba(0,0,0,.94);border-top:1px solid #1c1c1c;color:#fff}
   body.stu #stageWrap:fullscreen .stagebar select,body.stu #stageWrap.pseudoFs .stagebar select{background:#242424}
@@ -3556,9 +3573,13 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // fractions of the stage: how the kept region sits inside the 16:9 frame (fit, never stretch)
   function fitBox(){
     const vd=audio; const vw=vd.videoWidth||16, vh=vd.videoHeight||9;
-    const ca=(cropF.w*vw)/(cropF.h*vh), SA=16/9;
+    const ca=(cropF.w*vw)/(cropF.h*vh);
+    // phone (student view): the kept region covers the whole stage instead of sitting letterboxed in a 16:9 frame
+    const stg=$('stage'), fill=document.body.classList.contains('stu')&&matchMedia('(max-width:860px)').matches&&stg.clientWidth>0&&stg.clientHeight>0;
+    const SA=fill?stg.clientWidth/stg.clientHeight:16/9;
     let dw,dh;
-    if(ca>=SA){ dw=1; dh=SA/ca; } else { dh=1; dw=ca/SA; }
+    if(fill){ if(ca>=SA){ dh=1; dw=ca/SA; } else { dw=1; dh=SA/ca; } }
+    else if(ca>=SA){ dw=1; dh=SA/ca; } else { dh=1; dw=ca/SA; }
     return {dw,dh,left:(1-dw)/2-cropF.x*(dw/cropF.w),top:(1-dh)/2-cropF.y*(dh/cropF.h),
             fullW:dw/cropF.w, fullH:dh/cropF.h};
   }
@@ -5193,7 +5214,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const BASE='https://weichi2001.github.io/taigi-site/', SU='https://sutian.moe.edu.tw/', G=id=>document.getElementById(id);
     const fab=document.createElement('button'); fab.id='fab'; fab.setAttribute('aria-label','查辭典'); fab.innerHTML=IC.search;
     const mini=document.createElement('section'); mini.id='mini'; mini.hidden=true; mini.setAttribute('aria-label','查辭典');
-    mini.innerHTML=`<div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
+    mini.innerHTML=`<div class="mgrip" aria-hidden="true"></div><div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
       <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="輸入漢字、台羅或華語進行搜尋" autocomplete="off" enterkeyhint="search"><button type="button" class="clr" aria-label="清除" tabindex="-1"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></label><div class="mb" id="mb"></div>`;
     const tst=document.createElement('div'); tst.id='miniToast';
     document.body.append(fab,mini,tst);
@@ -5281,10 +5302,21 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         if(open&&!row.dataset.done) exLoad(fill); else fill(); return; }
       if(e.target.id==='mmore'){ mlim+=30; draw(); } });
     let mt=0;
+    // 手機：拖曳辭典上緣調整高度，用完把空間還給影片
+    const MH='ktvMiniH', isMob=()=>matchMedia('(max-width:860px)').matches&&mini.parentNode===document.body;
+    const clampH=h=>{ const bo=parseFloat(getComputedStyle(mini).bottom)||0; return Math.max(170,Math.min(innerHeight-bo-76,h)); };
+    const applyH=()=>{ if(!isMob()){ mini.style.height=''; return; } let h=0; try{ h=+localStorage.getItem(MH)||0; }catch(e){} mini.style.height=clampH(h||Math.round(innerHeight*.58))+'px'; };
+    addEventListener('resize',applyH);
+    (function(){ let sy=0,sh=0,on=false;
+      const down=e=>{ if(!isMob()||e.target.closest('.mx-close'))return; on=true; sy=e.clientY; sh=mini.offsetHeight; mini.classList.add('dragging'); try{ e.currentTarget.setPointerCapture(e.pointerId); }catch(_){} };
+      const move=e=>{ if(!on)return; mini.style.height=clampH(sh+(sy-e.clientY))+'px'; };
+      const up=()=>{ if(!on)return; on=false; mini.classList.remove('dragging'); try{ localStorage.setItem(MH,String(Math.round(mini.offsetHeight))); }catch(e){} };
+      [mini.querySelector('.mgrip'),mini.querySelector('.mtop')].forEach(el=>{ if(!el)return; el.addEventListener('pointerdown',down); el.addEventListener('pointermove',move); el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up); });
+    })();
     // 開關時，舞台（影片）跟著右移／回位，順順滑過去：main 的 margin-right 有 transition，開的時候同步重排歌詞
     const relayout=()=>{ let n=0; const f=()=>{ try{ applyStyle(); applyCrop(); relayoutHy(); }catch(e){} if(++n<14) requestAnimationFrame(f); }; f(); };
     function open(o){ clearTimeout(mt);
-      if(o){ mini.hidden=false; void mini.offsetWidth; document.body.classList.add('mini-on'); mini.classList.add('show'); fab.classList.add('gone'); dxLoad(); draw(); mt=setTimeout(()=>mq.focus({preventScroll:true}),380); }
+      if(o){ applyH(); mini.hidden=false; void mini.offsetWidth; document.body.classList.add('mini-on'); mini.classList.add('show'); fab.classList.add('gone'); dxLoad(); draw(); mt=setTimeout(()=>mq.focus({preventScroll:true}),380); }
       else { mq.blur(); mini.classList.remove('show'); fab.classList.remove('gone'); document.body.classList.remove('mini-on'); mt=setTimeout(()=>{ mini.hidden=true; },420); }
       relayout(); }
     window.__stuMiniClose=()=>{ if(mini.classList.contains('show')) open(false); };
