@@ -3414,11 +3414,13 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function setSlot(k,i){ const el=slots[k]; if(slotIdx[k]!==i){ slotIdx[k]=i; el.innerHTML=(i==null)?'':lineHTML(lines[i]); placeHy(el); } return el; }
   // put each hyphen exactly halfway between the end of one syllable and the start of the next
   function placeHy(el){
-    const lyr=el.querySelector('.lyr'); if(!lyr) return; const box=lyr.getBoundingClientRect();
+    const lyr=el.querySelector('.lyr'); if(!lyr) return;
+    // offset geometry ignores the 90deg rotation of fullscreen, getBoundingClientRect does not
+    const off=(n)=>{ let x=0,y=0,c=n; while(c&&c!==lyr){ x+=c.offsetLeft; y+=c.offsetTop; const op=c.offsetParent; if(op===lyr){ if(getComputedStyle(lyr).position==='static'){ x-=lyr.offsetLeft; y-=lyr.offsetTop; } break; } c=op; } return {x,y,w:n.offsetWidth}; };
     const us=lyr.querySelectorAll(':scope > .u');
     lyr.querySelectorAll('.hy').forEach(h=>{ const k=+h.dataset.k; const a=us[k]&&us[k].querySelector('.base .ur'), b=us[k+1]&&us[k+1].querySelector('.base .ur'); if(!a||!b) return;
-      const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(); const pad=parseFloat(getComputedStyle(a).paddingRight)||0;
-      h.style.left=(((ra.right-pad)+(rb.left+pad))/2-box.left)+'px'; h.style.top=(ra.top-box.top)+'px'; });
+      const pad=parseFloat(getComputedStyle(a).paddingRight)||0; const oa=off(a), ob=off(b);
+      h.style.left=(((oa.x+oa.w-pad)+(ob.x+pad))/2)+'px'; h.style.top=oa.y+'px'; });
   }
   function relayoutHy(){ slots.forEach(placeHy); }
   function paint(el,i,t){
@@ -3763,11 +3765,14 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     instWant=null; try{ instEl.currentTime=t; }catch(e){ instWant=t; } }
   ['loadedmetadata','canplay'].forEach(ev=>instEl.addEventListener(ev,()=>{ if(instWant!=null||(!audio.paused&&Math.abs(instEl.currentTime-instTarget())>0.5)){ instWant=null; instSeekAt=performance.now(); try{ instEl.currentTime=Math.max(0,instTarget()+instLag); }catch(e){} } }));
   instEl.addEventListener('seeked',()=>{ if(audio.paused||instEl.paused) return; const d=instTarget()-instEl.currentTime; if(Math.abs(d)<1) instLag=Math.max(-0.2,Math.min(0.6,instLag+d*0.7)); });
+  let instLazy=null;
   function setInst(f){
     instFile=f||null;
     $('instName').textContent=f?('伴唱音軌：'+f.name):'載入伴唱音軌（選用，先用外部工具去好人聲）';
     $('instClear').style.display=f?'inline':'none'; $('instMsg').textContent='';
-    if(f){ instEl.src=URL.createObjectURL(f); instSilence(!instOn()); if(!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } }
+    instLazy=null;
+    if(f&&!VOL_OK&&voxMode!=='inst'){ instLazy=f; try{ instEl.pause(); instEl.removeAttribute('src'); }catch(e){} }   // iPhone: never load it until 伴奏 is chosen, so it cannot sound by accident
+    else if(f){ instEl.src=URL.createObjectURL(f); instSilence(!instOn()); if(!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } }
     else { try{ instEl.pause(); instEl.removeAttribute('src'); }catch(e){} if(voxMode==='inst') setVox('orig'); }
     voxUI();
   }
@@ -3834,6 +3839,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function setVox(mode){
     if(ytp&&mode==='kara') mode='orig';
     if(mode==='inst'&&!instFile){ $('instMsg').textContent='還沒有伴唱音軌，先在 STEP 1 載入'; mode='orig'; }
+    if(mode==='inst'&&instLazy){ instEl.src=URL.createObjectURL(instLazy); instLazy=null; instSilence(false); }
     voxMode=mode; $('voxSel').value=mode; try{ localStorage.setItem('taigi-ktv-vox',mode); }catch(e){}
     if(mode==='kara'){ const g=ensureGraph(); if(g.ctx){ g.dry.gain.value=0; g.wet.gain.value=1; g.ctx.resume().catch(()=>{}); } }
     else if(graph.ctx){ graph.dry.gain.value=1; graph.wet.gain.value=0; }
@@ -4977,26 +4983,36 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('pq').addEventListener('input',renderSongs); document.querySelectorAll('input[name=pqBy]').forEach(r=>r.addEventListener('change',()=>{ renderSongs(); $('pq').focus(); }));
   $('pq').addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('pq').value=''; renderSongs(); } if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } });
   $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
+  let playTok=0; const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
   async function playSong(s,force){
     if(STU&&!force&&curI>=0&&psongs[curI]===s){ document.body.classList.remove('list'); stuMark(); setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0); return; }
+    const my=++playTok;
+    if(STU&&!vidEl._primed&&!vidEl.getAttribute('src')){ try{ vidEl.loop=true; vidEl.src=SILENT; const pr=vidEl.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){} }   // unlock playback inside the tap, before any download
     curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU){ if(!force) buildQueue(curI); stuMark(); }
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
     const o=JSON.parse(JSON.stringify(s.o)); pmsg('');
     if(!o.yt&&ytp) clearYT(true);
     loadObj(o);
+    if(o.yt){ try{ vidEl.pause(); vidEl.loop=false; if(/^data:audio\/wav/.test(vidEl.getAttribute('src')||'')) vidEl.removeAttribute('src'); }catch(e){} }
     if(!o.yt){
       let f=s.media;
-      if(f&&f instanceof DriveFile){ try{ pmsg('正在從 Drive 下載 '+f.name+'…'); f=await f.fetch((g,t)=>{ pmsg('正在從 Drive 下載 '+s.media.name+'… '+(t?Math.round(g/t*100)+'%':Math.round(g/1048576)+' MB')); if(STU) stuProg(g,t); }); pmsg(''); if(STU) stuProg(0,0); }catch(e){ pmsg('下載失敗：'+((e&&e.message)||'')); f=null; if(STU) stuProg(0,0); } }
+      if(f&&f instanceof DriveFile){ try{ pmsg('正在從 Drive 下載 '+f.name+'…'); f=await f.fetch((g,t)=>{ pmsg('正在從 Drive 下載 '+s.media.name+'… '+(t?Math.round(g/t*100)+'%':Math.round(g/1048576)+' MB')); if(STU) stuProg(g,t); }); pmsg(''); if(STU) stuProg(0,0); if(my!==playTok) return; }catch(e){ pmsg('下載失敗：'+((e&&e.message)||'')); f=null; if(STU) stuProg(0,0); } }
       if(!f&&o.audio&&o.audio.name){ try{ const c=await getAudio('__byname:'+nfc(o.audio.name)); if(c&&c.blob) f=new File([c.blob],c.name,{type:c.type||c.blob.type}); }catch(e){} }
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
-    let instF=s.inst||null; if(instF&&instF instanceof DriveFile){ try{ pmsg('正在從 Drive 下載伴奏…'); instF=await instF.fetch((g,tt)=>{ if(tt) pmsg('正在從 Drive 下載伴奏… '+Math.round(g/tt*100)+'%'); }); pmsg(''); }catch(e){ instF=null; pmsg(''); } }
-    setInst(instF); setVox('orig'); document.body.classList.remove('list');
+    if(my!==playTok) return;
+    setInst(null); setVox('orig'); document.body.classList.remove('list');
     $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
-    if(STU){ try{ const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){} }
+    if(STU){ try{ vidEl.loop=false; const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }
+    // the instrumental comes in the background; the song is already playing
+    let instF=s.inst||null;
+    if(instF){ try{
+      if(instF instanceof DriveFile){ pmsg('正在準備伴奏…'); instF=await instF.fetch((g,tt)=>{ if(my===playTok&&tt) pmsg('正在準備伴奏… '+Math.round(g/tt*100)+'%'); }); }
+      if(my===playTok){ pmsg(''); setInst(instF); setVox('orig'); }
+    }catch(e){ if(my===playTok) pmsg(''); } }
   }
   // ---------- feedback (Google Forms): two public forms; their response pages are linked in developer mode
   const FB={
