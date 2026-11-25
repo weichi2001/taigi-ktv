@@ -332,7 +332,9 @@
   body.stu #vol{accent-color:#fff;width:90px}
   body.stu #pnow{display:none}
   @media (max-width:860px){
-    body.stu{--sw:0px;--bar:calc(132px + var(--sab,0px))}
+    body.stu{--sw:0px;--bar:calc(204px + var(--sab,0px))}
+    body.stu .status#pmsg{position:fixed;left:14px;right:14px;bottom:calc(16px + var(--sab,0px));margin:0;z-index:35;font-size:13px;padding:9px 14px;border-radius:999px;background:rgba(36,36,36,.96);text-align:center;pointer-events:none}
+    body.stu.played .status#pmsg{bottom:calc(var(--bar) + 10px)}
     html:has(body.stu),body.stu{background:#121212}
     body.stu #stuSide{left:0;right:0;top:64px;bottom:auto;width:auto;height:auto;flex-direction:row;align-items:center;border-radius:0;padding:6px 10px;z-index:16;background:#121212;gap:4px}
     body.stu.played #stuSide{bottom:auto}
@@ -355,7 +357,16 @@
     body.stu .song{grid-template-columns:28px 1fr}
     body.stu .song .tg,#plist .cols span:last-child{display:none} #plist .cols{grid-template-columns:28px 1fr}
     body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{flex-wrap:wrap;height:var(--bar);padding:8px 12px calc(8px + var(--sab,0px));box-sizing:border-box;align-content:center;row-gap:4px}
-    #stuNow{flex:1 1 100%} #stuNow .cv{width:40px;height:40px;font-size:18px}
+    #stuNow{flex:1 1 100%;order:1} #stuNow .cv{width:44px;height:44px;font-size:19px}
+    body.stu .stagebar{padding-top:10px!important;row-gap:2px!important;gap:0!important}
+    body.stu #seek{order:2;flex:1 1 100%;min-width:0;height:20px;margin:0}
+    body.stu #timeLbl{order:3;flex:1 1 100%;text-align:right;font-size:11.5px;margin:-2px 2px 4px}
+    body.stu #stuShuf,body.stu #stuPrev,body.stu #playBtn,body.stu #stuNext,body.stu #stuRep{order:4;flex:1 1 0;display:grid;place-items:center;height:52px}
+    body.stu #playBtn{flex:0 0 60px;width:52px;height:52px;margin:0 auto}
+    body.stu .stagebar::after{content:'';order:5;flex:0 0 100%;height:0}
+    body.stu #restartBtn,body.stu #vocQuickWrap,body.stu #voxSel,body.stu #stuQbtn,body.stu #fsBtn{order:6;flex:1 1 0;height:34px;display:grid;place-items:center;justify-content:center;font-size:13px;padding:0 4px}
+    body.stu #voxSel{flex:2 1 0;margin:0 6px}
+    body.stu #volWrap{display:none}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:100%;margin-top:0}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:0}
   }
@@ -4903,7 +4914,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(f) loadAudio(f);
       else { try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){} lastFile=null; peaks=null; syncVideoUI(); pmsg('找不到這首歌的音檔'+(o.audio&&o.audio.name?('：'+o.audio.name+'。把它放進同一個資料夾再重選一次資料夾'):'')); }
     }
-    let instF=s.inst||null; if(instF&&instF instanceof DriveFile){ try{ pmsg('正在從 Drive 下載伴奏…'); instF=await instF.fetch(); pmsg(''); }catch(e){ instF=null; } }
+    let instF=s.inst||null; if(instF&&instF instanceof DriveFile){ try{ pmsg('正在從 Drive 下載伴奏…'); instF=await instF.fetch((g,tt)=>{ if(tt) pmsg('正在從 Drive 下載伴奏… '+Math.round(g/tt*100)+'%'); }); pmsg(''); }catch(e){ instF=null; pmsg(''); } }
     setInst(instF); setVox('orig'); document.body.classList.remove('list');
     $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
