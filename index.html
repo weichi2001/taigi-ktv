@@ -5188,11 +5188,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const pushRecent=x=>{ const k=sKey(x); RECENT=[k,...RECENT.filter(z=>z!==k)].slice(0,12); try{ localStorage.setItem('taigi-ktv-recent',JSON.stringify(RECENT)); }catch(e){} };
   const homeCard=i=>{ const x=psongs[i]; return `<div class="hcd" data-i="${i}"><span class="cv" style="${cvStyle(x)}">${coverUrl(x)?'':esc([...sTitle(x)][0]||'♪')}</span><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>`; };
   function homeHtml(groups,cnt){
-    const hr=new Date().getHours(), hi=hr<5?'夜深了':hr<11?'早安':hr<14?'午安':hr<18?'午後好':'晚安';
-    const byKey={}; psongs.forEach((x,i)=>{ byKey[sKey(x)]=i; });
+        const byKey={}; psongs.forEach((x,i)=>{ byKey[sKey(x)]=i; });
     const rec=RECENT.map(k=>byKey[k]).filter(i=>i!=null).slice(0,10);
     const fav=psongs.map((x,i)=>favs.has(sKey(x))?i:-1).filter(i=>i>=0);
-    let h=`<div class="hm"><div class="hmh"><small>台語歌廳</small><h2>${hi}，來唱一首</h2><p>${psongs.length} 首歌・${groups.length} 位歌手</p><button class="pa" data-a="play" title="播放全部">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`;
+    let h=`<div class="hm"><div class="hmh"><small>台語歌廳</small><h2>食飽未？來高歌一曲吧～</h2><p>${psongs.length} 首歌・${groups.length} 位歌手</p><button class="pa" data-a="play" title="播放全部">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`;
     if(groups.length){ h+=`<h3>歌手</h3><div class="hrow">`+groups.map(g=>{ const ph=artPhoto(g); return `<div class="art" data-g="${esc(g)}"><span class="ph" style="background:${coverBg(g)}${ph?`;background:url('${esc(ph)}') center top/cover no-repeat,${coverBg(g)}`:''}">${ph?'':esc([...g][0]||'')}</span><b>${esc(g)}</b><small>${cnt[g]} 首</small></div>`; }).join('')+`</div>`; }
     if(rec.length) h+=`<h3>最近播放</h3><div class="hrow">${rec.map(homeCard).join('')}</div>`;
     if(fav.length) h+=`<h3>我的最愛</h3><div class="hrow">${fav.slice(0,12).map(homeCard).join('')}</div>`;
