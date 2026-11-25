@@ -332,7 +332,7 @@
   body.stu #vol{accent-color:#fff;width:90px}
   body.stu #pnow{display:none}
   @media (max-width:860px){
-    body.stu{--sw:0px;--bar:132px}
+    body.stu{--sw:0px;--bar:calc(132px + var(--sab,0px))}
     html:has(body.stu),body.stu{background:#121212}
     body.stu #stuSide{left:0;right:0;top:64px;bottom:auto;width:auto;height:auto;flex-direction:row;align-items:center;border-radius:0;padding:6px 10px;z-index:16;background:#121212;gap:4px}
     body.stu.played #stuSide{bottom:auto}
@@ -354,7 +354,7 @@
     #plist .head{margin-top:-116px;padding-top:140px}
     body.stu .song{grid-template-columns:28px 1fr}
     body.stu .song .tg,#plist .cols span:last-child{display:none} #plist .cols{grid-template-columns:28px 1fr}
-    body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{flex-wrap:wrap;height:var(--bar);padding:8px 12px;align-content:center;row-gap:4px}
+    body.stu #stageWrap:not(:fullscreen):not(.pseudoFs) .stagebar{flex-wrap:wrap;height:var(--bar);padding:8px 12px calc(8px + var(--sab,0px));box-sizing:border-box;align-content:center;row-gap:4px}
     #stuNow{flex:1 1 100%} #stuNow .cv{width:40px;height:40px;font-size:18px}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:100%;margin-top:0}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:0}
