@@ -422,7 +422,7 @@
     body.stu #stageWrap.pseudoFs.barOn #stage,body.stu #stageWrap:fullscreen.barOn #stage{padding-bottom:calc(112px + var(--sab,0px))}
     /* iPhone 不能鎖橫向：直拿時把整個全螢幕畫面轉 90 度 */
     body.stu #stageWrap.pseudoFs.rot{inset:auto;top:0;left:0;width:100vh;width:100dvh;height:100vw;height:100dvw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg)}
-    body.stu #stageWrap.pseudoFs.rot #stage{padding-left:22px;padding-right:calc(5% + var(--sab,0px))}
+    body.stu #stageWrap.pseudoFs.rot #stage{padding-left:calc(var(--sat,0px) + 36px);padding-right:calc(5% + var(--sab,0px))}
   }
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
@@ -3465,7 +3465,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function applyStyle(){
     const st=$('stage').style;
     const sw=$('stage').clientWidth||940;
-    const ph=document.body.classList.contains('stu')&&matchMedia('(max-width:940px)').matches;   // phone: portrait stage, lyrics a little larger
+    const ph=document.body.classList.contains('stu')&&matchMedia('(max-width:940px)').matches&&matchMedia('(orientation:portrait)').matches&&!$('stageWrap').classList.contains('pseudoFs')&&!(document.fullscreenElement||document.webkitFullscreenElement);   // phone: portrait stage, lyrics a little larger
     const base=+$('fsize').value*(sw/942)*(ph?1.25:1);
     st.setProperty('--hsize',base+'px'); st.setProperty('--tsize',(base*.9)+'px'); st.setProperty('--rratio',+$('rsize').value/100);
     st.setProperty('--ol',outline(Math.max(2.5,base/14),'#0b0d1a')); st.setProperty('--ol2',outline(Math.max(1.5,base*(+$('rsize').value/100)/9),'#0b0d1a'));
@@ -3737,6 +3737,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const VOL_OK=(()=>{ try{ const a=new Audio(); a.volume=0.5; return Math.abs(a.volume-0.5)<0.01; }catch(e){ return false; } })();   // false on iPhone / iPad
   // Silence by volume, not by muting, wherever volume works: a muted element lets the browser
   // close its audio output, and reopening it on unmute costs a few dozen ms that land as lag.
+  // iPhone / iPad cannot set an element's volume, and a muted-but-playing second track has been heard through: there the
+  // instrumental only plays while 伴唱 is chosen
+  if(!VOL_OK){ const _pl=instEl.play.bind(instEl); instEl.play=function(){ return voxMode==='inst'?_pl():Promise.resolve(); }; }
   const instSilence=on=>{ if(VOL_OK){ instEl.volume=on?0:userVol(); instEl.muted=false; } else instEl.muted=on; };
   if(!VOL_OK){ const w=$('volWrap'); if(w) w.style.display='none'; }
   // instSeek: every jump of the instrumental goes through here. A seek in an mp3 lands late by a
@@ -3842,7 +3845,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     clearInterval(fadeTimer);
     const V=userVol(), from=Math.min(1,Math.max(0,instEl.volume/(V||1)));
     const to=toInst?1:0;
-    if(!VOL_OK||!instFile||audio.paused||from===to){ instSilence(!(toInst&&instFile)); if(VOL_OK) audio.volume=V; audio.muted=toInst&&!!instFile; return; }
+    if(!VOL_OK||!instFile||audio.paused||from===to){ instSilence(!(toInst&&instFile)); if(VOL_OK) audio.volume=V; audio.muted=toInst&&!!instFile;
+      if(!VOL_OK&&instFile){ if(toInst&&!audio.paused){ instSeek(true); instEl.play().catch(()=>{}); } else if(!toInst){ try{ instEl.pause(); }catch(e){} } }
+      return; }
     audio.muted=false; instEl.muted=false;
     if(toInst&&instEl.paused){ instSeek(true); instEl.play().catch(()=>{}); }
     const t0=performance.now(), D=250;
@@ -5095,7 +5100,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(!shown) pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認網路、資料夾是「知道連結的人都能檢視」。'); }
     finally{ driveBusy=false; }
   }
-  addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); });
+  addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') { document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); if(typeof d.top==='number') document.documentElement.style.setProperty('--sat',Math.max(0,Math.min(80,d.top))+'px'); } });
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
