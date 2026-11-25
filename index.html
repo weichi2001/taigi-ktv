@@ -432,6 +432,34 @@
     body.stu #stageWrap.pseudoFs:not(.rot) #stage,body.stu #stageWrap:fullscreen:not(.rot) #stage{padding-left:calc(var(--sal,0px) + 36px);padding-right:calc(5% + var(--sar,0px))}
     body.stu #stageWrap.pseudoFs:not(.rot) .stagebar,body.stu #stageWrap:fullscreen:not(.rot) .stagebar{padding-left:calc(14px + var(--sal,0px));padding-right:calc(14px + var(--sar,0px))}
   }
+  /* ---- 首頁 ---- */
+  #plist .hm{padding:8px 0 24px}
+  #plist .hmh{padding:28px 28px 6px;margin:-60px -14px 6px;padding-top:88px;background:linear-gradient(180deg,#2c2a3a,#121212);border-radius:12px 12px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+  #plist .hmh small{flex:0 0 100%;font-size:12px;font-weight:700;letter-spacing:.1em;color:#e6e6e6}
+  #plist .hmh h2{flex:0 0 100%;margin:0;font-size:clamp(26px,4.4vw,44px);line-height:1.15;font-weight:900}
+  #plist .hmh p{flex:0 0 100%;margin:0 0 6px;color:#c8c8c8;font-size:14px}
+  #plist .hmh .pa{width:52px;height:52px;border-radius:50%;border:0;background:var(--accent);color:#000;font-size:20px;cursor:pointer;display:grid;place-items:center}
+  #plist .hmh .sh{border:1px solid #5a5a5a;background:transparent;color:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-size:14px;cursor:pointer}
+  #plist .hm h3{margin:22px 14px 10px;font-size:20px;font-weight:800;color:#fff}
+  #plist .hm .hrow{display:flex;gap:6px;overflow-x:auto;padding:2px 8px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #plist .hm .hrow::-webkit-scrollbar{display:none}
+  #plist .hm .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;padding:0 8px}
+  #plist .hm .art,#plist .hm .hcd{flex:none;padding:10px;border-radius:10px;cursor:pointer;transition:background .15s;min-width:0}
+  #plist .hm .art{width:140px;text-align:center}
+  #plist .hm .hcd{width:156px}
+  #plist .hm .grid .hcd{width:auto}
+  #plist .hm .art:hover,#plist .hm .hcd:hover{background:#1f1f1f}
+  #plist .hm .art .ph{display:grid;place-items:center;width:120px;height:120px;border-radius:50%;margin:0 auto 10px;font-size:44px;font-weight:700;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+  #plist .hm .hcd .cv{display:grid;place-items:center;width:100%;height:auto;max-width:none;aspect-ratio:1/1;border-radius:8px;margin-bottom:10px;font-size:44px;font-weight:700;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35);box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  #plist .hm b{display:block;font-size:15px;font-weight:700;color:#fff;line-height:1.35;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  #plist .hm small{display:block;margin-top:2px;font-size:13px;color:#a7a7a7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media(max-width:940px){
+    #plist .hm .art{width:112px;padding:6px} #plist .hm .art .ph{width:96px;height:96px;font-size:36px}
+    #plist .hm .hcd{width:132px;padding:6px}
+    #plist .hmh{margin-top:-116px;padding-top:140px}
+    #plist .hm .grid{grid-template-columns:repeat(2,1fr);gap:4px 8px}
+    #plist .hm .grid .hcd{padding:6px}
+  }
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
   #mini .mgrip{display:none}
@@ -598,7 +626,7 @@
       <div class="status" id="projStatus"></div>
       <div id="audioAsk" style="display:none;margin-top:10px;padding:12px;border-radius:10px;background:var(--accent-soft);border:1px solid #efc9bd">
         <div style="font-size:14px">這台電腦找不到這個專案用的音檔：<b id="askName"></b></div>
-        <div class="row"><button class="accent" id="askPick">選擇音檔</button><button id="askSkip">暫不選取</button></div>
+        <div class="hrow"><button class="accent" id="askPick">選擇音檔</button><button id="askSkip">暫不選取</button></div>
       </div>
     </div>
     <div class="section">
@@ -658,7 +686,7 @@
       <details id="hapBox" style="margin-top:10px"><summary style="cursor:pointer;font-size:14px;font-weight:700">合音表（幾個字唱成一個音）</summary>
         <p class="hint" style="margin-top:6px">一行一組：<b>漢字=台羅</b>，不同聲調用逗號列出。</p>
         <textarea id="hapIn" class="rom" style="min-height:110px"></textarea>
-        <div class="row"><button id="hapReset">還原預設</button></div>
+        <div class="hrow"><button id="hapReset">還原預設</button></div>
       </details>
       <div id="vocBox" style="margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--soft)">
         <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;cursor:pointer"><input type="checkbox" id="vocOn" style="width:16px;height:16px;accent-color:var(--accent)">教學生字模式</label>
@@ -671,7 +699,7 @@
           <p class="hint" style="margin-top:6px">登記的詞在歌詞裡出現時，漢字和台羅都會用這個顏色。</p>
         </div>
       </div>
-      <div class="row"><button class="primary" id="parseBtn">讀入歌詞</button><span id="parseInfo" class="status" style="margin:0"></span></div>
+      <div class="hrow"><button class="primary" id="parseBtn">讀入歌詞</button><span id="parseInfo" class="status" style="margin:0"></span></div>
     </div>
     <div class="section">
       <div class="step">字幕外觀 · 清除</div>
@@ -683,7 +711,7 @@
       </div>
       <details style="margin-top:10px"><summary style="cursor:pointer;font-size:13px;color:var(--muted)">進階：用文字複製存檔</summary>
         <textarea id="dataBox" style="min-height:70px;font-family:ui-monospace,monospace;font-size:12px;margin-top:6px"></textarea>
-        <div class="row"><button id="exportBtn">產生並複製</button><button id="importBtn">讀入存檔</button><span class="status" id="dataStatus" style="margin:0"></span></div>
+        <div class="hrow"><button id="exportBtn">產生並複製</button><button id="importBtn">讀入存檔</button><span class="status" id="dataStatus" style="margin:0"></span></div>
       </details>
       <div class="row" style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
         <button id="clearTimesBtn">清除時間（保留歌詞）</button>
@@ -4990,11 +5018,12 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   $('pq').addEventListener('input',renderSongs); document.querySelectorAll('input[name=pqBy]').forEach(r=>r.addEventListener('change',()=>{ renderSongs(); $('pq').focus(); }));
   $('pq').addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('pq').value=''; renderSongs(); } if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } });
-  $('plist').onclick=async e=>{ const el=e.target.closest('.song'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
+  $('plist').onclick=async e=>{ const el=e.target.closest('.song,.hcd'); if(!el) return; await playSong(psongs[+el.dataset.i]); };
   let playTok=0; const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
   async function playSong(s,force){
     if(STU&&!force&&curI>=0&&psongs[curI]===s){ document.body.classList.remove('list'); stuMark(); setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0); return; }
     const my=++playTok;
+    if(STU) try{ pushRecent(s); }catch(e){}
     if(STU&&!vidEl._primed&&!ytp){ try{ vidEl.loop=true; vidEl.src=SILENT; vidEl.muted=false; const pr=vidEl.play(); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }   // unlock playback inside the tap, before any download
     curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU){ if(!force) buildQueue(curI); stuMark(); }
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
@@ -5133,7 +5162,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   (function(){ let t; addEventListener('scroll',()=>{ document.body.classList.add('scrolling'); clearTimeout(t); t=setTimeout(()=>document.body.classList.remove('scrolling'),700); },{passive:true}); })();
   // ---------- 學生版（?student）：Spotify 風格介面，自動載入 Drive 歌單、沒有密碼和編輯功能
   const FAV_K='__fav__';
-  let stuGrp=null, stuShuf=false, stuRep='off', stuQ=[], favs=new Set();
+  const HOME_K='__home__';
+  let stuGrp=HOME_K, stuShuf=false, stuRep='off', stuQ=[], favs=new Set();
   try{ favs=new Set(JSON.parse(localStorage.getItem('taigi-ktv-fav')||'[]')); }catch(e){}
   try{ stuShuf=localStorage.getItem('taigi-ktv-shuf')==='1'; stuRep=localStorage.getItem('taigi-ktv-rep')||'off'; }catch(e){}
   const hueOf=t=>{ let h=0; for(const c of String(t||'')) h=(h*31+c.codePointAt(0))%360; return h; };
@@ -5142,29 +5172,54 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   const sArtist=x=>x.o.artist||x.group||'';
   const sKey=x=>sTitle(x)+'|'+sArtist(x);
   // 專案檔裡如果有 cover（圖片網址）就用專輯封面，沒有就用歌名自動配色
-  const cvStyle=x=>/^https?:\/\//.test(x.o.cover||'')?`background:url("${esc(x.o.cover)}") center/cover`:`background:${coverBg(sTitle(x))}`;
+  // 封面：專案檔有 cover 就用；沒有就用 YouTube 縮圖（16:9，置中裁成方形）；都沒有就用歌名配色
+  const coverUrl=x=>/^https?:\/\//.test(x.o.cover||'')?x.o.cover:(x.o.yt&&/^[A-Za-z0-9_-]{11}$/.test(x.o.yt)?'https://i.ytimg.com/vi/'+x.o.yt+'/mqdefault.jpg':'');
+  const cvStyle=x=>{ const u=coverUrl(x); return u?`background:url('${esc(u)}') center/cover no-repeat,${coverBg(sTitle(x))}`:`background:${coverBg(sTitle(x))}`; };
   const saveFav=()=>{ try{ localStorage.setItem('taigi-ktv-fav',JSON.stringify([...favs])); }catch(e){} };
-  const stuVisible=()=>{ const q=fold($('pq').value); const out=[]; psongs.forEach((x,i)=>{ if(stuGrp===FAV_K){ if(!favs.has(sKey(x))) return; } else if(stuGrp!==null&&x.group!==stuGrp) return; if(!songMatch(x,q,'all')) return; out.push(i); }); return out; };
+  const stuVisible=()=>{ const q=fold($('pq').value); const out=[]; psongs.forEach((x,i)=>{ if(stuGrp===FAV_K){ if(!favs.has(sKey(x))) return; } else if(stuGrp!==null&&stuGrp!==HOME_K&&x.group!==stuGrp) return; if(!songMatch(x,q,'all')) return; out.push(i); }); return out; };
   const HEART='<svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 21s-7.5-4.6-9.5-9.2C1.2 8.6 3 5.5 6.2 5.5c1.9 0 3.4 1 4.3 2.4h3C14.4 6.5 15.9 5.5 17.8 5.5c3.2 0 5 3.1 3.7 6.3C19.5 16.4 12 21 12 21z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" fill="currentColor"/></svg>';
+
+  // ---------- 首頁（像 Spotify）：歌手、最近播放、我的最愛、全部歌曲
+  let ARTPH={}; try{ ARTPH=JSON.parse(localStorage.getItem('taigi-ktv-artph')||'{}')||{}; }catch(e){}
+  // 歌手照片：放進 artists/ 資料夾，再在 artists.json 登記「歌手名：檔名」就會自動套用
+  try{ fetch('artists.json',{cache:'no-cache'}).then(r=>r.ok?r.json():{}).then(j=>{ if(j&&typeof j==='object'&&JSON.stringify(j)!==JSON.stringify(ARTPH)){ ARTPH=j; try{ localStorage.setItem('taigi-ktv-artph',JSON.stringify(j)); }catch(e){} if(typeof renderStu==='function'&&document.getElementById('plist')&&psongs.length) try{ renderStu(); }catch(e){} } }).catch(()=>{}); }catch(e){}
+  const artPhoto=g=>{ const f=ARTPH[g]; if(!f) return ''; return /^https?:\/\//.test(f)?f:'artists/'+encodeURIComponent(f); };
+  let RECENT=[]; try{ RECENT=JSON.parse(localStorage.getItem('taigi-ktv-recent')||'[]')||[]; }catch(e){}
+  const pushRecent=x=>{ const k=sKey(x); RECENT=[k,...RECENT.filter(z=>z!==k)].slice(0,12); try{ localStorage.setItem('taigi-ktv-recent',JSON.stringify(RECENT)); }catch(e){} };
+  const homeCard=i=>{ const x=psongs[i]; return `<div class="hcd" data-i="${i}"><span class="cv" style="${cvStyle(x)}">${coverUrl(x)?'':esc([...sTitle(x)][0]||'♪')}</span><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>`; };
+  function homeHtml(groups,cnt){
+    const hr=new Date().getHours(), hi=hr<5?'夜深了':hr<11?'早安':hr<14?'午安':hr<18?'午後好':'晚安';
+    const byKey={}; psongs.forEach((x,i)=>{ byKey[sKey(x)]=i; });
+    const rec=RECENT.map(k=>byKey[k]).filter(i=>i!=null).slice(0,10);
+    const fav=psongs.map((x,i)=>favs.has(sKey(x))?i:-1).filter(i=>i>=0);
+    let h=`<div class="hm"><div class="hmh"><small>台語歌廳</small><h2>${hi}，來唱一首</h2><p>${psongs.length} 首歌・${groups.length} 位歌手</p><button class="pa" data-a="play" title="播放全部">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`;
+    if(groups.length){ h+=`<h3>歌手</h3><div class="hrow">`+groups.map(g=>{ const ph=artPhoto(g); return `<div class="art" data-g="${esc(g)}"><span class="ph" style="background:${coverBg(g)}${ph?`;background:url('${esc(ph)}') center top/cover no-repeat,${coverBg(g)}`:''}">${ph?'':esc([...g][0]||'')}</span><b>${esc(g)}</b><small>${cnt[g]} 首</small></div>`; }).join('')+`</div>`; }
+    if(rec.length) h+=`<h3>最近播放</h3><div class="hrow">${rec.map(homeCard).join('')}</div>`;
+    if(fav.length) h+=`<h3>我的最愛</h3><div class="hrow">${fav.slice(0,12).map(homeCard).join('')}</div>`;
+    h+=`<h3>全部歌曲</h3><div class="grid">${psongs.map((x,i)=>homeCard(i)).join('')}</div></div>`;
+    return h;
+  }
   function renderStu(){
     const q=fold($('pq').value), groups=[]; const cnt={};
     psongs.forEach(x=>{ const g=x.group||''; if(!(g in cnt)){ cnt[g]=0; groups.push(g); } cnt[g]++; });
-    if(stuGrp!==null&&stuGrp!==FAV_K&&!(stuGrp in cnt)) stuGrp=null;
+    if(stuGrp!==null&&stuGrp!==HOME_K&&stuGrp!==FAV_K&&!(stuGrp in cnt)) stuGrp=HOME_K;
     const nfav=psongs.filter(x=>favs.has(sKey(x))).length;
-    $('stuLib').innerHTML=`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">${IC.note}</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
+    $('stuLib').innerHTML=`<button class="it${stuGrp===HOME_K?' on':''}" data-g="${HOME_K}" title="首頁"><span class="cv all">${IC.home}</span><span class="nm">首頁</span></button>`
+      +`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">${IC.note}</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
       +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}" title="我的最愛"><span class="cv fav">${IC.heart}</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
       +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}" title="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
     const vis=stuVisible();
     let html='';
+    if(stuGrp===HOME_K&&!q&&psongs.length){ $('plist').innerHTML=homeHtml(groups.filter(g=>g!==''),cnt); return; }
     if(psongs.length){
-      const ttl=stuGrp===null?'全部歌曲':stuGrp===FAV_K?'我的最愛':stuGrp;
-      html+=`<div class="head" style="--hue:hsl(${hueOf(ttl)},45%,28%)"><small>${stuGrp===null||stuGrp===FAV_K?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div>`
+      const ttl=(stuGrp===null||stuGrp===HOME_K)?'全部歌曲':stuGrp===FAV_K?'我的最愛':stuGrp;
+      html+=`<div class="head" style="--hue:hsl(${hueOf(ttl)},45%,28%)"><small>${stuGrp===null||stuGrp===HOME_K||stuGrp===FAV_K?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div>`
         +`<div class="acts"><button class="pa" data-a="play" title="播放">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`
         +`<div class="cols"><span>#</span><span>歌名</span><span style="text-align:right">備註</span></div>`;
       if(stuGrp===FAV_K&&!vis.length) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">還沒有收藏。點歌曲右邊的愛心就會放進來（存在這台裝置的瀏覽器裡）。</div>';
     }
     vis.forEach((i,n)=>{ const x=psongs[i], o=x.o; const bad=!o.yt&&o.audio&&!x.media; const fv=favs.has(sKey(x));
-      html+=`<div class="song${bad?' bad':''}${i===curI?' now':''}" data-i="${i}"><span class="n">${n+1}</span><span class="tt"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div></span><span class="tg">${x.inst?'<em>有伴奏</em>':''}<button class="qa" data-qa="${i}" title="加入播放佇列">＋</button><button class="hr${fv?' on':''}" data-fav="${i}" title="${fv?'取消收藏':'加入我的最愛'}">${HEART}</button></span></div>`; });
+      html+=`<div class="song${bad?' bad':''}${i===curI?' now':''}" data-i="${i}"><span class="n">${n+1}</span><span class="tt"><span class="cv" style="${cvStyle(x)}">${coverUrl(x)?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div></span><span class="tg">${x.inst?'<em>有伴奏</em>':''}<button class="qa" data-qa="${i}" title="加入播放佇列">＋</button><button class="hr${fv?' on':''}" data-fav="${i}" title="${fv?'取消收藏':'加入我的最愛'}">${HEART}</button></span></div>`; });
     if(!vis.length&&psongs.length&&stuGrp!==FAV_K) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">找不到符合的歌</div>';
     $('plist').innerHTML=html;
   }
@@ -5177,7 +5232,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   }
   function stuMark(){
     const x=psongs[curI]; if(!x) return;
-    $('stuNow').innerHTML=`<span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(x.o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div><button id="stuHeart" class="${favs.has(sKey(x))?'on':''}" title="加入我的最愛">${HEART}</button>`;
+    $('stuNow').innerHTML=`<span class="cv" style="${cvStyle(x)}">${coverUrl(x)?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div><button id="stuHeart" class="${favs.has(sKey(x))?'on':''}" title="加入我的最愛">${HEART}</button>`;
     document.querySelectorAll('#plist .song').forEach(el=>el.classList.toggle('now',+el.dataset.i===curI));
     const h=hueOf(sTitle(x)); $('stage').style.background=`linear-gradient(160deg,hsl(${h},42%,24%),#0b0d1a 78%)`;
     stuQDraw();
@@ -5195,7 +5250,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function stuQDraw(){
     const box=$('stuQlist'); if(!box) return;
     const at=stuQ.indexOf(curI); const cur=psongs[curI];
-    const row=(i,k,rm)=>{ const x=psongs[i]; return `<div class="qi" data-qi="${i}"><span class="cv" style="${cvStyle(x)}">${/^https?:\/\//.test(x.o.cover||'')?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>${rm?`<button class="qx" data-qx="${k}" title="從佇列移除">${IC.close}</button>`:''}</div>`; };
+    const row=(i,k,rm)=>{ const x=psongs[i]; return `<div class="qi" data-qi="${i}"><span class="cv" style="${cvStyle(x)}">${coverUrl(x)?'':esc([...sTitle(x)][0]||'♪')}</span><div><b>${esc(sTitle(x))}</b><small>${esc(sArtist(x))}</small></div>${rm?`<button class="qx" data-qx="${k}" title="從佇列移除">${IC.close}</button>`:''}</div>`; };
     let html='';
     if(cur) html+=`<div class="qh">正在播放</div>`+row(curI,-1,false);
     const next=at<0?stuQ:stuQ.slice(at+1);
@@ -5242,7 +5297,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     window.__stuQclose=stuQclose; $('stuQclose').onclick=stuQclose;
     qp.addEventListener('click',e=>{ const x=e.target.closest('[data-qx]'); if(x){ stuQ.splice(+x.dataset.qx,1); stuQDraw(); return; } const r=e.target.closest('[data-qi]'); if(r&&+r.dataset.qi!==curI) playSong(psongs[+r.dataset.qi],true); });
     const toast2s=m=>{ const t=document.getElementById('miniToast'); if(!t) return; t.textContent=m; t.classList.add('on'); clearTimeout(window.__tt2); window.__tt2=setTimeout(()=>t.classList.remove('on'),1800); };
-    $('stuLib').onclick=e=>{ const b=e.target.closest('.it'); if(!b) return; stuGrp=b.dataset.g===''?null:b.dataset.g; renderStu(); document.body.classList.add('list'); window.scrollTo(0,0); };
+    $('stuLib').onclick=e=>{ const b=e.target.closest('.it'); if(!b) return; stuGrp=b.dataset.g===''?null:b.dataset.g; $('stuQ')&&($('stuQ').value='',$('pq').value=''); renderStu(); document.body.classList.add('list'); window.scrollTo(0,0); };
     $('stuQ').addEventListener('input',()=>{ $('pq').value=$('stuQ').value; renderStu(); });
     $('stuQ').addEventListener('keydown',e=>{ if(e.key==='Enter'){ const f=$('plist').querySelector('.song'); if(f) f.click(); } if(e.key==='Escape'){ $('stuQ').value=''; $('pq').value=''; renderStu(); } });
     // 愛心、加入佇列：不要當成「點歌」
@@ -5252,6 +5307,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         if(f){ const x=psongs[+f.dataset.fav]; const k=sKey(x); favs.has(k)?favs.delete(k):favs.add(k); saveFav(); f.classList.toggle('on',favs.has(k)); if(stuGrp===FAV_K) renderStu(); else { const nm=document.querySelector('#stuLib [data-g="'+FAV_K+'"] small'); if(nm) nm.textContent=psongs.filter(z=>favs.has(sKey(z))).length; } if(+f.dataset.fav===curI) stuMark(); }
         else { const i=+qa.dataset.qa; if(curI<0){ buildQueue(i); playSong(psongs[i],true); toast2s('開始播放'); } else { const at=stuQ.indexOf(curI); stuQ=stuQ.filter(z=>z!==i||z===curI); const pos=stuQ.indexOf(curI); stuQ.splice(pos+1,0,i); stuQDraw(); toast2s('已加入佇列：'+sTitle(psongs[i])); } }
         return; } },true);
+    $('plist').addEventListener('click',e=>{ const a=e.target.closest('.art'); if(a){ stuGrp=a.dataset.g; renderStu(); window.scrollTo(0,0); return; } });
     $('plist').addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(!b) return; if(b.dataset.a==='shuf'){ stuShuf=!stuShuf; stuModes(); if(stuShuf){ const v=stuVisible(); if(v.length){ const i=v[Math.floor(Math.random()*v.length)]; playSong(psongs[i]); } } else if(curI>=0) buildQueue(curI); } else { const v=stuVisible(); if(v.length) playSong(psongs[v[0]]); } });
     now.addEventListener('click',e=>{ if(e.target.closest('#stuHeart')) return; if(document.body.classList.contains('list')&&curI>=0&&psongs[curI]) playSong(psongs[curI]); });
     bar.addEventListener('click',e=>{ const h=e.target.closest('#stuHeart'); if(!h) return; const x=psongs[curI]; if(!x) return; const k=sKey(x); favs.has(k)?favs.delete(k):favs.add(k); saveFav(); h.classList.toggle('on',favs.has(k)); renderStu(); });
