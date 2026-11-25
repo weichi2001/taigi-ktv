@@ -3428,7 +3428,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function applyStyle(){
     const st=$('stage').style;
     const sw=$('stage').clientWidth||940;
-    const base=+$('fsize').value*(sw/942);
+    const ph=document.body.classList.contains('stu')&&matchMedia('(max-width:860px)').matches;   // phone: portrait stage, lyrics a little larger
+    const base=+$('fsize').value*(sw/942)*(ph?1.25:1);
     st.setProperty('--hsize',base+'px'); st.setProperty('--tsize',(base*.9)+'px'); st.setProperty('--rratio',+$('rsize').value/100);
     st.setProperty('--ol',outline(Math.max(2.5,base/14),'#0b0d1a')); st.setProperty('--ol2',outline(Math.max(1.5,base*(+$('rsize').value/100)/9),'#0b0d1a'));
     $('stage').classList.toggle('hide-rom',!$('showRom').checked); document.documentElement.style.setProperty('--ktv-fill',$('fillColor').value);
