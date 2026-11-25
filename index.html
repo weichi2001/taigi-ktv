@@ -332,7 +332,7 @@
   body.stu #vol{accent-color:#fff;width:90px}
   body.stu #pnow{display:none}
   @media (max-width:940px){
-    body.stu{--sw:0px;--bar:calc(204px + var(--sab,0px))}
+    body.stu{--sw:0px;--bar:calc(212px + var(--sab,0px))}
     body.stu .status#pmsg{position:fixed;left:14px;right:14px;bottom:calc(16px + var(--sab,0px));margin:0;z-index:35;font-size:13px;padding:9px 14px;border-radius:999px;background:rgba(36,36,36,.96);text-align:center;pointer-events:none}
     body.stu.played .status#pmsg{bottom:calc(var(--bar) + 10px)}
     html:has(body.stu),body.stu{background:#121212}
@@ -374,13 +374,13 @@
     #mini .mgrip::after{content:'';position:absolute;left:50%;top:9px;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:rgba(97,80,69,.35)}
     #mini .mtop{touch-action:none;padding-top:0}
     #stuNow{flex:1 1 100%;order:1} #stuNow .cv{width:44px;height:44px;font-size:19px}
-    body.stu .stagebar{padding-top:10px!important;row-gap:2px!important;gap:0!important}
+    body.stu .stagebar{padding-top:10px!important;gap:3px 0!important}
     body.stu #seek{order:2;flex:1 1 100%;min-width:0;height:20px;margin:0}
     body.stu #timeLbl{order:3;flex:1 1 100%;text-align:right;font-size:11.5px;margin:-2px 2px 4px}
-    body.stu #stuShuf,body.stu #stuPrev,body.stu #playBtn,body.stu #stuNext,body.stu #stuRep{order:4;flex:1 1 0;display:grid;place-items:center;height:52px}
+    body.stu #stuShuf,body.stu #stuPrev,body.stu #playBtn,body.stu #stuNext,body.stu #stuRep{order:4;flex:1 1 0;display:grid;place-items:center;height:56px}
     body.stu #playBtn{flex:0 0 56px;width:56px;height:56px;margin:0 auto;border-radius:50%}
     body.stu .stagebar::after{content:'';order:5;flex:0 0 100%;height:0}
-    body.stu #restartBtn,body.stu #vocQuickWrap,body.stu #voxSel,body.stu #stuQbtn,body.stu #fsBtn{order:6;flex:1 1 0;height:34px;display:grid;place-items:center;justify-content:center;font-size:13px;padding:0 4px}
+    body.stu #restartBtn,body.stu #vocQuickWrap,body.stu #voxSel,body.stu #stuQbtn,body.stu #fsBtn{order:6;flex:1 1 0;margin-top:5px;height:34px;display:grid;place-items:center;justify-content:center;font-size:13px;padding:0 4px}
     body.stu #voxSel{flex:2 1 0;margin:0 6px}
     body.stu #volWrap{display:none}
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs){width:100%;margin-top:0}
@@ -400,28 +400,28 @@
     body.stu #stageWrap:not(.pseudoFs) #volWrap{display:none}
   }
   @media (max-width:940px),(max-height:520px){
-    body.stu #stageWrap.pseudoFs .stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;height:auto;padding:8px 16px calc(8px + var(--sab,0px));box-sizing:border-box;z-index:45}
-    body.stu #stageWrap.pseudoFs #stuNow{display:none}
-    body.stu #stageWrap.pseudoFs #seek{order:1;flex:1 1 0;min-width:0;margin:0;height:22px}
-    body.stu #stageWrap.pseudoFs #timeLbl{order:2;flex:none;margin:0;font-size:12px}
-    body.stu #stageWrap.pseudoFs .stagebar::after{content:'';order:3;flex:0 0 100%;height:0}
-    body.stu #stageWrap.pseudoFs #stuShuf,body.stu #stageWrap.pseudoFs #stuPrev,body.stu #stageWrap.pseudoFs #stuNext,body.stu #stageWrap.pseudoFs #stuRep{order:4;flex:none;width:44px;height:44px;display:grid;place-items:center}
-    body.stu #stageWrap.pseudoFs #playBtn{order:4;flex:none;width:52px;height:52px;margin:0 6px;border-radius:50%}
-    body.stu #stageWrap.pseudoFs #restartBtn,body.stu #stageWrap.pseudoFs #vocQuickWrap,body.stu #stageWrap.pseudoFs #voxSel,body.stu #stageWrap.pseudoFs #stuQbtn,body.stu #stageWrap.pseudoFs #fsBtn{order:5;flex:none;width:auto;height:36px;display:grid;place-items:center;padding:0 8px;margin:0}
-    body.stu #stageWrap.pseudoFs #volWrap{display:none}
-    body.stu #stageWrap:fullscreen .stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;height:auto;padding:8px 16px calc(8px + var(--sab,0px));box-sizing:border-box;z-index:45}
-    body.stu #stageWrap:fullscreen #stuNow{display:none}
-    body.stu #stageWrap:fullscreen #seek{order:1;flex:1 1 0;min-width:0;margin:0;height:22px}
-    body.stu #stageWrap:fullscreen #timeLbl{order:2;flex:none;margin:0;font-size:12px}
-    body.stu #stageWrap:fullscreen .stagebar::after{content:'';order:3;flex:0 0 100%;height:0}
-    body.stu #stageWrap:fullscreen #stuShuf,body.stu #stageWrap:fullscreen #stuPrev,body.stu #stageWrap:fullscreen #stuNext,body.stu #stageWrap:fullscreen #stuRep{order:4;flex:none;width:44px;height:44px;display:grid;place-items:center}
-    body.stu #stageWrap:fullscreen #playBtn{order:4;flex:none;width:52px;height:52px;margin:0 6px;border-radius:50%}
-    body.stu #stageWrap:fullscreen #restartBtn,body.stu #stageWrap:fullscreen #vocQuickWrap,body.stu #stageWrap:fullscreen #voxSel,body.stu #stageWrap:fullscreen #stuQbtn,body.stu #stageWrap:fullscreen #fsBtn{order:5;flex:none;width:auto;height:36px;display:grid;place-items:center;padding:0 8px;margin:0}
-    body.stu #stageWrap:fullscreen #volWrap{display:none}
+    body.stu #stageWrap.pseudoFs .stagebar{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:0 8px;height:auto;padding:6px 14px calc(6px + var(--sab,0px));box-sizing:border-box;z-index:45}
+    body.stu #stageWrap.pseudoFs #stuNow,body.stu #stageWrap.pseudoFs #restartBtn,body.stu #stageWrap.pseudoFs #volWrap{display:none}
+    body.stu #stageWrap.pseudoFs .stagebar::after{display:none}
+    body.stu #stageWrap.pseudoFs #stuShuf,body.stu #stageWrap.pseudoFs #stuPrev,body.stu #stageWrap.pseudoFs #stuNext,body.stu #stageWrap.pseudoFs #stuRep{order:1;flex:none;width:40px;height:40px;display:grid;place-items:center}
+    body.stu #stageWrap.pseudoFs #playBtn{order:1;flex:none;width:46px;height:46px;margin:0 2px;border-radius:50%}
+    body.stu #stageWrap.pseudoFs #seek{order:2;flex:1 1 0;min-width:60px;margin:0 4px;height:22px}
+    body.stu #stageWrap.pseudoFs #timeLbl{order:3;flex:none;margin:0;font-size:12px;white-space:nowrap}
+    body.stu #stageWrap.pseudoFs #vocQuickWrap,body.stu #stageWrap.pseudoFs #voxSel,body.stu #stageWrap.pseudoFs #stuQbtn,body.stu #stageWrap.pseudoFs #fsBtn{order:4;flex:none;width:auto;height:34px;display:grid;place-items:center;padding:0 6px;margin:0}
+    body.stu #stageWrap:fullscreen .stagebar{display:flex;flex-wrap:nowrap;align-items:center;justify-content:center;gap:0 8px;height:auto;padding:6px 14px calc(6px + var(--sab,0px));box-sizing:border-box;z-index:45}
+    body.stu #stageWrap:fullscreen #stuNow,body.stu #stageWrap:fullscreen #restartBtn,body.stu #stageWrap:fullscreen #volWrap{display:none}
+    body.stu #stageWrap:fullscreen .stagebar::after{display:none}
+    body.stu #stageWrap:fullscreen #stuShuf,body.stu #stageWrap:fullscreen #stuPrev,body.stu #stageWrap:fullscreen #stuNext,body.stu #stageWrap:fullscreen #stuRep{order:1;flex:none;width:40px;height:40px;display:grid;place-items:center}
+    body.stu #stageWrap:fullscreen #playBtn{order:1;flex:none;width:46px;height:46px;margin:0 2px;border-radius:50%}
+    body.stu #stageWrap:fullscreen #seek{order:2;flex:1 1 0;min-width:60px;margin:0 4px;height:22px}
+    body.stu #stageWrap:fullscreen #timeLbl{order:3;flex:none;margin:0;font-size:12px;white-space:nowrap}
+    body.stu #stageWrap:fullscreen #vocQuickWrap,body.stu #stageWrap:fullscreen #voxSel,body.stu #stageWrap:fullscreen #stuQbtn,body.stu #stageWrap:fullscreen #fsBtn{order:4;flex:none;width:auto;height:34px;display:grid;place-items:center;padding:0 6px;margin:0}
     body.stu #stageWrap.pseudoFs #stage,body.stu #stageWrap:fullscreen #stage{transition:padding-bottom .25s ease}
-    body.stu #stageWrap.pseudoFs.barOn #stage,body.stu #stageWrap:fullscreen.barOn #stage{padding-bottom:calc(112px + var(--sab,0px))}
-    /* iPhone 不能鎖橫向：直拿時把整個全螢幕畫面轉 90 度 */
+    body.stu #stageWrap.pseudoFs.barOn #stage,body.stu #stageWrap:fullscreen.barOn #stage{padding-bottom:calc(74px + var(--sab,0px))}
+    /* iPhone 不能鎖橫向：直拿時把整個全螢幕畫面轉 90 度（Home 指示條在轉過去的右邊） */
     body.stu #stageWrap.pseudoFs.rot{inset:auto;top:0;left:0;width:100vh;width:100dvh;height:100vw;height:100dvw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg)}
+    body.stu #stageWrap.pseudoFs.rot .stagebar{padding:6px calc(14px + var(--sab,0px)) 6px calc(14px + var(--sat,0px))}
+    body.stu #stageWrap.pseudoFs.rot.barOn #stage{padding-bottom:74px}
     body.stu #stageWrap.pseudoFs.rot #stage{padding-left:calc(var(--sat,0px) + 36px);padding-right:calc(5% + var(--sab,0px))}
   }
   /* ---- 學生版：放大鏡（查辭典）---- */
