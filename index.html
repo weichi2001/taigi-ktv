@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>台語歌廳 Tâi-gí kua-thiann</title>
 <style>
+  :root{--sab:0px}
+  body.stu #plist{scroll-padding-bottom:var(--sab)}
   /* jf open 粉圓 2.1 (justfont, SIL OFL 1.1): Han + 台羅 tone marks */
   @font-face{font-family:"Huninn";src:url(huninn.woff2) format("woff2");font-display:swap;}
   /* Andika (SIL, OFL 1.1) — subset to Latin + combining diacritics so every 台羅 tone mark renders */
@@ -346,7 +348,7 @@
     body.stu.player main{margin:0;border-radius:0;padding-top:116px}
     body.stu.played main{margin-bottom:var(--bar)}
     body.stu.player.list #plist{padding-bottom:110px}
-    body.stu.list #fab{width:48px;height:48px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom,0px));transition:transform .25s,opacity .25s}
+    body.stu.list #fab{width:48px;height:48px;right:16px;bottom:calc(20px + var(--sab,0px));transition:transform .25s,opacity .25s}
     body.stu.list.scrolling #fab{opacity:0;transform:scale(.7);pointer-events:none}
     #plist .head{margin-top:-116px;padding-top:140px}
     body.stu .song{grid-template-columns:28px 1fr}
@@ -4994,20 +4996,21 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       // 2) only project files that are new or changed are downloaded, 12 at a time
       const texts={}; const old=(cache&&cache.texts)||{};
       const need=list.filter(m=>/\.json$/i.test(m.name)).filter(m=>{ const o=old[m.id]; if(o&&o.m===(m.md5Checksum||'')){ texts[m.id]=o; return false; } return true; });
-      let done=0; const total=need.length;
+      let done=0, firstErr=''; const total=need.length;
       if(total){ const msg=()=>`正在下載歌曲資料 ${done}/${total}…`; st(msg()); if(!shown) pmsg(msg());
-        await pool(need,6,async m=>{ try{ const t=await retry(()=>fetchB('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),9000,'text'),3); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){} done++; st(msg()); if(!shown) pmsg(msg()); }); }
+        await pool(need,3,async m=>{ try{ const t=await retry(()=>fetchB('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),15000,'text'),3); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){ if(!firstErr) firstErr=(e&&e.message)||'失敗'; } done++; st(msg()); if(!shown) pmsg(msg()); }); }
       writeDCache({at:Date.now(),list,texts});
       const sig=l=>l.map(m=>m.id+':'+(m.md5Checksum||'')+':'+m.rel).sort().join('|');
       const changed=!shown||sig(list)!==sig(cache.list);
       if(changed){ const inList=document.body.classList.contains('list'); await scanFolder(filesFrom(list,texts),shown&&!inList); }
       const failed=list.filter(m=>/\.json$/i.test(m.name)&&!texts[m.id]).length;
-      st('Drive 歌單：'+psongs.length+' 首'+(changed&&shown?'（已更新）':'')+(failed?`，${failed} 個檔案讀不到`:''));
+      st('Drive 歌單：'+psongs.length+' 首'+(changed&&shown?'（已更新）':'')+(failed?`，${failed} 個檔案讀不到（${firstErr}）`:''));
     }catch(e){ const m=(e&&e.message)||'';
       st((shown?'無法檢查更新，先用上次的歌單：':'讀不到 Drive：')+m);
       if(!shown) pmsg('讀不到 Google Drive 歌單（'+m+'）。請確認網路、資料夾是「知道連結的人都能檢視」。'); }
     finally{ driveBusy=false; }
   }
+  addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); });
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
