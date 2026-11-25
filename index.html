@@ -5192,7 +5192,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const rec=RECENT.map(k=>byKey[k]).filter(i=>i!=null).slice(0,10);
     const fav=psongs.map((x,i)=>favs.has(sKey(x))?i:-1).filter(i=>i>=0);
     let h=`<div class="hm"><div class="hmh"><small>台語歌廳</small><h2>食飽未？來高歌一曲吧～</h2><p>${psongs.length} 首歌・${groups.length} 位歌手</p><button class="pa" data-a="play" title="播放全部">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`;
-    if(groups.length){ h+=`<h3>歌手</h3><div class="hrow">`+groups.map(g=>{ const ph=artPhoto(g); return `<div class="art" data-g="${esc(g)}"><span class="ph" style="background:${coverBg(g)}${ph?`;background:url('${esc(ph)}') center top/cover no-repeat,${coverBg(g)}`:''}">${ph?'':esc([...g][0]||'')}</span><b>${esc(g)}</b><small>${cnt[g]} 首</small></div>`; }).join('')+`</div>`; }
+    if(groups.length){ h+=`<h3>歌手</h3><div class="hrow">`+groups.map(g=>{ const ph=artPhoto(g); return `<div class="art" data-g="${esc(g)}"><span class="ph" style="background:${coverBg(g)}${ph?`;background:url('${esc(ph)}') center/cover no-repeat,${coverBg(g)}`:''}">${ph?'':esc([...g][0]||'')}</span><b>${esc(g)}</b><small>${cnt[g]} 首</small></div>`; }).join('')+`</div>`; }
     if(rec.length) h+=`<h3>最近播放</h3><div class="hrow">${rec.map(homeCard).join('')}</div>`;
     if(fav.length) h+=`<h3>我的最愛</h3><div class="hrow">${fav.slice(0,12).map(homeCard).join('')}</div>`;
     h+=`<h3>全部歌曲</h3><div class="grid">${psongs.map((x,i)=>homeCard(i)).join('')}</div></div>`;
@@ -5206,7 +5206,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('stuLib').innerHTML=`<button class="it${stuGrp===HOME_K?' on':''}" data-g="${HOME_K}" title="首頁"><span class="cv all">${IC.home}</span><span class="nm">首頁</span></button>`
       +`<button class="it${stuGrp===null?' on':''}" data-g="" title="全部歌曲"><span class="cv all">${IC.note}</span><span class="nm">全部歌曲</span><small>${psongs.length}</small></button>`
       +`<button class="it${stuGrp===FAV_K?' on':''}" data-g="${FAV_K}" title="我的最愛"><span class="cv fav">${IC.heart}</span><span class="nm">我的最愛</span><small>${nfav}</small></button>`
-      +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}" title="${esc(g)}"><span class="cv" style="background:${coverBg(g)}">${esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
+      +groups.filter(g=>g!=='').map(g=>`<button class="it${stuGrp===g?' on':''}" data-g="${esc(g)}" title="${esc(g)}"><span class="cv" style="background:${artPhoto(g)?`url('${esc(artPhoto(g))}') center/cover no-repeat,`:''}${coverBg(g)}">${artPhoto(g)?'':esc([...g][0]||'')}</span><span class="nm">${esc(g)}</span><small>${cnt[g]}</small></button>`).join('');
     const vis=stuVisible();
     let html='';
     if(stuGrp===HOME_K&&!q&&psongs.length){ $('plist').innerHTML=homeHtml(groups.filter(g=>g!==''),cnt); return; }
