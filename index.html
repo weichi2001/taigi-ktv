@@ -432,6 +432,13 @@
     body.stu #stageWrap.pseudoFs:not(.rot) #stage,body.stu #stageWrap:fullscreen:not(.rot) #stage{padding-left:calc(var(--sal,0px) + 36px);padding-right:calc(5% + var(--sar,0px))}
     body.stu #stageWrap.pseudoFs:not(.rot) .stagebar,body.stu #stageWrap:fullscreen:not(.rot) .stagebar{padding-left:calc(14px + var(--sal,0px));padding-right:calc(14px + var(--sar,0px))}
   }
+  /* 歌手頁：用照片當背景（放大模糊）加一張圓形大頭照，不再只是色塊 */
+  #plist .head.hph{position:relative;overflow:hidden;display:flex;align-items:flex-end;gap:22px;background:#121212;isolation:isolate}
+  #plist .head.hph .hbg{position:absolute;inset:-30px;background-size:cover;background-position:center 20%;filter:blur(34px) saturate(1.15);opacity:.62;z-index:-2;transform:scale(1.15)}
+  #plist .head.hph::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,18,18,.1),#121212 96%);z-index:-1}
+  #plist .head.hph .hav{flex:none;width:168px;height:168px;border-radius:50%;background-size:cover;background-position:center;box-shadow:0 8px 28px rgba(0,0,0,.55)}
+  #plist .head.hph .ht{min-width:0}
+  @media(max-width:940px){ #plist .head.hph{gap:14px;padding-left:28px;padding-bottom:6px} #plist .head.hph .hav{width:96px;height:96px} #plist .head.hph h2{font-size:clamp(24px,7vw,34px)} }
   /* ---- 首頁 ---- */
   #plist .hm{padding:8px 0 24px}
   #plist .hmh{padding:28px 28px 6px;margin:-60px -14px 6px;padding-top:88px;background:linear-gradient(180deg,#2c2a3a,#121212);border-radius:12px 12px 0 0;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
@@ -5212,7 +5219,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(stuGrp===HOME_K&&!q&&psongs.length){ $('plist').innerHTML=homeHtml(groups.filter(g=>g!==''),cnt); return; }
     if(psongs.length){
       const ttl=(stuGrp===null||stuGrp===HOME_K)?'全部歌曲':stuGrp===FAV_K?'我的最愛':stuGrp;
-      html+=`<div class="head" style="--hue:hsl(${hueOf(ttl)},45%,28%)"><small>${stuGrp===null||stuGrp===HOME_K||stuGrp===FAV_K?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div>`
+      const hph=(stuGrp!==null&&stuGrp!==HOME_K&&stuGrp!==FAV_K)?artPhoto(stuGrp):'';
+      html+=`<div class="head${hph?' hph':''}" style="--hue:hsl(${hueOf(ttl)},45%,28%)">${hph?`<i class="hbg" style="background-image:url('${esc(hph)}')"></i><span class="hav" style="background-image:url('${esc(hph)}')"></span>`:''}<div class="ht"><small>${stuGrp===null||stuGrp===HOME_K||stuGrp===FAV_K?'歌單':'歌手'}</small><h2>${esc(ttl)}</h2><p>${q?('找到 '+vis.length+' 首'):(vis.length+' 首歌')}</p></div></div>`
         +`<div class="acts"><button class="pa" data-a="play" title="播放">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`
         +`<div class="cols"><span>#</span><span>歌名</span><span style="text-align:right">備註</span></div>`;
       if(stuGrp===FAV_K&&!vis.length) html+='<div class="status" style="padding:30px 14px;color:#a7a7a7">還沒有收藏。點歌曲右邊的愛心就會放進來（存在這台裝置的瀏覽器裡）。</div>';
