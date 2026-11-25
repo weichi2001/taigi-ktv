@@ -4992,7 +4992,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   async function playSong(s,force){
     if(STU&&!force&&curI>=0&&psongs[curI]===s){ document.body.classList.remove('list'); stuMark(); setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0); return; }
     const my=++playTok;
-    if(STU&&!vidEl._primed&&!vidEl.getAttribute('src')){ try{ vidEl.loop=true; vidEl.src=SILENT; const pr=vidEl.play(); if(pr&&pr.catch) pr.catch(()=>{}); }catch(e){} }   // unlock playback inside the tap, before any download
+    if(STU&&!vidEl._primed&&!ytp){ try{ vidEl.loop=true; vidEl.src=SILENT; vidEl.muted=false; const pr=vidEl.play(); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }   // unlock playback inside the tap, before any download
     curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU){ if(!force) buildQueue(curI); stuMark(); }
     if(rec) stopRec(''); try{ audio.pause(); }catch(e){}
     const o=JSON.parse(JSON.stringify(s.o)); pmsg('');
@@ -5011,7 +5011,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     $('vocQuick').checked=$('vocOn').checked; $('vocQuickWrap').title=VOC.words.length?('顯示教學生字（'+VOC.words.length+' 個詞）'):'這首歌沒有登記生字'; $('vocQuickWrap').style.opacity=VOC.words.length?1:.45; $('pnow').textContent=projName(); updateTitle();
     setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0);
     try{ audio.currentTime=0; }catch(e){}
-    if(STU){ try{ vidEl.loop=false; const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }
+    if(STU){ try{ vidEl.loop=false; vidEl.autoplay=true; const pr=audio.play(); if(pr&&pr.catch) pr.catch(()=>{}); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }
     // the instrumental comes in the background; the song is already playing
     let instF=s.inst||null;
     if(instF&&matchMedia('(max-width:940px)').matches) instF=null;   // 手機版不用伴奏
