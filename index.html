@@ -4981,7 +4981,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     if(driveBusy) return; driveBusy=true;
     const st=m=>{ $('devStat').textContent=m; };
     // 1) show the last list at once (no network), then check for changes behind it
-    const cache=readDCache(); let shown=false;
+    let cache=readDCache(); let shown=false;
+    if(!(cache&&cache.list&&cache.list.length)){ try{ const r=await fetch('drive-snapshot.json',{cache:'no-cache'}); if(r.ok){ const j=await r.json(); if(j&&j.list&&j.list.length) cache=j; } }catch(e){} }
     if(cache&&cache.list&&cache.list.length){ await scanFolder(filesFrom(cache.list,cache.texts)); shown=true; st('Drive 歌單：'+psongs.length+' 首（檢查更新中…）'); }
     else { st('正在讀取 Drive 歌單…'); pmsg('正在讀取 Google Drive 歌單…'); }
     try{
