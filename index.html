@@ -149,7 +149,7 @@
   .sy .jn{color:#b3a79b;margin-left:1px}
   #stageWrap:fullscreen,#stageWrap.pseudoFs{display:flex;flex-direction:column;background:#0b0d1a}
   #stageWrap:fullscreen #stage,#stageWrap.pseudoFs #stage{flex:1;aspect-ratio:auto;height:auto;padding:4% 5% 7%}
-  #stageWrap:fullscreen .stagebar,#stageWrap.pseudoFs .stagebar{position:fixed;left:0;right:0;bottom:0;opacity:0;transition:opacity .3s;background:rgba(20,24,49,.92);padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #stageWrap:fullscreen .stagebar,#stageWrap.pseudoFs .stagebar{position:fixed;z-index:45;left:0;right:0;bottom:0;opacity:0;transition:opacity .3s;background:rgba(20,24,49,.92);padding-bottom:max(8px,env(safe-area-inset-bottom))}
   #stageWrap:fullscreen.barOn .stagebar,#stageWrap:fullscreen .stagebar:hover,#stageWrap.pseudoFs.barOn .stagebar,#stageWrap.pseudoFs .stagebar:hover{opacity:1}
   #stageWrap.pseudoFs{position:fixed;inset:0;z-index:60;border-radius:0;height:100dvh}
   body.pseudoFsBody{overflow:hidden}
@@ -243,14 +243,14 @@
   #sbTog{flex:none;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:#a7a7a7;cursor:pointer;display:grid;place-items:center;font-size:17px;margin-top:-2px}
   #sbTog:hover{background:#242424;color:#fff}
   body.stu #stuSide,body.stu.player main,body.stu #stuTop{transition:width .28s cubic-bezier(.22,1,.36,1),margin-left .28s cubic-bezier(.22,1,.36,1),left .28s cubic-bezier(.22,1,.36,1)}
-  @media (min-width:861px){
+  @media (min-width:941px){
     body.stu.sb-off{--sw:88px}
     body.stu.sb-off #stuSide{padding:18px 10px 12px;align-items:stretch}
     body.stu.sb-off #stuSide .brand{padding:0 0 12px;justify-content:center}
     body.stu.sb-off #stuSide .brand .bt,body.stu.sb-off #stuSide .hd,body.stu.sb-off #stuSide .it .nm,body.stu.sb-off #stuSide .it small,body.stu.sb-off #stuSide .ft{display:none}
     body.stu.sb-off #stuSide .it{justify-content:center;padding:7px 0}
   }
-  @media (max-width:860px){ #sbTog{display:none} }
+  @media (max-width:940px){ #sbTog{display:none} }
   #stuSide .brand .rom{display:block;font-size:12px;font-weight:400;color:#a7a7a7;margin-top:3px}
   #stuSide .hd{font-size:12px;color:#a7a7a7;letter-spacing:.08em;padding:12px 10px 4px}
   #stuSide .lib{overflow:auto;flex:1;margin:0 -4px;padding:0 4px}
@@ -266,15 +266,15 @@
   #stuSide .ft .home{flex:1 1 100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 6px;border-radius:999px;background:#1f1f1f;color:#e6e6e6;font-size:13px;text-decoration:none;white-space:nowrap}
   #stuSide .ft .home:hover{background:#2c2c2c;color:#fff} #stuSide .ft .home .hi{font-size:16px;line-height:1}
   #stuHomeM{display:none}
-  @media (min-width:861px){ body.stu.sb-off #stuSide .ft{display:flex;border-top:0;padding:8px 0 0} body.stu.sb-off #stuSide .ft button,body.stu.sb-off #stuSide .ft .ht{display:none} body.stu.sb-off #stuSide .ft .home{flex:none;width:100%;padding:10px 0} }
-  @media (max-width:860px){ #stuHomeM{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#242424;color:#e6e6e6;text-decoration:none;font-size:18px} }
+  @media (min-width:941px){ body.stu.sb-off #stuSide .ft{display:flex;border-top:0;padding:8px 0 0} body.stu.sb-off #stuSide .ft button,body.stu.sb-off #stuSide .ft .ht{display:none} body.stu.sb-off #stuSide .ft .home{flex:none;width:100%;padding:10px 0} }
+  @media (max-width:940px){ #stuHomeM{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#242424;color:#e6e6e6;text-decoration:none;font-size:18px} }
   #stuSide .ft button:hover{background:#2c2c2c;color:#fff}
   body.stu #stuTop{display:flex;position:fixed;top:8px;left:var(--sw);right:8px;height:60px;align-items:center;gap:10px;padding:0 24px;z-index:15;border-radius:12px 12px 0 0;background:linear-gradient(rgba(18,18,18,.96),rgba(18,18,18,.82));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   body.stu::before{content:'';position:fixed;top:0;left:0;right:0;height:8px;background:#000;z-index:14;pointer-events:none}
   body.stu #stuTop::before,body.stu #stuTop::after{content:'';position:absolute;top:0;width:12px;height:12px;pointer-events:none}
   body.stu #stuTop::before{left:0;background:radial-gradient(circle at 12px 12px,transparent 11.5px,#000 12.5px)}
   body.stu #stuTop::after{right:0;background:radial-gradient(circle at 0 12px,transparent 11.5px,#000 12.5px)}
-  @media(max-width:860px){body.stu #stuTop::before,body.stu #stuTop::after{display:none}}
+  @media(max-width:940px){body.stu #stuTop::before,body.stu #stuTop::after{display:none}}
   #stuTop button{border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-size:14px;cursor:pointer;white-space:nowrap}
   #stuTop button:hover{background:rgba(255,255,255,.18)}
   body.stu.list #stuBack{display:none}
@@ -331,7 +331,7 @@
   body.stu #timeLbl{color:#a7a7a7;font-size:12.5px;white-space:nowrap}
   body.stu #vol{accent-color:#fff;width:90px}
   body.stu #pnow{display:none}
-  @media (max-width:860px){
+  @media (max-width:940px){
     body.stu{--sw:0px;--bar:calc(204px + var(--sab,0px))}
     body.stu .status#pmsg{position:fixed;left:14px;right:14px;bottom:calc(16px + var(--sab,0px));margin:0;z-index:35;font-size:13px;padding:9px 14px;border-radius:999px;background:rgba(36,36,36,.96);text-align:center;pointer-events:none}
     body.stu.played .status#pmsg{bottom:calc(var(--bar) + 10px)}
@@ -387,6 +387,43 @@
     body.stu:not(.list) #stageWrap:not(:fullscreen):not(.pseudoFs) #stage{border-radius:0}
   }
 
+  @media (max-width:940px) and (max-height:520px){
+    body.stu{--bar:calc(104px + var(--sab,0px))}
+    body.stu #stageWrap:not(.pseudoFs) .stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;height:auto;padding:8px 16px calc(8px + var(--sab,0px));box-sizing:border-box;z-index:45}
+    body.stu #stageWrap:not(.pseudoFs) #stuNow{display:none}
+    body.stu #stageWrap:not(.pseudoFs) #seek{order:1;flex:1 1 0;min-width:0;margin:0;height:22px}
+    body.stu #stageWrap:not(.pseudoFs) #timeLbl{order:2;flex:none;margin:0;font-size:12px}
+    body.stu #stageWrap:not(.pseudoFs) .stagebar::after{content:'';order:3;flex:0 0 100%;height:0}
+    body.stu #stageWrap:not(.pseudoFs) #stuShuf,body.stu #stageWrap:not(.pseudoFs) #stuPrev,body.stu #stageWrap:not(.pseudoFs) #stuNext,body.stu #stageWrap:not(.pseudoFs) #stuRep{order:4;flex:none;width:44px;height:44px;display:grid;place-items:center}
+    body.stu #stageWrap:not(.pseudoFs) #playBtn{order:4;flex:none;width:52px;height:52px;margin:0 6px;border-radius:50%}
+    body.stu #stageWrap:not(.pseudoFs) #restartBtn,body.stu #stageWrap:not(.pseudoFs) #vocQuickWrap,body.stu #stageWrap:not(.pseudoFs) #voxSel,body.stu #stageWrap:not(.pseudoFs) #stuQbtn,body.stu #stageWrap:not(.pseudoFs) #fsBtn{order:5;flex:none;width:auto;height:36px;display:grid;place-items:center;padding:0 8px;margin:0}
+    body.stu #stageWrap:not(.pseudoFs) #volWrap{display:none}
+  }
+  @media (max-width:940px),(max-height:520px){
+    body.stu #stageWrap.pseudoFs .stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;height:auto;padding:8px 16px calc(8px + var(--sab,0px));box-sizing:border-box;z-index:45}
+    body.stu #stageWrap.pseudoFs #stuNow{display:none}
+    body.stu #stageWrap.pseudoFs #seek{order:1;flex:1 1 0;min-width:0;margin:0;height:22px}
+    body.stu #stageWrap.pseudoFs #timeLbl{order:2;flex:none;margin:0;font-size:12px}
+    body.stu #stageWrap.pseudoFs .stagebar::after{content:'';order:3;flex:0 0 100%;height:0}
+    body.stu #stageWrap.pseudoFs #stuShuf,body.stu #stageWrap.pseudoFs #stuPrev,body.stu #stageWrap.pseudoFs #stuNext,body.stu #stageWrap.pseudoFs #stuRep{order:4;flex:none;width:44px;height:44px;display:grid;place-items:center}
+    body.stu #stageWrap.pseudoFs #playBtn{order:4;flex:none;width:52px;height:52px;margin:0 6px;border-radius:50%}
+    body.stu #stageWrap.pseudoFs #restartBtn,body.stu #stageWrap.pseudoFs #vocQuickWrap,body.stu #stageWrap.pseudoFs #voxSel,body.stu #stageWrap.pseudoFs #stuQbtn,body.stu #stageWrap.pseudoFs #fsBtn{order:5;flex:none;width:auto;height:36px;display:grid;place-items:center;padding:0 8px;margin:0}
+    body.stu #stageWrap.pseudoFs #volWrap{display:none}
+    body.stu #stageWrap:fullscreen .stagebar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:2px 10px;height:auto;padding:8px 16px calc(8px + var(--sab,0px));box-sizing:border-box;z-index:45}
+    body.stu #stageWrap:fullscreen #stuNow{display:none}
+    body.stu #stageWrap:fullscreen #seek{order:1;flex:1 1 0;min-width:0;margin:0;height:22px}
+    body.stu #stageWrap:fullscreen #timeLbl{order:2;flex:none;margin:0;font-size:12px}
+    body.stu #stageWrap:fullscreen .stagebar::after{content:'';order:3;flex:0 0 100%;height:0}
+    body.stu #stageWrap:fullscreen #stuShuf,body.stu #stageWrap:fullscreen #stuPrev,body.stu #stageWrap:fullscreen #stuNext,body.stu #stageWrap:fullscreen #stuRep{order:4;flex:none;width:44px;height:44px;display:grid;place-items:center}
+    body.stu #stageWrap:fullscreen #playBtn{order:4;flex:none;width:52px;height:52px;margin:0 6px;border-radius:50%}
+    body.stu #stageWrap:fullscreen #restartBtn,body.stu #stageWrap:fullscreen #vocQuickWrap,body.stu #stageWrap:fullscreen #voxSel,body.stu #stageWrap:fullscreen #stuQbtn,body.stu #stageWrap:fullscreen #fsBtn{order:5;flex:none;width:auto;height:36px;display:grid;place-items:center;padding:0 8px;margin:0}
+    body.stu #stageWrap:fullscreen #volWrap{display:none}
+    body.stu #stageWrap.pseudoFs #stage,body.stu #stageWrap:fullscreen #stage{transition:padding-bottom .25s ease}
+    body.stu #stageWrap.pseudoFs.barOn #stage,body.stu #stageWrap:fullscreen.barOn #stage{padding-bottom:calc(112px + var(--sab,0px))}
+    /* iPhone 不能鎖橫向：直拿時把整個全螢幕畫面轉 90 度 */
+    body.stu #stageWrap.pseudoFs.rot{inset:auto;top:0;left:0;width:100vh;width:100dvh;height:100vw;height:100dvw;transform-origin:0 0;transform:translateX(100vw) rotate(90deg)}
+    body.stu #stageWrap.pseudoFs.rot #stage{padding-left:22px;padding-right:calc(5% + var(--sab,0px))}
+  }
   /* ---- 學生版：放大鏡（查辭典）---- */
   #fab,#mini{display:none}
   #mini .mgrip{display:none}
@@ -415,7 +452,7 @@
     transition:transform .5s cubic-bezier(.22,1.15,.36,1),opacity .28s ease,filter .3s}
   body.stu #mini[hidden]{display:none}
   body.stu #mini.show{transform:none;opacity:1;pointer-events:auto;filter:none}
-  @media(min-width:861px){body.stu #mini{left:auto;right:18px;bottom:calc(var(--bar) + 18px);width:400px;height:min(680px,calc(100vh - var(--bar) - 36px));border-radius:24px;transform:translateY(20px) scale(.82)}
+  @media(min-width:941px){body.stu #mini{left:auto;right:18px;bottom:calc(var(--bar) + 18px);width:400px;height:min(680px,calc(100vh - var(--bar) - 36px));border-radius:24px;transform:translateY(20px) scale(.82)}
     body.stu #mini.show{transform:none}
     body.stu:not(.played) #mini{bottom:18px;height:min(680px,calc(100vh - 36px))}
     /* 放大鏡打開：只有影片往左讓位，歌單、上方列、底下工作列都不動 */
@@ -488,10 +525,10 @@
   #stuQlist .qi div{flex:1;min-width:0} #stuQlist .qi b{display:block;font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} #stuQlist .qi small{display:block;color:#a7a7a7;font-size:12.5px}
   #stuQlist .qx{border:0;background:transparent;color:#a7a7a7;cursor:pointer;width:28px;height:28px;border-radius:50%} #stuQlist .qx:hover{color:#fff;background:#3a3a3a}
   #stuQlist .qe{color:#8a8a8a;font-size:14px;padding:10px 8px;line-height:1.7}
-  @media(min-width:861px){
+  @media(min-width:941px){
     body.stu.q-on.player main{margin-right:386px} body.stu.q-on #stuTop{right:386px}
     body.stu:not(.list) #mini{top:86px;height:auto;bottom:calc(var(--bar) + 18px)}}
-  @media(max-width:860px){ body.stu #stuQp{left:0;right:0;top:auto;bottom:var(--bar);width:auto;height:58vh;border-radius:20px 20px 0 0} }
+  @media(max-width:940px){ body.stu #stuQp{left:0;right:0;top:auto;bottom:var(--bar);width:auto;height:58vh;border-radius:20px 20px 0 0} }
   body.stu .lyr > .u{cursor:pointer}
   #stuHl{display:none}
   body.stu #stuHl{display:block;position:fixed;z-index:49;pointer-events:none;border-radius:14px;border:2px solid rgba(255,190,160,.98);background:rgba(255,122,85,.13);
@@ -3428,7 +3465,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   function applyStyle(){
     const st=$('stage').style;
     const sw=$('stage').clientWidth||940;
-    const ph=document.body.classList.contains('stu')&&matchMedia('(max-width:860px)').matches;   // phone: portrait stage, lyrics a little larger
+    const ph=document.body.classList.contains('stu')&&matchMedia('(max-width:940px)').matches;   // phone: portrait stage, lyrics a little larger
     const base=+$('fsize').value*(sw/942)*(ph?1.25:1);
     st.setProperty('--hsize',base+'px'); st.setProperty('--tsize',(base*.9)+'px'); st.setProperty('--rratio',+$('rsize').value/100);
     st.setProperty('--ol',outline(Math.max(2.5,base/14),'#0b0d1a')); st.setProperty('--ol2',outline(Math.max(1.5,base*(+$('rsize').value/100)/9),'#0b0d1a'));
@@ -3467,6 +3504,15 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   // On iPhone / iPad an <audio> may only start inside a tap. The instrumental normally starts from
   // the song's own 'play' event, which is not a tap, so every tap that starts the song also pokes it.
   function primeInst(){ if(!instFile||!instEl.paused) return; try{ instSeek(true); const p=instEl.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} }
+  // 鎖定畫面／切到別的 app 時的播放控制（有自己音檔的歌可以繼續播）
+  (function(){ const ms=navigator.mediaSession; if(!ms) return;
+    const meta=()=>{ try{ ms.metadata=new MediaMetadata({title:$('songTitle').value||'台語歌廳',artist:$('songArtist').value||'',album:'台語歌廳'}); }catch(e){} };
+    audio.addEventListener('play',()=>{ meta(); ms.playbackState='playing'; }); audio.addEventListener('pause',()=>{ ms.playbackState='paused'; });
+    const set=(a,f)=>{ try{ ms.setActionHandler(a,f); }catch(e){} };
+    set('play',()=>{ audio.play().catch(()=>{}); }); set('pause',()=>{ audio.pause(); });
+    set('previoustrack',()=>{ const b=document.getElementById('stuPrev'); b&&b.click(); }); set('nexttrack',()=>{ const b=document.getElementById('stuNext'); b&&b.click(); });
+    set('seekto',e=>{ if(e.seekTime!=null) audio.currentTime=e.seekTime; });
+  })();
   function togglePlay(){ if(!audio.src) return; if(audio.paused){ playStop=null; audio.playbackRate=1; primeInst(); audio.play().catch(()=>{}); } else audio.pause(); }
   $('playBtn').onclick=()=>{ if(exporting) return; if(rec) stopRec(''); togglePlay(); };
   const playLbl=(ic,tx)=>{ const b=$('playBtn'); b.querySelector('.ic').innerHTML=IC[ic]; b.querySelector('.tx').textContent=tx; b.title=tx; };
@@ -3481,7 +3527,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('stage').addEventListener('pointerdown',e=>{ if(!rec) return; e.preventDefault(); const r=$('stage').getBoundingClientRect();
     if(e.clientX-r.left > r.width*0.78) endLine(); else tapChar(); });
   const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement||null;
-  const pseudoFs=on=>{ $('stageWrap').classList.toggle('pseudoFs',on); document.body.classList.toggle('pseudoFsBody',on); applyStyle(); applyCrop(); requestAnimationFrame(relayoutHy); if(on){ try{ screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} } };
+  const rotSync=()=>{ const w=$('stageWrap'); w.classList.toggle('rot',STU&&w.classList.contains('pseudoFs')&&matchMedia('(orientation:portrait)').matches&&matchMedia('(max-width:940px)').matches); };
+  const tellParent=on=>{ try{ if(parent!==window) parent.postMessage({ktvFs:!!on},'*'); }catch(e){} };
+  addEventListener('resize',rotSync); addEventListener('orientationchange',()=>setTimeout(rotSync,60));
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>tellParent(!!fsEl())));
+  const pseudoFs=on=>{ $('stageWrap').classList.toggle('pseudoFs',on); rotSync(); tellParent(on); document.body.classList.toggle('pseudoFsBody',on); applyStyle(); applyCrop(); requestAnimationFrame(relayoutHy); if(on){ try{ screen.orientation&&screen.orientation.lock&&screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} } };
   $('fsBtn').onclick=()=>{
     const w=$('stageWrap');
     if(w.classList.contains('pseudoFs')){ pseudoFs(false); return; }
@@ -3576,7 +3626,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const vd=audio; const vw=vd.videoWidth||16, vh=vd.videoHeight||9;
     const ca=(cropF.w*vw)/(cropF.h*vh);
     // phone (student view): the kept region covers the whole stage instead of sitting letterboxed in a 16:9 frame
-    const stg=$('stage'), fill=document.body.classList.contains('stu')&&matchMedia('(max-width:860px)').matches&&stg.clientWidth>0&&stg.clientHeight>0;
+    const stg=$('stage'), fill=document.body.classList.contains('stu')&&matchMedia('(max-width:940px)').matches&&stg.clientWidth>0&&stg.clientHeight>0;
     const SA=fill?stg.clientWidth/stg.clientHeight:16/9;
     let dw,dh;
     if(fill){ if(ca>=SA){ dh=1; dw=ca/SA; } else { dw=1; dh=SA/ca; } }
@@ -5304,7 +5354,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(e.target.id==='mmore'){ mlim+=30; draw(); } });
     let mt=0;
     // 手機：拖曳辭典上緣調整高度，用完把空間還給影片
-    const MH='ktvMiniH', isMob=()=>matchMedia('(max-width:860px)').matches&&mini.parentNode===document.body;
+    const MH='ktvMiniH', isMob=()=>matchMedia('(max-width:940px)').matches&&mini.parentNode===document.body;
     const clampH=h=>{ const bo=parseFloat(getComputedStyle(mini).bottom)||0; return Math.max(170,Math.min(innerHeight-bo-76,h)); };
     const applyH=()=>{ if(!isMob()){ mini.style.height=''; return; } let h=0; try{ h=+localStorage.getItem(MH)||0; }catch(e){} mini.style.height=clampH(h||Math.round(innerHeight*.58))+'px'; };
     addEventListener('resize',applyH);
