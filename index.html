@@ -5162,6 +5162,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     finally{ driveBusy=false; }
   }
   addEventListener('message',e=>{ const d=e.data&&e.data.ktvInsets; if(d&&typeof d.bottom==='number') { document.documentElement.style.setProperty('--sab',Math.max(0,Math.min(60,d.bottom))+'px'); if(typeof d.top==='number') document.documentElement.style.setProperty('--sat',Math.max(0,Math.min(80,d.top))+'px');  const R=document.documentElement.style; if(typeof d.left==='number') R.setProperty('--sal',Math.max(0,Math.min(80,d.left))+'px'); if(typeof d.right==='number') R.setProperty('--sar',Math.max(0,Math.min(80,d.right))+'px'); } });
+  (function(){ if(window.top!==window) return; const fit=()=>{ try{ const z=document.createElement('div'); z.style.cssText='position:fixed;left:0;bottom:0;width:0;height:0;visibility:hidden'; document.body.appendChild(z); const g=Math.round(z.getBoundingClientRect().bottom-innerHeight); z.remove(); if(g>0&&g<200) document.documentElement.style.setProperty('--sab',g+'px'); }catch(e){} }; addEventListener('resize',fit); addEventListener('orientationchange',fit); setTimeout(fit,300); setTimeout(fit,1500); })();
   $('devLoad').onclick=scanDrive;
   const openAdmin=k=>{ const u=FB[k].admin||FB[k].form; if(!u){ $('devStat').textContent='這個表單還沒設定'; return; } window.open(u,'_blank','noopener'); };
   $('devFbBug').onclick=()=>openAdmin('bug'); $('devFbSong').onclick=()=>openAdmin('song');
