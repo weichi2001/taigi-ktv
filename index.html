@@ -3181,7 +3181,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       // the API replaces the host element with the iframe and keeps the id
       const host=$('ytHost'); if(!host) throw new Error('舞台元素不見了');
       let origin; try{ if(location.protocol.startsWith('http')) origin=location.origin; }catch(e){}
-      const vars={autoplay:(STU?1:0),controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,playsinline:1,rel:0,enablejsapi:1}; if(origin) vars.origin=origin;
+      const vars={autoplay:(STU&&window.__stuPlayReq?1:0),controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,playsinline:1,rel:0,enablejsapi:1}; if(origin) vars.origin=origin;
       mine.player=new Y.Player(host,{videoId:id,width:'100%',height:'100%',playerVars:vars,host:'https://www.youtube-nocookie.com',
         events:{ onReady:()=>{ if(mine.dead) return; mine.onReady(); ytMsg('YouTube 已就緒（只能在網頁裡播放，無法匯出）'); applyCrop(); },
                  onStateChange:e=>{ const m=window.__ytCur; if(m&&!m.dead) m.onState(e.data); },
@@ -5052,7 +5052,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   let playTok=0; const SILENT='data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==';
   async function playSong(s,force){
     if(STU&&!force&&curI>=0&&psongs[curI]===s){ document.body.classList.remove('list'); stuMark(); setTimeout(()=>{ applyStyle(); applyCrop(); relayoutHy(); },0); return; }
-    const my=++playTok;
+    const my=++playTok; if(STU) window.__stuPlayReq=true;   // 只有學生點歌才自動播（開頁時還原的編輯中專案不能自己播）
     if(STU) try{ pushRecent(s); }catch(e){}
     if(STU&&!vidEl._primed&&!ytp){ try{ vidEl.loop=true; vidEl.src=SILENT; vidEl.muted=false; const pr=vidEl.play(); if(pr&&pr.then) pr.then(()=>{ vidEl._primed=true; },()=>{}); }catch(e){} }   // unlock playback inside the tap, before any download
     curI=psongs.indexOf(s); document.body.classList.add('played'); if(STU){ if(!force) buildQueue(curI); stuMark(); }
