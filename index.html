@@ -489,8 +489,8 @@
   body.stu #fab.gone{transform:scale(.3) rotate(-120deg);opacity:0;pointer-events:none}
   /* 手機：放大鏡縮小，垂直置中在上方列（60px）裡，不再壓到影片，也沒有模糊玻璃效果 */
   @media(max-width:700px){
-    html body.stu:not(.list)>#fab,html body.stu.list>#fab{width:40px;height:40px;top:18px;right:16px;bottom:auto;box-shadow:none;background:var(--accent);backdrop-filter:none;-webkit-backdrop-filter:none}
-    html body.stu>#fab .svgi{width:20px;height:20px}
+    html body.stu:not(.list)>#fab,html body.stu.list>#fab{width:40px;height:40px;top:10px;right:16px;bottom:auto;display:flex;align-items:center;justify-content:center;padding:0;line-height:0;box-shadow:none;background:var(--accent);backdrop-filter:none;-webkit-backdrop-filter:none}
+    html body.stu>#fab .svgi{width:20px;height:20px;display:block;margin:0;vertical-align:baseline}
     html body.stu:not(.list) #stuTop{padding-right:68px}
   }
   body.stu #mini{--ink:#615045;--ink2:#7a6a5e;--okbg:#e9f2e1;--ok:#4f8a3a;position:fixed;z-index:41;left:0;right:0;bottom:var(--bar);height:62vh;display:flex;flex-direction:column;color:#615045;
