@@ -580,6 +580,7 @@
     body.stu:not(.list) #mini{top:86px;height:auto;bottom:calc(var(--bar) + 18px)}}
   @media(max-width:940px){ body.stu #stuQp{left:0;right:0;top:auto;bottom:var(--bar);width:auto;height:58vh;border-radius:20px 20px 0 0} }
   body.stu .lyr > .u{cursor:pointer}
+  #ytUnmuteHint{position:fixed;left:50%;bottom:calc(var(--bar,0px) + 18px);transform:translateX(-50%);z-index:90;padding:9px 18px;border-radius:99px;background:rgba(0,0,0,.78);color:#fff;font-size:14px;pointer-events:none;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.4)}
   #stuHl{display:none}
   body.stu #stuHl{display:block;position:fixed;z-index:49;pointer-events:none;border-radius:14px;border:2px solid rgba(255,190,160,.98);background:rgba(255,122,85,.13);
     box-shadow:0 0 0 1px rgba(255,122,85,.55),0 0 16px rgba(255,122,85,.75),0 0 38px rgba(255,122,85,.4),inset 0 0 14px rgba(255,150,110,.28);
@@ -3106,18 +3107,28 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(A._playing) return res();
       const t0=now(); A._wantPlay={res,rej,t0};
       if(A._ready) try{ A.player.playVideo(); }catch(e){}
+      // 手機（iOS）常擋「沒有點到影片本身的自動播放」：1.5 秒還沒開始，就改成靜音先播，點一下畫面再開聲音
+      if(STU) [1500,3500].forEach(ms=>setTimeout(()=>{ if(A.dead||A._playing||A._autoMuted||!A._ready||!A._wantPlay||A._wantPlay.t0!==t0) return; try{ A._autoMuted=true; A.player.mute(); A.player.playVideo(); }catch(e){} },ms));
       setTimeout(()=>{ if(A._wantPlay&&A._wantPlay.t0===t0){ A._wantPlay=null; rej(new DOMException('YouTube 沒有開始播放','NotAllowedError')); } },6000);
     });
     A.pause=()=>{ if(A._ready) try{ A.player.pauseVideo(); }catch(e){} };
     A.destroy=()=>{ A.dead=true; A._playing=false; clearInterval(A._iv); try{ A.player&&A.player.destroy(); }catch(e){} A.player=null; };
     A.onState=st=>{
       // -1 unstarted, 0 ended, 1 playing, 2 paused, 3 buffering, 5 cued
+      if(st===1&&A._autoMuted) ytUnmuteHint(A);
       if(st===1){ const was=A._playing; A._frozen=false; A._ended=false; sync(); A._playing=true; if(!A._dur) try{ A._dur=A.player.getDuration()||0; emit('durationchange'); }catch(e){}
         if(A._wantPlay){ const w=A._wantPlay; A._wantPlay=null; w.res(); } if(!was){ emit('play'); } emit('playing'); }
       else if(st===2){ sync(); if(A._playing){ A._playing=false; emit('pause'); } A._frozen=false; }
       else if(st===0){ A._t=A._dur||pt(); A._tAt=now(); if(A._playing){ A._playing=false; emit('pause'); } A._ended=true; emit('ended'); }
       else if(st===3){ sync(); A._frozen=true; emit('waiting'); }
     };
+    function ytUnmuteHint(A){
+      if(A._hintOn) return; A._hintOn=true;
+      const h=document.createElement('div'); h.id='ytUnmuteHint'; h.textContent='點一下畫面，開啟聲音'; document.body.appendChild(h);
+      const done=()=>{ if(!A._hintOn) return; A._hintOn=false; A._autoMuted=false; try{ if(!A._muted&&A.player) A.player.unMute(); }catch(e){} h.remove();
+        ['pointerdown','touchend','click','keydown'].forEach(k=>document.removeEventListener(k,done,true)); };
+      ['pointerdown','touchend','click','keydown'].forEach(k=>document.addEventListener(k,done,true));
+    }
     A.onReady=()=>{ A._ready=true; A.readyState=4; try{ A._dur=A.player.getDuration()||0; }catch(e){}
       try{ A.player.setVolume(Math.round(A._vol*100)); A._muted?A.player.mute():A.player.unMute(); if(A._rate!==1) A.player.setPlaybackRate(A._rate); }catch(e){}
       emit('loadedmetadata'); emit('durationchange');
@@ -3165,7 +3176,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       // the API replaces the host element with the iframe and keeps the id
       const host=$('ytHost'); if(!host) throw new Error('舞台元素不見了');
       let origin; try{ if(location.protocol.startsWith('http')) origin=location.origin; }catch(e){}
-      const vars={autoplay:0,controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,playsinline:1,rel:0,enablejsapi:1}; if(origin) vars.origin=origin;
+      const vars={autoplay:(STU?1:0),controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,playsinline:1,rel:0,enablejsapi:1}; if(origin) vars.origin=origin;
       mine.player=new Y.Player(host,{videoId:id,width:'100%',height:'100%',playerVars:vars,host:'https://www.youtube-nocookie.com',
         events:{ onReady:()=>{ if(mine.dead) return; mine.onReady(); ytMsg('YouTube 已就緒（只能在網頁裡播放，無法匯出）'); applyCrop(); },
                  onStateChange:e=>{ if(!mine.dead) mine.onState(e.data); },
