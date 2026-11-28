@@ -3155,7 +3155,10 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     opts=opts||{};
     if(!id) return;
     if(ytp&&ytp.id===id&&!ytp.dead) return;
-    if(ytp) clearYT(true);
+    // 學生版換下一首：沿用同一個 YouTube 播放器（只換影片），第一次點過之後 iPhone 就不會每首都再擋自動播放
+    let keep=null;
+    if(STU&&ytp&&!ytp.dead&&ytp._ready&&ytp.player&&$('ytHost')&&$('ytHost').tagName==='IFRAME'){ keep=ytp.player; clearInterval(ytp._iv); ytp.dead=true; ytp._playing=false; ytp.player=null; ytp=null; ytId=null; }
+    else if(ytp) clearYT(true);
     // a YouTube source replaces any file
     if(rec) stopRec('');
     try{ vidEl.pause(); vidEl.removeAttribute('src'); vidEl.load(); }catch(e){}
@@ -3170,7 +3173,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     syncVideoUI(); renderRec(); drawTL(); if(!opts.quiet) save();
     // title (best effort; needs network)
     if(!$('songTitle').value){ try{ const r=await fetch('https://www.youtube.com/oembed?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D'+id+'&format=json'); if(r.ok){ const j=await r.json(); if(j&&j.title&&!$('songTitle').value&&ytId===id){ $('songTitle').value=j.title; updateTitle(); save(); } } }catch(e){} }
-    const mine=ytp;
+    const mine=ytp; window.__ytCur=mine;
+    if(keep){ try{ mine.player=keep; keep.loadVideoById(id); mine.onReady(); ytMsg('YouTube 已就緒（只能在網頁裡播放，無法匯出）'); applyCrop(); return; }catch(e){ mine.player=null; try{ keep.destroy(); }catch(_){} const d=document.createElement('div'); d.id='ytHost'; const h=$('ytHost'); if(h) h.replaceWith(d); } }
     try{
       const Y=await ytApi(); if(mine.dead) return;
       // the API replaces the host element with the iframe and keeps the id
@@ -3179,9 +3183,9 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const vars={autoplay:(STU?1:0),controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,playsinline:1,rel:0,enablejsapi:1}; if(origin) vars.origin=origin;
       mine.player=new Y.Player(host,{videoId:id,width:'100%',height:'100%',playerVars:vars,host:'https://www.youtube-nocookie.com',
         events:{ onReady:()=>{ if(mine.dead) return; mine.onReady(); ytMsg('YouTube 已就緒（只能在網頁裡播放，無法匯出）'); applyCrop(); },
-                 onStateChange:e=>{ if(!mine.dead) mine.onState(e.data); },
-                 onPlaybackRateChange:e=>{ if(!mine.dead){ mine._rate=e.data||1; } },
-                 onError:e=>{ if(mine.dead) return; const c=e&&e.data; ytMsg(YT_ERR[c]||('YouTube 播放器錯誤（'+c+'）'),true); } }});
+                 onStateChange:e=>{ const m=window.__ytCur; if(m&&!m.dead) m.onState(e.data); },
+                 onPlaybackRateChange:e=>{ const m=window.__ytCur; if(m&&!m.dead){ m._rate=e.data||1; } },
+                 onError:e=>{ const m=window.__ytCur; if(!m||m.dead) return; const c=e&&e.data; ytMsg(YT_ERR[c]||('YouTube 播放器錯誤（'+c+'）'),true); } }});
       const ifr=$('ytHost'); if(ifr&&ifr.tagName==='IFRAME'){ ifr.setAttribute('allow','autoplay; encrypted-media'); ifr.style.pointerEvents='none'; }
       applyCrop();
     }catch(err){ if(!mine.dead) ytMsg((err&&err.message)||'YouTube 載入失敗',true); }
