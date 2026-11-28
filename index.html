@@ -538,6 +538,7 @@
   #mini .mr .sx{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .45s cubic-bezier(.22,1,.36,1),opacity .35s ease}
   #mini .mr .sxi{overflow:hidden;min-height:0} #mini .mr.open .sx{grid-template-rows:1fr;opacity:1} #mini .mr .sx.empty,#mini .mr.open .sx.empty{display:none} #mini .mr .oth{margin-top:2px}
   #mini .mr .ex{padding:8px 12px;margin:5px 0 3px;border-left:3px solid #f0b99a;background:rgba(255,236,220,.5);border-radius:0 10px 10px 0}
+  #mini .mr .ex.hasau{position:relative;padding-right:56px} #mini .mr .ex .au{position:absolute;right:10px;top:10px;width:36px;height:36px}
   #mini .mr .ex .hd{font-size:17px;color:#3d3027} #mini .mr .ex .tl{font-size:13px;color:var(--ink2)} #mini .mr .ex .h{font-size:14px;color:#4a3b30}
   #mini .mr .macts{display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed rgba(97,80,69,.2)}
   #mini .mr .ml{font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;border:0;background:rgba(255,255,255,.55);color:#615045;cursor:pointer;text-decoration:none}
@@ -5444,7 +5445,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         if(ok)return st===0&&q.length===units.length?0:st===0?1:2}
       return 9};
     const inW700=new Set();
-    let DX=null,DXS='idle',EXD=null,mlim=30,exAsk=false,dxP=null,hcSet=null;
+    let DX=null,DXS='idle',EXD=null,EXAD={},mlim=30,exAsk=false,dxP=null,hcSet=null;
     function dxLoad(){
       if(DXS!=='idle') return dxP; DXS='load';
       return dxP=fetch(BASE+'dict.json').then(r=>r.ok?r.json():Promise.reject()).then(a=>{
@@ -5452,7 +5453,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         hcSet=new Set(DX.map(e=>e.hc)); DXS='ok'; draw();
       }).catch(()=>{ DXS='err'; draw(); });
     }
-    function exLoad(cb){ if(EXD){ cb(); return; } fetch(BASE+'ex.json').then(r=>r.json()).then(x=>{ EXD=x; cb(); }).catch(()=>{ EXD={}; cb(); }); }
+    function exLoad(cb){ if(EXD){ cb(); return; } fetch(BASE+'ex.json').then(r=>r.json()).then(x=>{ EXD=x; return fetch(BASE+'ex_audio.json').then(r=>r.ok?r.json():{}).catch(()=>({})).then(a=>{ EXAD=a||{}; cb(); }); }).catch(()=>{ EXD={}; cb(); }); }
     // 華語查詢：解釋裡整段剛好等於查詢字排最前，越前面的義項、義項越少越優先
     function gl(e,raw){ let best=4;
       e.s.forEach(([p,d],i)=>{ d.split(/[、，；,;。]/).forEach((g,j)=>{ g=g.replace(/[（(].*?[）)]/g,'').trim(); if(!g.includes(raw)) return;
@@ -5497,8 +5498,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     let cur=null;
     mb.addEventListener('click',e=>{
       const au=e.target.closest('[data-au]');
-      if(au){ const id=+au.dataset.au; if(cur) cur.pause(); const ap=au.dataset.ap;
-        const src=SU+'media/senn/mp3/imtong/'+(ap?ap+'/'+id+'1.mp3':'subak/'+Math.floor(id/1000)+'/'+id+'.mp3');
+      if(au){ const id=+au.dataset.au; if(cur) cur.pause(); const ap=au.dataset.ap, eu=+au.dataset.eu||0;
+        const src=SU+'media/senn/mp3/imtong/'+(eu?'leku/'+Math.floor(eu/1000)+'/'+eu+'.mp3':ap?ap+'/'+id+'1.mp3':'subak/'+Math.floor(id/1000)+'/'+id+'.mp3');
         let tries=0; const attempt=u=>{ const me=cur=new Audio(u); me.preload='auto';
           me.play().catch(err=>{ if(err&&err.name==='AbortError') return; if(cur!==me) return;
             if(err&&err.name==='NotAllowedError'){ toast2('瀏覽器擋住了自動播放，請再按一次喇叭'); return; }
@@ -5508,7 +5509,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       const tg=e.target.closest('[data-tg]');
       if(tg){ const row=tg.closest('.mr'), id=row.dataset.id, open=!row.classList.contains('open');
         const fill=()=>{ if(!row.dataset.done){ row.dataset.done=1; const L=(EXD&&EXD[id])||[];
-            const html=x=>`<div class="ex"><div class="hd">${esc(x[0])}</div><div class="tl">${esc(x[1])}</div><div class="h">${esc(x[2])}</div></div>`; const left=[];
+            const AU=EXAD[id]||[];
+            const html=x=>{ const eu=AU[L.indexOf(x)]||0; return `<div class="ex${eu?' hasau':''}"><div class="hd">${esc(x[0])}</div><div class="tl">${esc(x[1])}</div><div class="h">${esc(x[2])}</div>${eu?`<button class="au" data-au="0" data-eu="${eu}" aria-label="聽例句"><svg viewBox="1.5 0 24 24" width="18" height="18" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`:''}</div>`; }; const left=[];
             L.forEach(x=>{ const li=x[3]!=null?row.querySelector(`li[data-sid="${x[3]}"] .sxi`):null; if(li) li.insertAdjacentHTML('beforeend',html(x)); else left.push(x); });
             const o=row.querySelector('.oth .sxi');
             if(left.length) o.innerHTML=(L.length>left.length?'<p class="note">其他例句</p>':'')+left.map(html).join('');
