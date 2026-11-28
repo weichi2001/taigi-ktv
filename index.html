@@ -266,6 +266,7 @@
   #stuSide .ft .home{flex:1 1 100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:9px 6px;border-radius:999px;background:#1f1f1f;color:#e6e6e6;font-size:13px;text-decoration:none;white-space:nowrap}
   #stuSide .ft .home:hover{background:#2c2c2c;color:#fff} #stuSide .ft .home .hi{font-size:16px;line-height:1}
   #stuHomeM{display:none}
+  .newtag{display:inline-block;margin-left:8px;padding:1px 7px;border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:700;letter-spacing:.08em;vertical-align:middle}
   @media (min-width:941px){ body.stu.sb-off #stuSide .ft{display:flex;border-top:0;padding:8px 0 0} body.stu.sb-off #stuSide .ft button,body.stu.sb-off #stuSide .ft .ht{display:none} body.stu.sb-off #stuSide .ft .home{flex:none;width:100%;padding:10px 0} }
   @media (max-width:940px){ #stuHomeM{display:grid;place-items:center;flex:none;width:36px;height:36px;border-radius:50%;background:#242424;color:#e6e6e6;text-decoration:none;font-size:18px} }
   #stuSide .ft button:hover{background:#2c2c2c;color:#fff}
@@ -5109,7 +5110,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   $('devKeySave').onclick=()=>{ const k=$('devKey').value.trim(); if(!k) return; try{ localStorage.setItem('taigi-ktv-drivekey',k); }catch(e){} $('devKeyRow').style.display='none'; $('devStat').textContent='金鑰已記住'; };
   // a Drive file that behaves enough like a File for the scanner: text() for json now, fetch() for media later
   class DriveFile{
-    constructor(m,rel){ this.id=m.id; this.name=m.name; this.size=+m.size||0; this.type=m.mimeType||''; this.md5=m.md5Checksum||''; this.webkitRelativePath=rel; this._file=null; }
+    constructor(m,rel){ this.id=m.id; this.name=m.name; this.size=+m.size||0; this.type=m.mimeType||''; this.md5=m.md5Checksum||''; this.created=m.createdTime||''; this.webkitRelativePath=rel; this._file=null; }
     url(){ return 'https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(this.id)+'?alt=media&key='+encodeURIComponent(driveKey()); }
     async text(){ if(this._text!=null) return this._text; return (this._text=await retry(()=>fetchB(this.url(),12000,'text'),2)); }
     async fetch(onp){
@@ -5137,7 +5138,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
   async function driveQuery(parents){
     const out=[]; let tok='';
     const q='('+parents.map(id=>`'${id}' in parents`).join(' or ')+') and trashed=false';
-    do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum,parents)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
+    do{ const u='https://www.googleapis.com/drive/v3/files?q='+encodeURIComponent(q)+'&fields='+encodeURIComponent('nextPageToken,files(id,name,mimeType,size,md5Checksum,createdTime,parents)')+'&pageSize=1000&key='+encodeURIComponent(driveKey())+(tok?'&pageToken='+tok:'');
       const j=await retry(()=>fetchB(u,20000,'json'),3);
       out.push(...(j.files||[])); tok=j.nextPageToken||''; }while(tok);
     return out;
@@ -5173,7 +5174,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(total){ const msg=()=>`正在下載歌曲資料 ${done}/${total}…`; st(msg()); if(!shown) pmsg(msg());
         await pool(need,3,async m=>{ try{ const t=await retry(()=>fetchB('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(m.id)+'?alt=media&key='+encodeURIComponent(driveKey()),15000,'text'),3); texts[m.id]={m:m.md5Checksum||'',t}; }catch(e){ if(!firstErr) firstErr=(e&&e.message)||'失敗'; } done++; st(msg()); if(!shown) pmsg(msg()); }); }
       writeDCache({at:Date.now(),list,texts});
-      const sig=l=>l.map(m=>m.id+':'+(m.md5Checksum||'')+':'+m.rel).sort().join('|');
+      const sig=l=>l.map(m=>m.id+':'+(m.md5Checksum||'')+':'+(m.createdTime||'')+':'+m.rel).sort().join('|');
       const changed=!shown||sig(list)!==sig(cache.list);
       if(changed){ const inList=document.body.classList.contains('list'); await scanFolder(filesFrom(list,texts),shown&&!inList); }
       const failed=list.filter(m=>/\.json$/i.test(m.name)&&!texts[m.id]).length;
@@ -5222,6 +5223,8 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const rec=RECENT.map(k=>byKey[k]).filter(i=>i!=null).slice(0,10);
     const fav=psongs.map((x,i)=>favs.has(sKey(x))?i:-1).filter(i=>i>=0);
     let h=`<div class="hm"><div class="hmh"><small>台語歌廳</small><h2>食飽未？來高歌一曲吧～</h2><p>${psongs.length} 首歌・${groups.length} 位歌手</p><button class="pa" data-a="play" title="播放全部">${IC.play}</button><button class="sh${stuShuf?' on':''}" data-a="shuf">${IC.shuf}<span>隨機播放</span></button></div>`;
+    const NOW=Date.now(), nw=psongs.map((x,i)=>({i,t:Date.parse(x.f&&x.f.created||'')})).filter(z=>z.t&&NOW-z.t<30*864e5&&NOW>=z.t-864e5).sort((a,b)=>b.t-a.t).slice(0,12).map(z=>z.i);
+    if(nw.length) h+=`<h3>本月新歌<span class="newtag">NEW</span></h3><div class="hrow">${nw.map(homeCard).join('')}</div>`;
     if(groups.length){ h+=`<h3>歌手</h3><div class="hrow">`+groups.map(g=>{ const ph=artPhoto(g); return `<div class="art" data-g="${esc(g)}"><span class="ph" style="background:${coverBg(g)}${ph?`;background:url('${esc(ph)}') center/cover no-repeat,${coverBg(g)}`:''}">${ph?'':esc([...g][0]||'')}</span><b>${esc(g)}</b><small>${cnt[g]} 首</small></div>`; }).join('')+`</div>`; }
     if(rec.length) h+=`<h3>最近播放</h3><div class="hrow">${rec.map(homeCard).join('')}</div>`;
     if(fav.length) h+=`<h3>我的最愛</h3><div class="hrow">${fav.slice(0,12).map(homeCard).join('')}</div>`;

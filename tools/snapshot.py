@@ -9,7 +9,7 @@ def get(u):
 def q(pid):
     out=[];tok=''
     while True:
-        u='https://www.googleapis.com/drive/v3/files?q='+urllib.parse.quote("'%s' in parents and trashed=false"%pid)+'&fields='+urllib.parse.quote('nextPageToken,files(id,name,mimeType,size,md5Checksum)')+'&pageSize=1000&key='+KEY+('&pageToken='+tok if tok else '')
+        u='https://www.googleapis.com/drive/v3/files?q='+urllib.parse.quote("'%s' in parents and trashed=false"%pid)+'&fields='+urllib.parse.quote('nextPageToken,files(id,name,mimeType,size,md5Checksum,createdTime)')+'&pageSize=1000&key='+KEY+('&pageToken='+tok if tok else '')
         j=json.loads(get(u));out+=j.get('files',[]);tok=j.get('nextPageToken','')
         if not tok:return out
 root=q(ROOT);lst=[];dirs=[m for m in root if m['mimeType']==FOLDER]
