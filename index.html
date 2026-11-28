@@ -5336,7 +5336,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const hl=document.createElement('div'); hl.id='stuHl'; document.body.append(hl);
     let lkEls=[], raf=0;
     const PAD=7;
-    const clearLk=()=>{ cancelAnimationFrame(raf); lkEls=[]; hl.classList.remove('on'); tip.classList.remove('on'); };
+    const clearLk=fast=>{ cancelAnimationFrame(raf); lkEls=[];
+      if(fast===true){ hl.style.transition='none'; tip.style.transition='none'; }
+      hl.classList.remove('on'); tip.classList.remove('on');
+      if(fast===true){ void hl.offsetWidth; requestAnimationFrame(()=>{ hl.style.transition=''; tip.style.transition=''; }); } };
+    window.__stuClearLk=()=>clearLk(true);
     const place=()=>{
       if(!lkEls.length||!lkEls[0].isConnected){ clearLk(); return; }
       let l=1e9,t=1e9,r=-1e9,b=-1e9; lkEls.forEach(el=>{ const q=el.getBoundingClientRect(); l=Math.min(l,q.left); t=Math.min(t,q.top); r=Math.max(r,q.right); b=Math.max(b,q.bottom); });
@@ -5510,7 +5514,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     // 開關時，舞台（影片）跟著右移／回位，順順滑過去：main 的 margin-right 有 transition，開的時候同步重排歌詞
     const relayout=()=>{ let n=0; const f=()=>{ try{ applyStyle(); applyCrop(); relayoutHy(); }catch(e){} if(++n<14) requestAnimationFrame(f); }; f(); };
     function open(o){ clearTimeout(mt);
-      if(o){ applyH(); mini.hidden=false; void mini.offsetWidth; document.body.classList.add('mini-on'); mini.classList.add('show'); fab.classList.add('gone'); dxLoad(); draw(); mt=setTimeout(()=>mq.focus({preventScroll:true}),380); }
+      if(o){ window.__stuClearLk&&window.__stuClearLk(); applyH(); mini.hidden=false; void mini.offsetWidth; document.body.classList.add('mini-on'); mini.classList.add('show'); fab.classList.add('gone'); dxLoad(); draw(); mt=setTimeout(()=>mq.focus({preventScroll:true}),380); }
       else { mq.blur(); mini.classList.remove('show'); fab.classList.remove('gone'); document.body.classList.remove('mini-on'); mt=setTimeout(()=>{ mini.hidden=true; },420); }
       relayout(); }
     window.__stuMiniClose=()=>{ if(mini.classList.contains('show')) open(false); };
@@ -5527,7 +5531,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       return {a,b,word}; };
     window.__stuLook=async(chars,idx,jn)=>{
       if(!hasHan(chars[idx]||'')) return;
-      window.__stuQclose&&window.__stuQclose(); open(true);
+      window.__stuClearLk&&window.__stuClearLk(); window.__stuQclose&&window.__stuQclose(); open(true);
       try{ await dxLoad(); }catch(e){}
       const w=window.__stuWord(chars,idx,jn||[]); mq.value=w.word; mlim=30; draw(); };
     setTimeout(()=>{ try{ dxLoad(); }catch(e){} },3000);
