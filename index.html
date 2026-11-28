@@ -487,6 +487,12 @@
   body.stu:not(.played) #fab{bottom:20px}
   body.stu #fab:hover{transform:scale(1.07)} body.stu #fab:active{transform:scale(.94)}
   body.stu #fab.gone{transform:scale(.3) rotate(-120deg);opacity:0;pointer-events:none}
+  /* 手機：放大鏡縮小，垂直置中在上方列（60px）裡，不再壓到影片，也沒有模糊玻璃效果 */
+  @media(max-width:700px){
+    html body.stu:not(.list)>#fab,html body.stu.list>#fab{width:40px;height:40px;top:18px;right:16px;bottom:auto;box-shadow:none;background:var(--accent);backdrop-filter:none;-webkit-backdrop-filter:none}
+    html body.stu>#fab .svgi{width:20px;height:20px}
+    html body.stu:not(.list) #stuTop{padding-right:68px}
+  }
   body.stu #mini{--ink:#615045;--ink2:#7a6a5e;--okbg:#e9f2e1;--ok:#4f8a3a;position:fixed;z-index:41;left:0;right:0;bottom:var(--bar);height:62vh;display:flex;flex-direction:column;color:#615045;
     font-family:Huninn,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;border-radius:24px 24px 0 0;
     background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,248,238,.52));backdrop-filter:blur(34px) saturate(1.9) brightness(1.04);-webkit-backdrop-filter:blur(34px) saturate(1.9) brightness(1.04);
@@ -536,6 +542,7 @@
   #mini .mr .ml{font:inherit;font-size:13px;padding:6px 12px;border-radius:99px;border:0;background:rgba(255,255,255,.55);color:#615045;cursor:pointer;text-decoration:none}
   #mini .mr .ml:hover{background:rgba(226,68,3,.12);color:#e24403}
   #miniToast{position:fixed;left:50%;bottom:calc(var(--bar) + 30px);transform:translateX(-50%);z-index:60;background:#222;color:#fff;padding:9px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s} #miniToast.on{opacity:1}
+  .pjt{display:inline-block;margin-left:6px;padding:1px 9px;border-radius:99px;border:1px solid rgba(255,255,255,.2);font-size:12.5px;color:var(--ink2,#777);white-space:nowrap;vertical-align:1px}.pjt b{font-weight:600;margin-right:5px;font-size:11px;letter-spacing:.06em;color:var(--accent,#e24403)}
   @media(prefers-reduced-motion:reduce){body.stu #fab,body.stu #mini,#mini .mr,#mini .mr .sx,body.stu.player main,body.stu #stuTop{transition:none!important;animation:none!important}}
 
   /* ---- 學生版：佇列、愛心、模式按鈕、進度條 ---- */
@@ -5366,7 +5373,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const fab=document.createElement('button'); fab.id='fab'; fab.setAttribute('aria-label','查辭典'); fab.innerHTML=IC.search;
     const mini=document.createElement('section'); mini.id='mini'; mini.hidden=true; mini.setAttribute('aria-label','查辭典');
     mini.innerHTML=`<div class="mgrip" aria-hidden="true"></div><div class="mtop"><div class="mtt"><b>查辭典</b><span>教育部臺灣台語常用詞辭典</span></div><button class="mx-close" id="mclose" aria-label="關閉"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></div>
-      <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="輸入漢字、台羅或華語進行搜尋" autocomplete="off" enterkeyhint="search"><button type="button" class="clr" aria-label="清除" tabindex="-1"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></label><div class="mb" id="mb"></div>`;
+      <label class="msb"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input type="search" id="mq" placeholder="輸入漢字、台羅、白話字或華語進行搜尋" autocomplete="off" enterkeyhint="search"><button type="button" class="clr" aria-label="清除" tabindex="-1"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></label><div class="mb" id="mb"></div>`;
     const tst=document.createElement('div'); tst.id='miniToast';
     document.body.append(fab,mini,tst);
     mini.addEventListener('click',e=>{if(!e.target.closest('.clr'))return;const q=mini.querySelector('#mq');q.value='';q.dispatchEvent(new Event('input',{bubbles:true}));q.focus()});
@@ -5379,8 +5386,41 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     new MutationObserver(fsSync).observe(sw,{attributes:true,attributeFilter:['class']});
     const mq=G('mq'), mb=G('mb');
     let tt=0; const toast2=m=>{ tst.textContent=m; tst.classList.add('on'); clearTimeout(tt); tt=setTimeout(()=>tst.classList.remove('on'),2400); };
-    const norm=x=>x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
     const hasHan=x=>/\p{Script=Han}/u.test(x), clean=x=>x.replace(/【[^】]*】/g,'');
+    // 白話字（教會羅馬字，POJ）→ 台羅（TL）：搜尋時兩邊先統一成同一種拼法，所以打哪一種都查得到
+    // 差別：chh/ch→tsh/ts、o͘（ou）→oo、oa/oe→ua/ue、eng/ek→ing/ik、ⁿ→nn、ṳ→ir（聲調符號兩套相同，比對時本來就忽略）
+    const poj=s=>s.normalize('NFD').replace(/ⁿ/g,'nn').replace(/([aeiouAEIOU])N(?![a-zA-Z])/g,'$1nn')
+      .replace(/([oO])([̀-͗]*)[̇͘·ˑ̨]/g,'$1o$2').replace(/ʰ/g,'h').replace(/[uU][̣̤]/g,'ir')
+      .replace(/[̀-ͯ]/g,'').toLowerCase()
+      .replace(/chh/g,'tsh').replace(/ch/g,'ts').replace(/ou/g,'oo').replace(/oa/g,'ua').replace(/oe/g,'ue').replace(/eng/g,'ing').replace(/ek/g,'ik');
+    const norm=x=>poj(x).replace(/[^\p{L}\p{N}]/gu,'');
+    // 台羅 → 白話字（只用來「顯示」；搜尋仍是兩邊統一後比對）
+    const tl2poj=s=>s.normalize('NFD')
+      .replace(/([Tt])[sS]([hH]?)/g,(m,a,h)=>(a==='T'?'C':'c')+'h'+(h?'h':''))
+      .replace(/([iI])([̀-ͯ]*)r/g,(m,a,t)=>(a==='I'?'U':'u')+'̤'+t)
+      .replace(/([oO])([̀-ͯ]*)[oO]/g,'$1$2͘')
+      .replace(/([aeiouAEIOU][̀-ͯ]*)nn/g,'$1ⁿ')
+      .replace(/([uU])([aeAE])/g,(m,a,b)=>(a==='U'?'O':'o')+b)
+      .replace(/([iI])([̀-ͯ]*)(ng|k)(?![a-zA-Z])/g,(m,a,t,c)=>(a==='I'?'E':'e')+t+c)
+      .normalize('NFC');
+    const isPoj=s=>{const t=s.normalize('NFD').toLowerCase();return /ch|ou|oa|oe|eng|ek|ⁿ|o[̇͘·ˑ̨]|u[̣̤]/.test(t)||/[aeiou]N(?![a-zA-Z])/.test(s)};
+    let PJM=false;
+    // 漢羅混寫搜尋：「niáu鼠」「tsiah飯」這種一半漢字一半拼音也找得到
+    // 做法：把詞條的漢字與拼音一音節對一字排好（字數對得上才用），查詢也拆成「字／音節」逐一比對，拼音不分聲調、白話字台羅都可
+    const isMix=s=>hasHan(s)&&/[A-Za-zÀ-ɏ̀-ͯⁿ]/.test(s);
+    const mixQ=raw=>{const u=[];for(const m of raw.matchAll(/(\p{Script=Han}+)|([^\p{Script=Han}]+)/gu)){
+      if(m[1])[...m[1]].forEach(c=>u.push({c}));
+      else m[2].split(/[\s\-‑·,，、.。]+/).forEach(x=>{const n=norm(x);if(n)u.push({s:n})})}
+      return u};
+    const mixUnits=(h,r)=>{const ch=[...String(h||'').replace(/【[^】]*】/g,'')].filter(c=>/\p{Script=Han}/u.test(c));
+      const sy=String(r||'').split('/')[0].split(/[\s\-‑]+/).map(x=>norm(x)).filter(Boolean);
+      return ch.length&&ch.length===sy.length?ch.map((c,i)=>({c,s:sy[i]})):null};
+    const mixScore=(units,q)=>{if(!units||!q.length||q.length>units.length)return 9;
+      for(let st=0;st+q.length<=units.length;st++){let ok=true;
+        for(let i=0;i<q.length;i++){const a=q[i],b=units[st+i];
+          if(a.c?a.c!==b.c:!(a.s===b.s||(i===q.length-1&&b.s.startsWith(a.s)))){ok=false;break}}
+        if(ok)return st===0&&q.length===units.length?0:st===0?1:2}
+      return 9};
     const inW700=new Set();
     let DX=null,DXS='idle',EXD=null,mlim=30,exAsk=false,dxP=null,hcSet=null;
     function dxLoad(){
@@ -5402,9 +5442,11 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
         e.s.forEach(([p,d],i)=>d.split(/[、，；,;。]/).forEach((g,j)=>{ if(g.trim()!==c) return; const v=i*0.04+j*0.02+(/^【文】/.test(e.r)?0.1:0); if(v<bs){ bs=v; best=e.hc; } })); }
       return CM[c]=best||c; }
     function dxFind(raw){
+      const MQ=isMix(raw)?mixQ(raw):null;
       const k=norm(raw),han=hasHan(raw),out=[]; const tr=han&&raw.length>=2?[...raw].map(cmap).join(''):raw;
       for(const e of DX){ let sc=9;
-        if(han){ if(e.hc===raw) sc=0; else if(e.hc.startsWith(raw)) sc=1; else if(e.hc.includes(raw)) sc=2; else if(e.v.some(x=>clean(x[0]).includes(raw))) sc=3; else if(e.d.includes(raw)) sc=gl(e,raw);
+        if(MQ){ sc=mixScore(e.mu||(e.mu=mixUnits(e.hc,e.r)),MQ); if(sc>2&&e.v.length) for(const x of e.v){ const q=mixScore(mixUnits(x[0],x[1]),MQ); if(q<sc) sc=q+.5; } }
+        else if(han){ if(e.hc===raw) sc=0; else if(e.hc.startsWith(raw)) sc=1; else if(e.hc.includes(raw)) sc=2; else if(e.v.some(x=>clean(x[0]).includes(raw))) sc=3; else if(e.d.includes(raw)) sc=gl(e,raw);
           if(tr!==raw&&sc>2){ if(e.hc===tr) sc=1.6; else if(e.hc.startsWith(tr)) sc=1.7; else if(e.hc.includes(tr)) sc=1.9; }
         }else if(k){ if(e.ks.includes(k)) sc=0; else if(e.ks.some(x=>x.startsWith(k))) sc=1; else if(e.k.includes(k)) sc=2; }
         if(sc===9&&han&&EXD){ const L=EXD[e.id]; if(L&&L.some(x=>x[2].includes(raw))) sc=5; }
@@ -5414,7 +5456,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
     const dictUrl=w=>SU+'zh-hant/tshiau/?lui=tai_su&tsha='+encodeURIComponent(w);
     function dxRow(e){
       const sn=e.s.map(([p,d,sid])=>`<li data-sid="${sid||''}"><div class="sl">${p?`<span class="pos">${esc(p)}</span>`:''}<span>${esc(d)}</span></div><div class="sx"><div class="sxi"></div></div></li>`);
-      return `<article class="mr" data-id="${e.id}"><div class="mt"><div class="mw"><div class="w">${esc(e.hc||e.h)}</div><div class="r tl">${esc(e.r)}</div></div>
+      return `<article class="mr" data-id="${e.id}"><div class="mt"><div class="mw"><div class="w">${esc(e.hc||e.h)}</div><div class="r tl">${esc(e.r)}${PJM?` <span class="pjt"><b>白話字</b>${esc(tl2poj(e.r))}</span>`:''}</div></div>
         ${e.a?`<button class="au" data-au="${e.id}" data-ap="${e.ap}" aria-label="聽發音"><svg viewBox="1.5 0 24 24" width="22" height="22" fill="currentColor"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`:''}</div>
         ${e.v.length?`<div class="alt">又唸作　${e.v.map(x=>esc(x[0])+' <span class="tl">'+esc(x[1])+'</span>').join('、')}</div>`:''}
         <ol class="sns">${sn.join('')}</ol><div class="sx oth"><div class="sxi"></div></div>
@@ -5425,6 +5467,7 @@ if (typeof module === "object" && typeof module.exports === "object") Object.ass
       if(DXS==='load'||DXS==='idle'){ mb.innerHTML='<p class="note">辭典載入中…</p>'; return; }
       if(DXS==='err'){ mb.innerHTML=`<p class="note">辭典暫時載不進來。可以直接到教育部辭典查：</p><div class="acts"><a class="btn" href="${dictUrl(raw)}" target="_blank" rel="noopener">到教育部辭典查「${esc(raw)}」</a></div>`; return; }
       if(hasHan(raw)&&!EXD&&!exAsk){ exAsk=true; exLoad(()=>{ if(mq.value.trim()===raw) draw(); }); }
+      PJM=isPoj(raw.replace(/\p{Script=Han}+/gu,' '));
       const r=dxFind(raw);
       mb.innerHTML=(r.length?`<p class="cnt">找到 ${r.length} 筆</p>`+r.slice(0,mlim).map(dxRow).join('')+(r.length>mlim?'<div class="acts" style="justify-content:center"><button class="btn" id="mmore">再看更多</button></div>':'')
         :`<p class="note">辭典裡沒有「${esc(raw)}」。可以換個寫法，或華語換個說法再試。</p>`)
